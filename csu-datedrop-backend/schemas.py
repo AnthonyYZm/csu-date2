@@ -50,6 +50,14 @@ class LoginRequest(BaseModel):
 # --- User ---
 
 
+class ProfileUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    campus: Optional[str] = None
+    grade: Optional[str] = None
+    major: Optional[str] = None
+
+
 class WechatUpdateRequest(BaseModel):
     wechat: str = ""
 

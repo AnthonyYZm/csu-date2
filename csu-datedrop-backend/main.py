@@ -35,6 +35,7 @@ from schemas import (
     GreetRequest,
     LoginRequest,
     PausedRequest,
+    ProfileUpdateRequest,
     QuizSubmit,
     RegisterRequest,
     ResetPasswordRequest,
@@ -657,6 +658,28 @@ def auth_reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db
 @app.get("/api/user/me")
 def get_me(user: CurrentUser, db: Session = Depends(get_db)):
     return serialize_user(db, user)
+
+
+@app.put("/api/user/profile")
+def update_profile(
+    body: ProfileUpdateRequest,
+    user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+    """更新用户个人资料（昵称、简介、校区、年级、专业）。"""
+    if body.name is not None:
+        user.name = body.name.strip()[:32]
+    if body.bio is not None:
+        user.bio = body.bio.strip()[:200]
+    if body.campus is not None:
+        user.campus = body.campus.strip()[:32]
+    if body.grade is not None:
+        user.grade = body.grade.strip()[:16]
+    if body.major is not None:
+        user.major = body.major.strip()[:64]
+    db.commit()
+    db.refresh(user)
+    return {"ok": True, "user": serialize_user(db, user)}
 
 
 @app.get("/api/user/quiz")

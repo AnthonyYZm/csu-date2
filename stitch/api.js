@@ -106,8 +106,8 @@
       ? 'linear-gradient(135deg, #dc2626, #b91c1c)'
       : 'linear-gradient(135deg, #f59e0b, #d97706)';
     var msg = blocked
-      ? '你的教育邮箱未验证且已超期，匹配功能已暂停！请立即前往仪表盘验证 教育邮箱 邮箱。'
-      : '你使用的是非教育邮箱注册，请尽快验证 教育邮箱 教育邮箱，否则将无法参与匹配。';
+      ? '你的教育邮箱未验证且已超期，匹配功能已暂停！请立即前往仪表盘验证 @csu.edu.cn 邮箱。'
+      : '你使用的是非教育邮箱注册，请尽快验证 @csu.edu.cn 教育邮箱，否则将无法参与匹配。';
 
     banner.innerHTML = ''
       + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">'

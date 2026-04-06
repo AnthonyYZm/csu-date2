@@ -135,6 +135,33 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 .btn-logout:hover{background:var(--cream-mid);color:var(--coral-hex)}
 .btn-logout .material-symbols-outlined{font-size:1.125rem}
 
+/* ── Edit Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:1rem}
+.modal-overlay.show{display:flex}
+.modal{background:var(--white-warm);border-radius:2rem;padding:clamp(1.5rem,4vw,2.5rem);width:100%;max-width:28rem;max-height:90vh;overflow-y:auto;animation:cardIn .3s ease}
+.modal-title{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.25rem;color:var(--ink-hex);margin-bottom:1.5rem}
+.modal-field{margin-bottom:1.25rem}
+.modal-label{display:block;font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-ghost);margin-bottom:.5rem}
+.modal-input{width:100%;padding:.75rem 1rem;background:var(--cream);border:none;border-radius:1rem;font-family:'Outfit',sans-serif;font-size:.875rem;color:var(--text);outline:none;transition:box-shadow .2s}
+.modal-input:focus{box-shadow:0 0 0 2px oklch(48% 0.17 28/0.15)}
+.modal-input::placeholder{color:var(--text-ghost)}
+textarea.modal-input{resize:vertical;min-height:5rem;line-height:1.6}
+select.modal-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236d6a62' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center}
+.modal-actions{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem}
+.modal-btn{padding:.625rem 1.5rem;border-radius:9999px;font-family:'Outfit',sans-serif;font-weight:600;font-size:.8125rem;border:none;cursor:pointer;transition:transform .2s,background .2s}
+.modal-btn:active{transform:scale(.97)}
+.modal-btn-cancel{background:var(--cream);color:var(--text-dim)}
+.modal-btn-cancel:hover{background:var(--cream-deep)}
+.modal-btn-save{background:var(--ink-hex);color:var(--cream)}
+.modal-btn-save:hover{opacity:.9}
+.modal-btn-save:disabled{opacity:.5;cursor:not-allowed}
+.modal-charcount{font-size:.6875rem;color:var(--text-ghost);text-align:right;margin-top:.25rem}
+
+/* ── Toast ── */
+.profile-toast{position:fixed;top:1.25rem;left:50%;transform:translateX(-50%);z-index:2000;padding:.75rem 1.5rem;border-radius:1rem;font-size:.8125rem;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.12);transition:opacity .3s;pointer-events:none}
+.profile-toast.error{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5}
+.profile-toast.success{background:#f0fdf4;color:#16a34a;border:1px solid #86efac}
+
 /* ── Mobile Nav: Floating Pill ── */
 .mobile-nav{display:none;position:fixed;bottom:clamp(1rem,3vw,1.5rem);left:50%;transform:translateX(-50%);z-index:100;padding:.5rem .375rem calc(.5rem + env(safe-area-inset-bottom))}
 .mobile-nav-inner{display:flex;align-items:center;gap:.25rem;background:var(--ink-hex);border-radius:9999px;padding:.375rem;box-shadow:0 8px 32px oklch(18% 0.09 275/0.25),0 2px 8px oklch(18% 0.09 275/0.1)}
@@ -184,26 +211,18 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <div class="hero-card">
     <div class="avatar-area">
       <div class="avatar">
-        <span class="avatar-initials" id="avatarInit">林</span>
+        <span class="avatar-initials" id="avatarInit">?</span>
       </div>
       <div class="avatar-badge">
         <span class="material-symbols-outlined">verified</span>
       </div>
-      <div class="avatar-edit" role="button" aria-label="更换头像" tabindex="0">
-        <span class="material-symbols-outlined">photo_camera</span>
-      </div>
     </div>
     <div class="identity">
-      <div class="identity-eyebrow" id="idEyebrow">岳麓山校区 · 大三</div>
-      <h1 class="identity-name" id="idName">林晓霜</h1>
-      <p class="identity-handle" id="idHandle">@xiaoshuang · 计算机科学与技术</p>
-      <p class="identity-bio" id="idBio">喜欢在图书馆靠窗的位置看书，偶尔去岳麓山跑步。相信慢慢来，比较快。</p>
-      <div class="identity-tags" id="idTags">
-        <span class="tag tag-accent">经世致用</span>
-        <span class="tag">共情力</span>
-        <span class="tag">独立思考</span>
-        <span class="tag">好奇心</span>
-      </div>
+      <div class="identity-eyebrow" id="idEyebrow">加载中...</div>
+      <h1 class="identity-name" id="idName">--</h1>
+      <p class="identity-handle" id="idHandle">--</p>
+      <p class="identity-bio" id="idBio">--</p>
+      <div class="identity-tags" id="idTags"></div>
     </div>
   </div>
 
@@ -211,28 +230,13 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <div class="section">
     <div class="section-head">
       <h2 class="section-title">我的价值观</h2>
-      <button class="section-action">
+      <button class="section-action" onclick="location.href='index.html?startQuiz=true'">
         重新选择
         <span class="material-symbols-outlined">edit</span>
       </button>
     </div>
     <div class="values-grid" id="valuesGrid">
-      <div class="value-chip">
-        <span class="material-symbols-outlined">auto_stories</span>
-        经世致用
-      </div>
-      <div class="value-chip">
-        <span class="material-symbols-outlined">favorite</span>
-        共情力
-      </div>
-      <div class="value-chip">
-        <span class="material-symbols-outlined">psychology</span>
-        独立思考
-      </div>
-      <div class="value-chip">
-        <span class="material-symbols-outlined">explore</span>
-        好奇心
-      </div>
+      <div class="value-chip" style="color:var(--text-ghost)">加载中...</div>
     </div>
   </div>
 
@@ -266,13 +270,13 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
       <h2 class="section-title">账户设置</h2>
     </div>
     <div class="settings-list">
-      <div class="setting-item" onclick="alert('编辑资料功能即将上线')">
+      <div class="setting-item" onclick="openEditModal()">
         <div class="setting-icon si-purple">
           <span class="material-symbols-outlined">person</span>
         </div>
         <div class="setting-text">
           <div class="setting-name">编辑资料</div>
-          <div class="setting-desc">修改昵称、头像和个人简介</div>
+          <div class="setting-desc">修改昵称和个人简介</div>
         </div>
         <div class="setting-arrow"><span class="material-symbols-outlined">chevron_right</span></div>
       </div>
@@ -288,30 +292,19 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
         <div class="setting-arrow"><span class="material-symbols-outlined">chevron_right</span></div>
       </div>
 
-      <div class="setting-item" onclick="alert('匹配偏好设置即将上线')">
+      <div class="setting-item" onclick="location.href='index.html?startQuiz=true'">
         <div class="setting-icon si-gold">
           <span class="material-symbols-outlined">tune</span>
         </div>
         <div class="setting-text">
           <div class="setting-name">匹配偏好</div>
-          <div class="setting-desc">调整寻找类型、校区范围</div>
-        </div>
-        <div class="setting-arrow"><span class="material-symbols-outlined">chevron_right</span></div>
-      </div>
-
-      <div class="setting-item" onclick="alert('通知设置即将上线')">
-        <div class="setting-icon si-sage">
-          <span class="material-symbols-outlined">notifications</span>
-        </div>
-        <div class="setting-text">
-          <div class="setting-name">通知设置</div>
-          <div class="setting-desc">匹配推送和邮件提醒</div>
+          <div class="setting-desc">在问卷中调整寻找类型、校区范围</div>
         </div>
         <div class="setting-arrow"><span class="material-symbols-outlined">chevron_right</span></div>
       </div>
 
       <a href="dashboard.html" class="setting-item">
-        <div class="setting-icon si-purple">
+        <div class="setting-icon si-sage">
           <span class="material-symbols-outlined">space_dashboard</span>
         </div>
         <div class="setting-text">
@@ -343,6 +336,53 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 
 </main>
 
+<!-- ─── Edit Profile Modal ─── -->
+<div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal">
+    <h2 class="modal-title">编辑资料</h2>
+    <div class="modal-field">
+      <label class="modal-label" for="editName">昵称</label>
+      <input type="text" class="modal-input" id="editName" placeholder="你的昵称" maxlength="32"/>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label" for="editBio">个人简介</label>
+      <textarea class="modal-input" id="editBio" placeholder="介绍一下自己吧" maxlength="200" oninput="document.getElementById('bioCount').textContent=this.value.length+' / 200'"></textarea>
+      <div class="modal-charcount" id="bioCount">0 / 200</div>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label" for="editCampus">校区</label>
+      <select class="modal-input" id="editCampus">
+        <option value="">请选择</option>
+        <option value="新校区">新校区</option>
+        <option value="南校区">南校区</option>
+        <option value="本部">本部</option>
+        <option value="湘雅">湘雅</option>
+        <option value="铁道校区">铁道校区</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label" for="editGrade">年级</label>
+      <select class="modal-input" id="editGrade">
+        <option value="">请选择</option>
+        <option value="大一">大一</option>
+        <option value="大二">大二</option>
+        <option value="大三">大三</option>
+        <option value="大四">大四</option>
+        <option value="研究生">研究生</option>
+        <option value="博士">博士</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label" for="editMajor">专业</label>
+      <input type="text" class="modal-input" id="editMajor" placeholder="你的专业" maxlength="64"/>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">取消</button>
+      <button class="modal-btn modal-btn-save" id="editSaveBtn" onclick="saveProfile()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- ─── Mobile Nav ─── -->
 <nav class="mobile-nav">
   <div class="mobile-nav-inner">
@@ -363,31 +403,64 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 
 <script src="api.js"></script>
 <script>
+/* ── Toast ── */
+function showToast(msg, isError){
+  var old=document.getElementById('_profileToast');
+  if(old) old.remove();
+  var t=document.createElement('div');
+  t.id='_profileToast';
+  t.className='profile-toast '+(isError?'error':'success');
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove();},300);},2500);
+}
+
+/* ── Render Profile ── */
+var VALUE_ICONS={
+  '经世致用':'auto_stories','共情力':'favorite','独立思考':'psychology',
+  '好奇心':'explore','自律':'fitness_center','责任感':'shield',
+  '创造力':'palette','乐观':'sunny','勇气':'local_fire_department',
+  '真诚':'handshake','幽默':'mood','坚韧':'diamond'
+};
+
 function applyProfileUser(u){
   document.getElementById('avatarInit').textContent=(u.name&&u.name.charAt(0))||'?';
-  document.getElementById('idName').textContent=u.name||'';
-  document.getElementById('idEyebrow').textContent=(u.campus||'')+' · '+(u.grade||'');
+  document.getElementById('idName').textContent=u.name||'未设置昵称';
+  document.getElementById('idEyebrow').textContent=(u.campus||'未选校区')+' · '+(u.grade||'');
   document.getElementById('idHandle').textContent='@'+(u.id||'')+' · '+(u.major||'');
-  document.getElementById('idBio').textContent=u.bio||'';
+  document.getElementById('idBio').textContent=u.bio||'还没有写简介';
 
+  var tags=document.getElementById('idTags');
   if(u.values&&u.values.length){
-    const container=document.getElementById('idTags');
-    container.innerHTML=u.values.map((v,i)=>
-      `<span class="tag ${i===0?'tag-accent':''}">${String(v).replace(/</g,'&lt;')}</span>`
-    ).join('');
+    tags.innerHTML=u.values.map(function(v,i){
+      return '<span class="tag '+(i===0?'tag-accent':'')+'">'+String(v).replace(/</g,'&lt;')+'</span>';
+    }).join('');
+  }else{
+    tags.innerHTML='<span class="tag" style="color:var(--text-ghost)">完成问卷后显示</span>';
+  }
+
+  var grid=document.getElementById('valuesGrid');
+  if(u.values&&u.values.length){
+    grid.innerHTML=u.values.map(function(v){
+      var icon=VALUE_ICONS[v]||'star';
+      return '<div class="value-chip"><span class="material-symbols-outlined">'+icon+'</span>'+String(v).replace(/</g,'&lt;')+'</div>';
+    }).join('');
+  }else{
+    grid.innerHTML='<div class="value-chip" style="color:var(--text-ghost)">完成问卷后显示你的价值观</div>';
   }
 }
 
+/* ── Init ── */
 (async function(){
-  const raw=localStorage.getItem('csudate_user');
+  var raw=localStorage.getItem('csudate_user');
   if(!raw){window.location.href='login.html';return;}
-  let u;
+  var u;
   try{
     u=JSON.parse(raw);
     if(!u.loggedIn) throw new Error('x');
   }catch(e){window.location.href='login.html';return;}
 
-  const fresh=await csudateRefreshMe();
+  var fresh=await csudateRefreshMe();
   if(fresh) u=fresh;
 
   try{
@@ -397,35 +470,30 @@ function applyProfileUser(u){
   }catch(e){window.location.href='login.html';}
 })();
 
+/* ── Logout ── */
 function logout(){
   csudateLogout();
   window.location.href='login.html';
 }
 
+/* ── Pause/Resume ── */
 async function togglePause(){
-  const raw=localStorage.getItem('csudate_user');
+  var raw=localStorage.getItem('csudate_user');
   if(!raw)return;
-  const u=JSON.parse(raw);
-  const next=!u.paused;
-  if(!window.csudateGetToken || !csudateGetToken()){
-    u.paused=next;
-    localStorage.setItem('csudate_user',JSON.stringify(u));
-    updatePauseUI(next);
-    alert(next?'已暂停匹配（仅本机）':'已恢复匹配（仅本机）');
-    return;
-  }
+  var u=JSON.parse(raw);
+  var next=!u.paused;
   try{
-    const res=await csudateFetch('/api/user/paused',{method:'POST',body:JSON.stringify({paused:next})});
-    const data=await res.json().catch(()=>({}));
+    var res=await csudateFetch('/api/user/paused',{method:'POST',body:JSON.stringify({paused:next})});
+    var data=await res.json().catch(function(){return {};});
     if(!res.ok){
-      alert(csudateApiErrorMessage(data));
+      showToast(csudateApiErrorMessage(data),true);
       return;
     }
     if(data.user) localStorage.setItem('csudate_user',JSON.stringify(data.user));
     updatePauseUI(!!data.user.paused);
-    alert(data.user.paused?'已暂停匹配，你不会出现在匹配池中':'已恢复匹配，欢迎回来！');
+    showToast(data.user.paused?'已暂停匹配，你不会出现在匹配池中':'已恢复匹配，欢迎回来！');
   }catch(e){
-    alert('网络错误');
+    showToast('网络错误，请重试',true);
   }
 }
 
@@ -434,61 +502,43 @@ function updatePauseUI(paused){
   document.getElementById('pauseDesc').textContent=paused?'你当前已暂停，点击恢复匹配':'暂时退出匹配池，随时恢复';
 }
 
-// WeChat
+/* ── WeChat ── */
 function showWechatEdit(){
   document.getElementById('wechatEdit').classList.add('show');
   document.getElementById('wechatInput').focus();
 }
 async function saveWechat(){
-  const val=document.getElementById('wechatInput').value.trim();
-  if(window.csudateGetToken && csudateGetToken()){
-    try{
-      const res=await csudateFetch('/api/user/wechat',{method:'POST',body:JSON.stringify({wechat:val})});
-      const data=await res.json().catch(()=>({}));
-      if(!res.ok){
-        alert(csudateApiErrorMessage(data));
-        return;
-      }
-      if(data.user) localStorage.setItem('csudate_user',JSON.stringify(data.user));
-    }catch(e){
-      alert('网络错误');
+  var val=document.getElementById('wechatInput').value.trim();
+  try{
+    var res=await csudateFetch('/api/user/wechat',{method:'POST',body:JSON.stringify({wechat:val})});
+    var data=await res.json().catch(function(){return {};});
+    if(!res.ok){
+      showToast(csudateApiErrorMessage(data),true);
       return;
     }
-  }else{
-    const raw=localStorage.getItem('csudate_user');
-    if(raw){
-      try{
-        const u=JSON.parse(raw);
-        u.wechat=val||'';
-        localStorage.setItem('csudate_user',JSON.stringify(u));
-      }catch(e){}
-    }
+    if(data.user) localStorage.setItem('csudate_user',JSON.stringify(data.user));
+    showToast(val?'微信号已保存':'微信号已清除');
+  }catch(e){
+    showToast('网络错误',true);
+    return;
   }
   renderWechat(val);
 }
 async function clearWechat(){
-  if(window.csudateGetToken && csudateGetToken()){
-    try{
-      const res=await csudateFetch('/api/user/wechat',{method:'POST',body:JSON.stringify({wechat:''})});
-      const data=await res.json().catch(()=>({}));
-      if(data.user) localStorage.setItem('csudate_user',JSON.stringify(data.user));
-    }catch(e){}
-  }else{
-    const raw=localStorage.getItem('csudate_user');
-    if(raw){
-      try{
-        const u=JSON.parse(raw);
-        u.wechat='';
-        localStorage.setItem('csudate_user',JSON.stringify(u));
-      }catch(e){}
-    }
+  try{
+    var res=await csudateFetch('/api/user/wechat',{method:'POST',body:JSON.stringify({wechat:''})});
+    var data=await res.json().catch(function(){return {};});
+    if(data.user) localStorage.setItem('csudate_user',JSON.stringify(data.user));
+    showToast('微信号已清除');
+  }catch(e){
+    showToast('网络错误',true);
   }
   renderWechat('');
 }
 function renderWechat(val){
-  const display=document.getElementById('wechatDisplay');
-  const edit=document.getElementById('wechatEdit');
-  const actions=document.getElementById('wechatActions');
+  var display=document.getElementById('wechatDisplay');
+  var edit=document.getElementById('wechatEdit');
+  var actions=document.getElementById('wechatActions');
   edit.classList.remove('show');
   if(val){
     display.textContent=val;
@@ -501,23 +551,71 @@ function renderWechat(val){
     document.getElementById('wechatInput').value='';
   }
 }
-// Topbar scroll shadow
+
+/* ── Edit Profile Modal ── */
+function openEditModal(){
+  var raw=localStorage.getItem('csudate_user');
+  if(!raw) return;
+  var u=JSON.parse(raw);
+  document.getElementById('editName').value=u.name||'';
+  document.getElementById('editBio').value=u.bio||'';
+  document.getElementById('editCampus').value=u.campus||'';
+  document.getElementById('editGrade').value=u.grade||'';
+  document.getElementById('editMajor').value=u.major||'';
+  document.getElementById('bioCount').textContent=(u.bio||'').length+' / 200';
+  document.getElementById('editModal').classList.add('show');
+}
+function closeEditModal(){
+  document.getElementById('editModal').classList.remove('show');
+}
+async function saveProfile(){
+  var btn=document.getElementById('editSaveBtn');
+  btn.disabled=true;
+  btn.textContent='保存中...';
+  var body={
+    name:document.getElementById('editName').value.trim(),
+    bio:document.getElementById('editBio').value.trim(),
+    campus:document.getElementById('editCampus').value,
+    grade:document.getElementById('editGrade').value,
+    major:document.getElementById('editMajor').value.trim()
+  };
+  try{
+    var res=await csudateFetch('/api/user/profile',{method:'PUT',body:JSON.stringify(body)});
+    var data=await res.json().catch(function(){return {};});
+    if(!res.ok){
+      showToast(csudateApiErrorMessage(data),true);
+      btn.disabled=false;btn.textContent='保存';
+      return;
+    }
+    if(data.user){
+      localStorage.setItem('csudate_user',JSON.stringify(data.user));
+      applyProfileUser(data.user);
+    }
+    closeEditModal();
+    showToast('资料已更新');
+  }catch(e){
+    showToast('网络错误，请重试',true);
+  }
+  btn.disabled=false;btn.textContent='保存';
+}
+
+/* ── Topbar scroll shadow ── */
 (function(){
-  const tb=document.getElementById('topbar');
-  let ticking=false;
-  window.addEventListener('scroll',()=>{
-    if(!ticking){requestAnimationFrame(()=>{tb.classList.toggle('scrolled',window.scrollY>8);ticking=false;});ticking=true;}
+  var tb=document.getElementById('topbar');
+  var ticking=false;
+  window.addEventListener('scroll',function(){
+    if(!ticking){requestAnimationFrame(function(){tb.classList.toggle('scrolled',window.scrollY>8);ticking=false;});ticking=true;}
   },{passive:true});
 })();
 
-// Scroll reveal
-const sections=document.querySelectorAll('.section');
-const observer=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
+/* ── Scroll reveal ── */
+var sections=document.querySelectorAll('.section');
+var observer=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
     if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='none';}
   });
 },{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
-sections.forEach(s=>observer.observe(s));
+sections.forEach(function(s){observer.observe(s);});
 </script>
 
 </body>
