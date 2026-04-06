@@ -224,6 +224,22 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 var matchId=new URLSearchParams(location.search).get('id');
 var matchData=null;
 
+// Toast 提示组件
+function showToast(msg,isError){
+  var existing=document.getElementById('_greetToast');
+  if(existing)existing.remove();
+  var toast=document.createElement('div');
+  toast.id='_greetToast';
+  toast.textContent=msg;
+  toast.setAttribute('style','position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;'
+    +'padding:12px 24px;border-radius:12px;font-size:.875rem;font-weight:500;'
+    +'box-shadow:0 4px 20px rgba(0,0,0,.15);transition:opacity .3s;'
+    +(isError?'background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;'
+             :'background:#f0fdf4;color:#16a34a;border:1px solid #86efac;'));
+  document.body.appendChild(toast);
+  setTimeout(function(){toast.style.opacity='0';setTimeout(function(){toast.remove();},300);},3000);
+}
+
 // Load match info and populate recipient
 (async function(){
   if(!matchId){document.getElementById('recipientLabel').textContent='缺少匹配 ID';return;}
@@ -287,7 +303,7 @@ async function sendGreeting(){
     });
     var data=await res.json().catch(function(){return {};});
     if(!res.ok){
-      alert(data.detail||'发送失败');
+      showToast(data.detail||'发送失败',true);
       btn.innerHTML=prevHtml;btn.disabled=false;
       return;
     }
@@ -298,7 +314,7 @@ async function sendGreeting(){
     }
     sent.classList.add('show');
   }catch(e){
-    alert('网络错误，请重试');
+    showToast('网络错误，请重试',true);
     btn.innerHTML=prevHtml;btn.disabled=false;
   }
 }

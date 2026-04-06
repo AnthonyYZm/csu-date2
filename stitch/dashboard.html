@@ -222,7 +222,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
       <a href="inbox.html">信箱</a>
       <a href="profile.html">我的</a>
       <span class="topbar-sep"></span>
-      <a href="profile.html" class="topbar-avatar" id="topAvatar"><span>林</span></a>
+      <a href="profile.html" class="topbar-avatar" id="topAvatar"><span></span></a>
     </div>
   </div>
 </nav>
@@ -233,8 +233,8 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <!-- Greeting -->
   <div class="greeting" id="greeting">
     <div class="greeting-eyebrow" id="greetingTime">下午好</div>
-    <h1 class="greeting-title"><em id="greetingName">晓霜</em>，欢迎回来</h1>
-    <p class="greeting-sub">这是你在 CSU Date 的第 <strong>7</strong> 周</p>
+    <h1 class="greeting-title"><em id="greetingName"></em>，欢迎回来</h1>
+    <p class="greeting-sub" id="greetingSub"></p>
   </div>
 
   <!-- Edu Email Verification Banner (non-edu users only) -->
@@ -283,15 +283,15 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <!-- Stats (hidden when quiz not completed) -->
   <div class="stats-row" id="statsRow">
     <div class="stat-card">
-      <div class="stat-number sn-ink" id="statMatches">12</div>
+      <div class="stat-number sn-ink" id="statMatches">--</div>
       <div class="stat-label">累计匹配</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number sn-coral" id="statBest">89%</div>
+      <div class="stat-number sn-coral" id="statBest">--</div>
       <div class="stat-label">最高契合</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number sn-sage" id="statWeeks">7</div>
+      <div class="stat-number sn-sage" id="statWeeks">--</div>
       <div class="stat-label">活跃周数</div>
     </div>
   </div>
@@ -537,15 +537,14 @@ function _eduShowMsg(text,type){
 function esc(t){if(t==null||t==='')return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
 
 function applyDashboardUser(u){
-  const firstName=(u.name&&u.name.length>1)?u.name.slice(1):(u.name||'');
-  document.getElementById('greetingName').textContent=firstName;
+  document.getElementById('greetingName').textContent=u.name||'';
   document.getElementById('topAvatar').querySelector('span').textContent=(u.name&&u.name.charAt(0))||'?';
 
   if(!u.quizCompleted){
     document.getElementById('onboardCard').classList.remove('hidden');
     document.getElementById('statsRow').classList.add('hidden');
     document.getElementById('dashContent').classList.add('hidden');
-    document.querySelector('.greeting-sub').innerHTML='完成问卷后即可开始每周匹配';
+    document.getElementById('greetingSub').innerHTML='完成问卷后即可开始每周匹配';
     return;
   }
 
@@ -558,7 +557,7 @@ function applyDashboardUser(u){
     document.getElementById('statBest').textContent=u.stats.bestScore?u.stats.bestScore+'%':'--';
     document.getElementById('statWeeks').textContent=u.stats.weeks;
   }
-  document.querySelector('.greeting-sub').innerHTML='这是你在 CSU Date 的第 <strong>'+(u.stats?u.stats.weeks:1)+'</strong> 周';
+  document.getElementById('greetingSub').innerHTML='这是你在 CSU Date 的第 <strong>'+(u.stats?u.stats.weeks:1)+'</strong> 周';
 
   startCountdown();
 }

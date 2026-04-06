@@ -27,7 +27,7 @@ apt install -y python3 python3-pip python3-venv nginx certbot python3-certbot-ng
 # ── 2. Python 虚拟环境 ──
 echo "[2/7] setup Python venv..."
 cd "$BACKEND_DIR"
-python3.9 -m venv venv
+python3.11 -m venv venv
 ./venv/bin/pip install --upgrade pip -q
 ./venv/bin/pip install -r requirements.txt -q
 echo "  Python deps installed"
@@ -35,7 +35,7 @@ echo "  Python deps installed"
 # ── 3. 初始化数据库 ──
 echo "[3/7] init database..."
 cd "$BACKEND_DIR"
-./venv/bin/python -c "from database import engine; from models import Base; Base.metadata.create_all(bind=engine); print('  DB ready')"
+./venv/bin/python3.11 -c "from database import engine; from models import Base; Base.metadata.create_all(bind=engine); print('  DB ready')"
 
 # ── 4. systemd 后端服务 ──
 echo "[4/7] configure backend service..."

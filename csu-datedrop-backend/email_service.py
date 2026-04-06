@@ -22,9 +22,10 @@ FROM_EMAIL = os.getenv("FROM_EMAIL", "verify@csudate.com")
 # 格式: { "email": {"code": "123456", "expires": timestamp, "attempts": 0} }
 _store = {}
 
-CODE_TTL = 600        # 验证码有效期 10 分钟
-MAX_ATTEMPTS = 5      # 最多验证 5 次
-COOLDOWN = 60         # 同一邮箱发送冷却 60 秒
+from config import CODE_COOLDOWN, CODE_MAX_ATTEMPTS, CODE_TTL
+
+MAX_ATTEMPTS = CODE_MAX_ATTEMPTS
+COOLDOWN = CODE_COOLDOWN
 
 
 def _clean_expired():

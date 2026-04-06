@@ -11,15 +11,20 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from config import (
+    DEFAULT_HEIGHT_CM,
+    DEFAULT_HEIGHT_PREF_MAX,
+    DEFAULT_HEIGHT_PREF_MIN,
+    EDU_VERIFY_DAYS,
+    SCORE_SCALE_FACTOR,
+    is_edu_email,
+)
 from models import Match, Profile, User
-
-EDU_VERIFY_DAYS = 3
 
 
 def _is_edu_blocked(user: User) -> bool:
-    """非教育邮箱用户超过 3 天未验证教育邮箱则封锁。"""
-    email = (user.email or "").strip().lower()
-    if email.endswith("@csu.edu.cn"):
+    """非教育邮箱用户超过验证期限未验证教育邮箱则封锁。"""
+    if is_edu_email(user.email or ""):
         return False
     if user.edu_email_verified_at:
         return False
@@ -232,19 +237,19 @@ def user_profile_to_participant_item(
 
     height = raw.get("height")
     try:
-        height_f = float(height) if height is not None else 170.0
+        height_f = float(height) if height is not None else DEFAULT_HEIGHT_CM
     except (TypeError, ValueError):
-        height_f = 170.0
-    hmin = raw.get("heightPrefMin", 150)
-    hmax = raw.get("heightPrefMax", 190)
+        height_f = DEFAULT_HEIGHT_CM
+    hmin = raw.get("heightPrefMin", DEFAULT_HEIGHT_PREF_MIN)
+    hmax = raw.get("heightPrefMax", DEFAULT_HEIGHT_PREF_MAX)
     try:
         hmin_f = float(hmin)
     except (TypeError, ValueError):
-        hmin_f = 150.0
+        hmin_f = DEFAULT_HEIGHT_PREF_MIN
     try:
         hmax_f = float(hmax)
     except (TypeError, ValueError):
-        hmax_f = 190.0
+        hmax_f = DEFAULT_HEIGHT_PREF_MAX
 
     college = raw.get("college")
     college_s = str(college).strip().lower() if college else "other"
@@ -395,7 +400,7 @@ def run_weekly_matching(db: Session, week_id: int) -> Dict[str, Any]:
             sc = float(score_total) if score_total is not None else 0.0
         except (TypeError, ValueError):
             sc = 0.0
-        score_db = round(sc * 100.0, 2)
+        score_db = round(sc * SCORE_SCALE_FACTOR, 2)
 
         breakdown = m.get("scoreBreakdown") or {}
         report_data = {

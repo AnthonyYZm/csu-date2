@@ -75,6 +75,16 @@ class Crush(Base):
     sender = relationship("User", back_populates="sent_crushes")
 
 
+class PageView(Base):
+    __tablename__ = "page_views"
+
+    id = Column(Integer, primary_key=True, index=True)
+    path = Column(String, nullable=False, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    ip = Column(String, nullable=True)
+    user_agent = Column(String, nullable=True)
+
+
 class Match(Base):
     __tablename__ = "matches"
 

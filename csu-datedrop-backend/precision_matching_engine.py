@@ -1401,7 +1401,8 @@ def maximum_weight_matching(edges: Sequence[MatchEdge], participants: Sequence[P
     graph.add_nodes_from([p.user_id for p in participants])
 
     for edge in edges:
-        graph.add_edge(edge.user_a, edge.user_b, weight=edge.match_weight)
+        w = edge.match_weight
+        graph.add_edge(edge.user_a, edge.user_b, weight=w)
 
     matching = nx.algorithms.matching.max_weight_matching(
         graph,

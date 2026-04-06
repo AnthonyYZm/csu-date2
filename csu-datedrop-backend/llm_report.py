@@ -1,6 +1,6 @@
 """
 调用 MiniMax 大模型，根据匹配引擎的结构化数据生成自然语言匹配报告。
-使用 OpenAI 兼容接口：https://api.minimax.io/v1
+使用 OpenAI 兼容接口：https://api.minimax.chat/v1
 """
 
 from __future__ import annotations

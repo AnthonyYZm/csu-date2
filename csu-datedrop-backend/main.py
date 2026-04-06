@@ -1,4 +1,4 @@
-import os
+import logging
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Optional, Tuple
 
@@ -12,8 +12,21 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
 
+from config import (
+    ACCESS_TOKEN_EXPIRE_DAYS,
+    ADMIN_TOKEN,
+    ALGORITHM,
+    EDU_DOMAIN,
+    EDU_VERIFY_DAYS,
+    NARRATIVE_WORKERS,
+    QUIZ_LOCK_HOUR_END,
+    QUIZ_LOCK_HOUR_START,
+    QUIZ_LOCK_WEEKDAY,
+    SECRET_KEY,
+    is_edu_email,
+)
 from database import engine, get_db
-from models import Base, Crush, Match, Profile, User
+from models import Base, Crush, Match, PageView, Profile, User
 from matcher_service import default_week_id, run_weekly_matching
 from llm_report import generate_narrative  # 提前 import，确保 .env 已加载
 from schemas import (
@@ -24,6 +37,7 @@ from schemas import (
     PausedRequest,
     QuizSubmit,
     RegisterRequest,
+    ResetPasswordRequest,
     RunMatchBody,
     SendCodeRequest,
     ShootRequest,
@@ -32,11 +46,12 @@ from schemas import (
 )
 import email_service
 
+logger = logging.getLogger(__name__)
+
 # --- Security ---
 
-SECRET_KEY = os.getenv("CSU_DATE_SECRET", "dev-csu-date-change-me")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_DAYS = 7
+if SECRET_KEY == "dev-csu-date-change-me":
+    logger.warning("CSU_DATE_SECRET 使用默认值，请在生产环境设置安全的密钥！")
 
 security = HTTPBearer(auto_error=False)
 
@@ -55,6 +70,40 @@ app.add_middleware(
 
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
+
+
+# ── 页面访问量记录中间件 ──
+TRACKED_PAGES = {
+    "/", "/index.html", "/login.html", "/dashboard.html",
+    "/report.html", "/greet.html", "/inbox.html", "/profile.html",
+    "/about.html", "/admin-dashboard.html",
+}
+
+
+class PageViewMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: StarletteRequest, call_next):
+        response = await call_next(request)
+        path = request.url.path.rstrip("/") or "/"
+        # 记录页面访问和 API 调用
+        if path in TRACKED_PAGES or path.startswith("/api/"):
+            try:
+                db = next(get_db())
+                db.add(PageView(
+                    path=path,
+                    timestamp=datetime.now(timezone.utc),
+                    ip=request.client.host if request.client else None,
+                    user_agent=(request.headers.get("user-agent") or "")[:256],
+                ))
+                db.commit()
+                db.close()
+            except Exception:
+                logger.exception("Failed to record page view for %s", path)
+        return response
+
+
+app.add_middleware(PageViewMiddleware)
 
 
 @app.exception_handler(RequestValidationError)
@@ -94,21 +143,13 @@ def normalize_csu_email(raw: str, no_edu: bool = False) -> str:
             )
         return s
     if "@" not in s:
-        s = f"{s}@csu.edu.cn"
-    if not s.endswith("@csu.edu.cn"):
+        s = f"{s}{EDU_DOMAIN}"
+    if not s.endswith(EDU_DOMAIN):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="必须使用 @csu.edu.cn 邮箱",
+            detail=f"必须使用 {EDU_DOMAIN} 邮箱",
         )
     return s
-
-
-EDU_VERIFY_DAYS = 3  # 非教育邮箱注册用户需在此天数内验证教育邮箱
-
-
-def is_edu_email(email: str) -> bool:
-    """判断邮箱是否为教育邮箱（@csu.edu.cn）。"""
-    return email.strip().lower().endswith("@csu.edu.cn")
 
 
 def edu_verify_deadline(user: User) -> Optional[datetime]:
@@ -123,7 +164,7 @@ def edu_verify_deadline(user: User) -> Optional[datetime]:
 
 
 def is_edu_blocked(user: User) -> bool:
-    """非教育邮箱用户超过 3 天未验证，则封锁匹配功能。"""
+    """非教育邮箱用户超过验证期限未验证，则封锁匹配功能。"""
     if is_edu_email(user.email):
         return False
     if user.edu_email_verified_at:
@@ -462,6 +503,71 @@ def admin_dashboard_stats(db: Session = Depends(get_db)):
         "scoreDist": score_dist,
         "crossCampus": {"yes": cross_yes, "no": cross_no},
         "growth": _build_growth_series(db),
+        "pageViews": _build_page_view_stats(db),
+    }
+
+
+def _build_page_view_stats(db: Session):
+    """构建页面访问量统计。"""
+    from sqlalchemy import func as fn
+    from collections import OrderedDict
+
+    total_views = db.query(PageView).count()
+
+    # 今日访问量
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_views = db.query(PageView).filter(PageView.timestamp >= today_start).count()
+
+    # 独立 IP 数
+    unique_ips = db.query(fn.count(fn.distinct(PageView.ip))).scalar() or 0
+    today_unique_ips = (
+        db.query(fn.count(fn.distinct(PageView.ip)))
+        .filter(PageView.timestamp >= today_start)
+        .scalar() or 0
+    )
+
+    # 各页面访问量（仅页面，不含 API）
+    page_rows = (
+        db.query(PageView.path, fn.count())
+        .filter(~PageView.path.startswith("/api/"))
+        .group_by(PageView.path)
+        .order_by(fn.count().desc())
+        .all()
+    )
+    page_dist = [{"name": r[0], "value": r[1]} for r in page_rows]
+
+    # API 调用量 Top 10
+    api_rows = (
+        db.query(PageView.path, fn.count())
+        .filter(PageView.path.startswith("/api/"))
+        .group_by(PageView.path)
+        .order_by(fn.count().desc())
+        .limit(10)
+        .all()
+    )
+    api_dist = [{"name": r[0], "value": r[1]} for r in api_rows]
+
+    # 每小时访问量趋势
+    hourly_rows = (
+        db.query(PageView.timestamp)
+        .filter(PageView.timestamp.isnot(None))
+        .order_by(PageView.timestamp)
+        .all()
+    )
+    hourly = OrderedDict()
+    for (ts,) in hourly_rows:
+        h = ts.strftime("%Y-%m-%d %H:00")
+        hourly[h] = hourly.get(h, 0) + 1
+
+    return {
+        "totalViews": total_views,
+        "todayViews": today_views,
+        "uniqueIPs": unique_ips,
+        "todayUniqueIPs": today_unique_ips,
+        "pageDist": page_dist,
+        "apiDist": api_dist,
+        "hourlyLabels": list(hourly.keys()),
+        "hourlyViews": list(hourly.values()),
     }
 
 
@@ -531,6 +637,23 @@ def auth_login(body: LoginRequest, db: Session = Depends(get_db)):
     }
 
 
+@app.post("/api/auth/reset-password")
+def auth_reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
+    """通过邮箱验证码重置密码。"""
+    email = normalize_csu_email(body.email, no_edu=body.no_edu)
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "该邮箱未注册")
+
+    ok, msg = email_service.verify_code(email, body.code)
+    if not ok:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, msg)
+
+    user.hashed_password = hash_password(body.new_password)
+    db.commit()
+    return {"ok": True, "message": "密码已重置，请重新登录"}
+
+
 @app.get("/api/user/me")
 def get_me(user: CurrentUser, db: Session = Depends(get_db)):
     return serialize_user(db, user)
@@ -591,8 +714,8 @@ def edu_email_send_code(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "你已验证过教育邮箱")
 
     edu_email = body.edu_email.strip().lower()
-    if not edu_email.endswith("@csu.edu.cn"):
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "必须使用 @csu.edu.cn 教育邮箱")
+    if not edu_email.endswith(EDU_DOMAIN):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"必须使用 {EDU_DOMAIN} 教育邮箱")
 
     ok, msg = email_service.generate_and_send(edu_email)
     if not ok:
@@ -613,8 +736,8 @@ def edu_email_verify(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "你已验证过教育邮箱")
 
     edu_email = body.edu_email.strip().lower()
-    if not edu_email.endswith("@csu.edu.cn"):
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "必须使用 @csu.edu.cn 教育邮箱")
+    if not edu_email.endswith(EDU_DOMAIN):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"必须使用 {EDU_DOMAIN} 教育邮箱")
 
     # 检查该教育邮箱是否已被其他账号使用或绑定
     existing = db.query(User).filter(
@@ -644,10 +767,10 @@ def crush_shoot(
     if is_edu_blocked(user):
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
-            "你尚未验证教育邮箱，注册已超过 3 天，无法参与匹配。请先绑定 @csu.edu.cn 教育邮箱。",
+            f"你尚未验证教育邮箱，注册已超过 {EDU_VERIFY_DAYS} 天，无法参与匹配。请先绑定 {EDU_DOMAIN} 教育邮箱。",
         )
 
-    target_email = normalize_csu_email(body.target_email, no_edu=("@" in body.target_email and not body.target_email.strip().endswith("@csu.edu.cn")))
+    target_email = normalize_csu_email(body.target_email, no_edu=("@" in body.target_email and not body.target_email.strip().endswith(EDU_DOMAIN)))
     if target_email == user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "不能对自己发射")
 
@@ -872,17 +995,15 @@ def send_match_greeting(
 
 
 def is_quiz_locked() -> bool:
-    """周四 16:00 ~ 21:00（UTC+8）期间锁定问卷提交。"""
+    """匹配计算窗口期间锁定问卷提交（默认周四 16:00~21:00 UTC+8）。"""
     import zoneinfo
     try:
         tz = zoneinfo.ZoneInfo("Asia/Shanghai")
     except Exception:
         tz = timezone(timedelta(hours=8))
     now = datetime.now(tz)
-    # weekday(): Monday=0, Thursday=3
-    if now.weekday() == 3:
-        hour = now.hour
-        if 16 <= hour < 21:
+    if now.weekday() == QUIZ_LOCK_WEEKDAY:
+        if QUIZ_LOCK_HOUR_START <= now.hour < QUIZ_LOCK_HOUR_END:
             return True
     return False
 
@@ -896,13 +1017,13 @@ def submit_quiz(
     if is_quiz_locked():
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
-            "问卷提交已锁定（周四 16:00-21:00 为匹配计算窗口），请 21:00 后再修改",
+            f"问卷提交已锁定（匹配计算窗口 {QUIZ_LOCK_HOUR_START}:00-{QUIZ_LOCK_HOUR_END}:00），请 {QUIZ_LOCK_HOUR_END}:00 后再修改",
         )
 
     if is_edu_blocked(user):
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
-            "你尚未验证教育邮箱，注册已超过 3 天，无法提交问卷。请先绑定 @csu.edu.cn 教育邮箱。",
+            f"你尚未验证教育邮箱，注册已超过 {EDU_VERIFY_DAYS} 天，无法提交问卷。请先绑定 {EDU_DOMAIN} 教育邮箱。",
         )
 
     cross_ok = _cross_campus_to_bool(payload.crossCampus)
@@ -932,7 +1053,6 @@ def submit_quiz(
     }
 
 
-NARRATIVE_WORKERS = int(os.getenv("NARRATIVE_WORKERS", "5"))
 
 
 def _bg_generate_narratives(week_id: int):
@@ -1029,10 +1149,23 @@ def _bg_generate_narratives(week_id: int):
         db.close()
 
 
+def verify_admin_token(
+    creds: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)],
+):
+    """校验管理员 token。需在 .env 中设置 CSU_DATE_ADMIN_TOKEN。"""
+    if not ADMIN_TOKEN:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "管理员令牌未配置（请设置 CSU_DATE_ADMIN_TOKEN 环境变量）")
+    if creds is None or not creds.credentials:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "需要管理员令牌")
+    if creds.credentials != ADMIN_TOKEN:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "管理员令牌无效")
+
+
 @app.post("/api/admin/run-match")
 def admin_run_match(
     body: Optional[RunMatchBody] = None,
     db: Session = Depends(get_db),
+    _admin: None = Depends(verify_admin_token),
 ):
     """MVP：无鉴权。先跑匹配，然后后台线程批量生成 LLM 叙事（不阻塞响应）。"""
     import threading
@@ -1052,7 +1185,10 @@ def admin_run_match(
 
 
 @app.get("/api/admin/narrative-progress")
-def narrative_progress(db: Session = Depends(get_db)):
+def narrative_progress(
+    db: Session = Depends(get_db),
+    _admin: None = Depends(verify_admin_token),
+):
     """查看当前周叙事生成进度。"""
     week_id = default_week_id()
     matches = db.query(Match).filter(Match.week_number == week_id).all()
