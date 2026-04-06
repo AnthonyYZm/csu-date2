@@ -5,13 +5,30 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from models import Match, Profile, User
+
+EDU_VERIFY_DAYS = 3
+
+
+def _is_edu_blocked(user: User) -> bool:
+    """非教育邮箱用户超过 3 天未验证教育邮箱则封锁。"""
+    email = (user.email or "").strip().lower()
+    if email.endswith("@csu.edu.cn"):
+        return False
+    if user.edu_email_verified_at:
+        return False
+    if not user.created_at:
+        return False
+    deadline = user.created_at + timedelta(days=EDU_VERIFY_DAYS)
+    now = datetime.now(timezone.utc)
+    deadline_aware = deadline.replace(tzinfo=timezone.utc) if deadline.tzinfo is None else deadline
+    return now >= deadline_aware
 from precision_matching_engine import PrecisionMatchConfig, solve_weekly_matches
 
 logger = logging.getLogger(__name__)
@@ -298,7 +315,7 @@ def run_weekly_matching(db: Session, week_id: int) -> Dict[str, Any]:
     """
     查询可匹配用户，组装 payload，调用 solve_weekly_matches，将结果写入 Match 表。
     """
-    rows = (
+    all_rows = (
         db.query(User, Profile)
         .join(Profile, Profile.user_id == User.id)
         .filter(
@@ -307,6 +324,12 @@ def run_weekly_matching(db: Session, week_id: int) -> Dict[str, Any]:
         )
         .all()
     )
+
+    # 过滤掉未验证教育邮箱且超过 3 天的非edu用户
+    rows = [(u, p) for u, p in all_rows if not _is_edu_blocked(u)]
+    edu_blocked_count = len(all_rows) - len(rows)
+    if edu_blocked_count > 0:
+        logger.info("edu_blocked: %d users excluded from matching", edu_blocked_count)
 
     if len(rows) < 2:
         return {

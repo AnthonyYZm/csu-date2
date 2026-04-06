@@ -38,6 +38,10 @@ class User(Base):
     bio = Column(String, default="")
     values_json = Column(JSON, nullable=True)
 
+    # 教育邮箱验证（非edu邮箱注册用户需在3天内绑定）
+    edu_email = Column(String, nullable=True)
+    edu_email_verified_at = Column(DateTime, nullable=True)
+
     profile = relationship("Profile", back_populates="user", uselist=False)
     sent_crushes = relationship("Crush", back_populates="sender")
 

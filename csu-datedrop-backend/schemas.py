@@ -77,5 +77,14 @@ class VerifyCodeRequest(BaseModel):
     code: str = Field(..., min_length=6, max_length=6)
 
 
+class EduEmailSendCodeRequest(BaseModel):
+    edu_email: str = Field(..., description="教育邮箱地址（@csu.edu.cn）")
+
+
+class EduEmailVerifyRequest(BaseModel):
+    edu_email: str = Field(..., description="教育邮箱地址")
+    code: str = Field(..., min_length=6, max_length=6, description="验证码")
+
+
 class RunMatchBody(BaseModel):
     week_id: Optional[int] = None

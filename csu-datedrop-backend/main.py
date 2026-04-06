@@ -17,6 +17,8 @@ from models import Base, Crush, Match, Profile, User
 from matcher_service import default_week_id, run_weekly_matching
 from llm_report import generate_narrative  # 提前 import，确保 .env 已加载
 from schemas import (
+    EduEmailSendCodeRequest,
+    EduEmailVerifyRequest,
     GreetRequest,
     LoginRequest,
     PausedRequest,
@@ -99,6 +101,37 @@ def normalize_csu_email(raw: str, no_edu: bool = False) -> str:
             detail="必须使用 @csu.edu.cn 邮箱",
         )
     return s
+
+
+EDU_VERIFY_DAYS = 3  # 非教育邮箱注册用户需在此天数内验证教育邮箱
+
+
+def is_edu_email(email: str) -> bool:
+    """判断邮箱是否为教育邮箱（@csu.edu.cn）。"""
+    return email.strip().lower().endswith("@csu.edu.cn")
+
+
+def edu_verify_deadline(user: User) -> Optional[datetime]:
+    """返回该用户的教育邮箱验证截止时间，教育邮箱用户返回 None。"""
+    if is_edu_email(user.email):
+        return None
+    if user.edu_email_verified_at:
+        return None
+    if not user.created_at:
+        return None
+    return user.created_at + timedelta(days=EDU_VERIFY_DAYS)
+
+
+def is_edu_blocked(user: User) -> bool:
+    """非教育邮箱用户超过 3 天未验证，则封锁匹配功能。"""
+    if is_edu_email(user.email):
+        return False
+    if user.edu_email_verified_at:
+        return False
+    deadline = edu_verify_deadline(user)
+    if deadline is None:
+        return False
+    return datetime.now(timezone.utc) >= deadline.replace(tzinfo=timezone.utc) if deadline.tzinfo is None else datetime.now(timezone.utc) >= deadline
 
 
 def _password_bytes(plain: str) -> bytes:
@@ -215,6 +248,12 @@ def serialize_user(db: Session, user: User, login_time_ms: Optional[int] = None)
     weekly = has_weekly_match(db, user.id, current_week_id())
     values = user.values_json if isinstance(user.values_json, list) else []
     now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
+
+    # 教育邮箱验证状态
+    edu_verified = is_edu_email(user.email) or bool(user.edu_email_verified_at)
+    deadline = edu_verify_deadline(user)
+    deadline_ms = int(deadline.replace(tzinfo=timezone.utc).timestamp() * 1000) if deadline and deadline.tzinfo is None else (int(deadline.timestamp() * 1000) if deadline else None)
+
     return {
         "id": local_id_from_email(user.email),
         "email": user.email,
@@ -231,6 +270,10 @@ def serialize_user(db: Session, user: User, login_time_ms: Optional[int] = None)
         "quizCompleted": bool(user.quiz_completed),
         "weeklyMatch": weekly,
         "paused": bool(user.paused),
+        "eduEmailVerified": edu_verified,
+        "eduEmail": user.edu_email or "",
+        "eduVerifyDeadline": deadline_ms,
+        "eduBlocked": is_edu_blocked(user),
     }
 
 
@@ -536,12 +579,74 @@ def set_paused(
     return {"ok": True, "user": serialize_user(db, user)}
 
 
+@app.post("/api/user/edu-email/send-code")
+def edu_email_send_code(
+    body: EduEmailSendCodeRequest,
+    user: CurrentUser,
+):
+    """非教育邮箱用户发送教育邮箱验证码。"""
+    if is_edu_email(user.email):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "你已使用教育邮箱注册，无需验证")
+    if user.edu_email_verified_at:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "你已验证过教育邮箱")
+
+    edu_email = body.edu_email.strip().lower()
+    if not edu_email.endswith("@csu.edu.cn"):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "必须使用 @csu.edu.cn 教育邮箱")
+
+    ok, msg = email_service.generate_and_send(edu_email)
+    if not ok:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, msg)
+    return {"ok": True, "message": msg}
+
+
+@app.post("/api/user/edu-email/verify")
+def edu_email_verify(
+    body: EduEmailVerifyRequest,
+    user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+    """验证教育邮箱验证码，完成绑定。"""
+    if is_edu_email(user.email):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "你已使用教育邮箱注册，无需验证")
+    if user.edu_email_verified_at:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "你已验证过教育邮箱")
+
+    edu_email = body.edu_email.strip().lower()
+    if not edu_email.endswith("@csu.edu.cn"):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "必须使用 @csu.edu.cn 教育邮箱")
+
+    # 检查该教育邮箱是否已被其他账号使用或绑定
+    existing = db.query(User).filter(
+        (User.email == edu_email) | (User.edu_email == edu_email)
+    ).first()
+    if existing and existing.id != user.id:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "该教育邮箱已被其他账号使用")
+
+    ok, msg = email_service.verify_code(edu_email, body.code)
+    if not ok:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, msg)
+
+    user.edu_email = edu_email
+    user.edu_email_verified_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(user)
+
+    return {"ok": True, "message": "教育邮箱验证成功", "user": serialize_user(db, user)}
+
+
 @app.post("/api/crush/shoot")
 def crush_shoot(
     body: ShootRequest,
     user: CurrentUser,
     db: Session = Depends(get_db),
 ):
+    if is_edu_blocked(user):
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "你尚未验证教育邮箱，注册已超过 3 天，无法参与匹配。请先绑定 @csu.edu.cn 教育邮箱。",
+        )
+
     target_email = normalize_csu_email(body.target_email, no_edu=("@" in body.target_email and not body.target_email.strip().endswith("@csu.edu.cn")))
     if target_email == user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "不能对自己发射")
@@ -792,6 +897,12 @@ def submit_quiz(
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
             "问卷提交已锁定（周四 16:00-21:00 为匹配计算窗口），请 21:00 后再修改",
+        )
+
+    if is_edu_blocked(user):
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "你尚未验证教育邮箱，注册已超过 3 天，无法提交问卷。请先绑定 @csu.edu.cn 教育邮箱。",
         )
 
     cross_ok = _cross_campus_to_bool(payload.crossCampus)

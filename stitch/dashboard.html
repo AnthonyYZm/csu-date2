@@ -163,6 +163,34 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 .modal-actions{display:flex;gap:.75rem;margin-top:1.25rem}
 .modal-actions .btn-match{flex:1}
 
+/* ── Edu Email Verification Banner ── */
+.edu-banner{background:linear-gradient(135deg,oklch(48% 0.17 28/0.06),oklch(72% 0.12 75/0.06));border:1.5px solid oklch(48% 0.17 28/0.15);border-radius:2.5rem;padding:clamp(1.75rem,4vw,2.5rem);margin-bottom:clamp(1.5rem,3vw,2.5rem);opacity:0;animation:cardIn .7s cubic-bezier(.16,1,.3,1) .15s forwards}
+.edu-banner.blocked{background:linear-gradient(135deg,oklch(55% 0.2 25/0.08),oklch(45% 0.15 25/0.06));border-color:oklch(48% 0.17 28/0.25)}
+.edu-banner-head{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.edu-banner-icon{width:2.75rem;height:2.75rem;border-radius:50%;background:oklch(48% 0.17 28/0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.edu-banner-icon .material-symbols-outlined{font-size:1.25rem;color:var(--coral-hex)}
+.edu-banner-title{font-family:'Noto Serif SC',serif;font-weight:700;font-size:clamp(1rem,2.2vw,1.25rem);color:var(--ink-hex)}
+.edu-banner-desc{color:var(--text-dim);font-size:.875rem;line-height:1.7;margin-bottom:1.25rem}
+.edu-banner-desc strong{color:var(--coral-hex);font-weight:600}
+.edu-deadline{display:inline-flex;align-items:center;gap:.375rem;padding:.375rem 1rem;border-radius:9999px;background:oklch(48% 0.17 28/0.08);font-size:.8125rem;font-weight:600;color:var(--coral-hex);margin-bottom:1.25rem}
+.edu-deadline .material-symbols-outlined{font-size:1rem}
+.edu-form{display:flex;flex-direction:column;gap:.75rem;max-width:24rem}
+.edu-form-row{display:flex;gap:.5rem}
+.edu-input{flex:1;padding:.75rem 1rem;border:1.5px solid oklch(18% 0.09 275/0.08);border-radius:1.25rem;background:var(--white-warm);color:var(--text);font-family:'Outfit',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s}
+.edu-input:focus{border-color:oklch(48% 0.17 28/0.3)}
+.edu-btn{padding:.75rem 1.5rem;border-radius:9999px;font-family:'Outfit',sans-serif;font-weight:600;font-size:.8125rem;border:none;cursor:pointer;transition:transform .25s,opacity .2s;white-space:nowrap}
+.edu-btn:active{transform:scale(.97)}
+.edu-btn:disabled{opacity:.5;cursor:not-allowed}
+.edu-btn-send{background:var(--ink-hex);color:var(--white-warm)}
+.edu-btn-verify{background:linear-gradient(135deg,var(--coral-hex),oklch(52% 0.15 30));color:var(--white-warm);box-shadow:0 4px 16px oklch(48% 0.17 28/0.15)}
+.edu-code-row{display:flex;gap:.5rem}
+.edu-msg{font-size:.8125rem;margin-top:.25rem;font-weight:500}
+.edu-msg.ok{color:var(--sage-hex)}
+.edu-msg.err{color:var(--coral-hex)}
+.edu-success{display:flex;align-items:center;gap:.75rem;padding:1rem 1.5rem;border-radius:1.5rem;background:oklch(65% 0.08 155/0.08);border:1.5px solid oklch(65% 0.08 155/0.15)}
+.edu-success .material-symbols-outlined{font-size:1.5rem;color:var(--sage-hex);font-variation-settings:'FILL' 1}
+.edu-success-text{font-size:.875rem;font-weight:600;color:var(--sage-hex)}
+
 /* ── Hidden ── */
 .hidden{display:none!important}
 
@@ -207,6 +235,38 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     <div class="greeting-eyebrow" id="greetingTime">下午好</div>
     <h1 class="greeting-title"><em id="greetingName">晓霜</em>，欢迎回来</h1>
     <p class="greeting-sub">这是你在 CSU Date 的第 <strong>7</strong> 周</p>
+  </div>
+
+  <!-- Edu Email Verification Banner (non-edu users only) -->
+  <div class="edu-banner hidden" id="eduBanner">
+    <div class="edu-banner-head">
+      <div class="edu-banner-icon"><span class="material-symbols-outlined">school</span></div>
+      <h2 class="edu-banner-title" id="eduBannerTitle">验证教育邮箱</h2>
+    </div>
+    <p class="edu-banner-desc" id="eduBannerDesc">
+      你使用的是非教育邮箱注册。为保证社区质量，请在 <strong id="eduDeadlineText">3 天内</strong> 绑定你的 <strong>@csu.edu.cn</strong> 教育邮箱，否则将无法参与匹配。
+    </p>
+    <div class="edu-deadline hidden" id="eduDeadlineRow">
+      <span class="material-symbols-outlined">schedule</span>
+      <span id="eduDeadlineCountdown">剩余 --</span>
+    </div>
+    <div id="eduFormArea">
+      <div class="edu-form">
+        <div class="edu-form-row">
+          <input type="text" class="edu-input" id="eduEmailInput" placeholder="学号（将自动补全 @csu.edu.cn）"/>
+          <button class="edu-btn edu-btn-send" id="eduSendBtn" onclick="eduSendCode()">发送验证码</button>
+        </div>
+        <div class="edu-code-row hidden" id="eduCodeRow">
+          <input type="text" class="edu-input" id="eduCodeInput" placeholder="输入 6 位验证码" maxlength="6"/>
+          <button class="edu-btn edu-btn-verify" onclick="eduVerifyCode()">验证</button>
+        </div>
+        <div class="edu-msg hidden" id="eduMsg"></div>
+      </div>
+    </div>
+    <div class="edu-success hidden" id="eduSuccess">
+      <span class="material-symbols-outlined">verified</span>
+      <span class="edu-success-text">教育邮箱已验证</span>
+    </div>
   </div>
 
   <!-- Onboarding (shown when quiz not completed) -->
@@ -350,6 +410,130 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 
 <script src="api.js"></script>
 <script>
+/* ── Edu Email Verification ── */
+var _eduCooldown=0;
+var _eduTimer=null;
+
+function showEduBanner(u){
+  // 教育邮箱用户或已验证：不显示
+  if(u.eduEmailVerified){
+    document.getElementById('eduBanner').classList.add('hidden');
+    return;
+  }
+  var banner=document.getElementById('eduBanner');
+  banner.classList.remove('hidden');
+
+  if(u.eduBlocked){
+    // 已超期
+    banner.classList.add('blocked');
+    document.getElementById('eduBannerTitle').textContent='教育邮箱未验证 — 匹配已暂停';
+    document.getElementById('eduBannerDesc').innerHTML='你使用非教育邮箱注册且已超过 <strong>3 天</strong>未验证，匹配功能已被暂停。请立即绑定 <strong>@csu.edu.cn</strong> 教育邮箱以恢复。';
+    document.getElementById('eduDeadlineRow').classList.add('hidden');
+  }else if(u.eduVerifyDeadline){
+    // 显示倒计时
+    document.getElementById('eduDeadlineRow').classList.remove('hidden');
+    _startEduCountdown(u.eduVerifyDeadline);
+  }
+}
+
+function _startEduCountdown(deadlineMs){
+  function tick(){
+    var now=Date.now();
+    var diff=deadlineMs-now;
+    if(diff<=0){
+      document.getElementById('eduDeadlineCountdown').textContent='已到期';
+      // 刷新用户状态
+      location.reload();
+      return;
+    }
+    var h=Math.floor(diff/36e5);
+    var m=Math.floor(diff%36e5/6e4);
+    var s=Math.floor(diff%6e4/1e3);
+    document.getElementById('eduDeadlineCountdown').textContent='剩余 '+h+'时'+String(m).padStart(2,'0')+'分'+String(s).padStart(2,'0')+'秒';
+  }
+  tick();
+  if(_eduTimer) clearInterval(_eduTimer);
+  _eduTimer=setInterval(tick,1000);
+}
+
+async function eduSendCode(){
+  var raw=document.getElementById('eduEmailInput').value.trim();
+  if(!raw){_eduShowMsg('请输入学号或邮箱','err');return;}
+  var email=raw;
+  if(email.indexOf('@')===-1) email=email+'@csu.edu.cn';
+  if(!email.endsWith('@csu.edu.cn')){_eduShowMsg('必须使用 @csu.edu.cn 教育邮箱','err');return;}
+
+  var btn=document.getElementById('eduSendBtn');
+  btn.disabled=true;
+  btn.textContent='发送中...';
+  try{
+    var res=await csudateFetch('/api/user/edu-email/send-code',{
+      method:'POST',
+      body:JSON.stringify({edu_email:email})
+    });
+    var data=await res.json().catch(function(){return {};});
+    if(!res.ok){
+      _eduShowMsg(csudateApiErrorMessage(data),'err');
+      btn.disabled=false;btn.textContent='发送验证码';
+      return;
+    }
+    _eduShowMsg('验证码已发送至 '+email,'ok');
+    document.getElementById('eduCodeRow').classList.remove('hidden');
+    // 60秒冷却
+    _eduCooldown=60;
+    btn.disabled=true;
+    var cd=setInterval(function(){
+      _eduCooldown--;
+      if(_eduCooldown<=0){clearInterval(cd);btn.disabled=false;btn.textContent='重新发送';return;}
+      btn.textContent=_eduCooldown+'s';
+    },1000);
+  }catch(e){
+    _eduShowMsg('网络错误','err');
+    btn.disabled=false;btn.textContent='发送验证码';
+  }
+}
+
+async function eduVerifyCode(){
+  var raw=document.getElementById('eduEmailInput').value.trim();
+  var email=raw;
+  if(email.indexOf('@')===-1) email=email+'@csu.edu.cn';
+  var code=document.getElementById('eduCodeInput').value.trim();
+  if(!code||code.length!==6){_eduShowMsg('请输入 6 位验证码','err');return;}
+
+  try{
+    var res=await csudateFetch('/api/user/edu-email/verify',{
+      method:'POST',
+      body:JSON.stringify({edu_email:email,code:code})
+    });
+    var data=await res.json().catch(function(){return {};});
+    if(!res.ok){
+      _eduShowMsg(csudateApiErrorMessage(data),'err');
+      return;
+    }
+    // 验证成功
+    if(data.user) localStorage.setItem('csudate_user',JSON.stringify(data.user));
+    document.getElementById('eduFormArea').classList.add('hidden');
+    document.getElementById('eduDeadlineRow').classList.add('hidden');
+    document.getElementById('eduSuccess').classList.remove('hidden');
+    document.getElementById('eduBannerTitle').textContent='教育邮箱已验证';
+    document.getElementById('eduBannerDesc').innerHTML='你的教育邮箱 <strong>'+email+'</strong> 已验证成功，匹配功能正常使用。';
+    var banner=document.getElementById('eduBanner');
+    banner.classList.remove('blocked');
+    if(_eduTimer){clearInterval(_eduTimer);_eduTimer=null;}
+    _eduShowMsg('','ok');
+  }catch(e){
+    _eduShowMsg('网络错误','err');
+  }
+}
+
+function _eduShowMsg(text,type){
+  var el=document.getElementById('eduMsg');
+  if(!text){el.classList.add('hidden');return;}
+  el.classList.remove('hidden','ok','err');
+  el.classList.add(type);
+  el.textContent=text;
+}
+
 function esc(t){if(t==null||t==='')return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
 
 function applyDashboardUser(u){
@@ -461,6 +645,7 @@ function renderMatchHistory(threads){
 
   try{
     applyDashboardUser(u);
+    showEduBanner(u);
   }catch(e){window.location.href='login.html';}
 
   // 从 /api/inbox 加载真实匹配数据
