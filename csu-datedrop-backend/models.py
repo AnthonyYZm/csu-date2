@@ -33,6 +33,7 @@ class User(Base):
     quiz_completed = Column(Boolean, default=False)
     paused = Column(Boolean, default=False)
     wechat = Column(String, default="")
+    created_at = Column(DateTime, nullable=True)
 
     bio = Column(String, default="")
     values_json = Column(JSON, nullable=True)

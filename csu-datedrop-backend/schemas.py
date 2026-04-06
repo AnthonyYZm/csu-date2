@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -12,7 +12,7 @@ class QuizSubmit(BaseModel):
     campus: Optional[str] = None
     crossCampus: Optional[str] = None
     sexuality: Optional[str] = None
-    raw_quiz_data: dict[str, Any] = Field(default_factory=dict)
+    raw_quiz_data: Dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="before")
     @classmethod
@@ -33,15 +33,18 @@ class QuizSubmit(BaseModel):
 class RegisterRequest(BaseModel):
     email: str = Field(..., description="完整邮箱或学号（将自动补全 @csu.edu.cn）")
     password: str = Field(..., min_length=6)
+    code: str = Field(..., min_length=6, max_length=6, description="邮箱验证码")
     name: str
     campus: str
     grade: str
     major: str
+    no_edu: bool = False
 
 
 class LoginRequest(BaseModel):
     email: str
     password: str
+    no_edu: bool = False
 
 
 # --- User ---
@@ -58,6 +61,20 @@ class ShootRequest(BaseModel):
 
 class PausedRequest(BaseModel):
     paused: bool
+
+
+class GreetRequest(BaseModel):
+    message: str
+
+
+class SendCodeRequest(BaseModel):
+    email: str = Field(..., description="完整邮箱或学号")
+    no_edu: bool = False
+
+
+class VerifyCodeRequest(BaseModel):
+    email: str
+    code: str = Field(..., min_length=6, max_length=6)
 
 
 class RunMatchBody(BaseModel):

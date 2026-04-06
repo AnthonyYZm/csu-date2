@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Tuple
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,19 +10,25 @@ from jose import JWTError, jwt
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 
 from database import engine, get_db
 from models import Base, Crush, Match, Profile, User
 from matcher_service import default_week_id, run_weekly_matching
+from llm_report import generate_narrative  # 提前 import，确保 .env 已加载
 from schemas import (
+    GreetRequest,
     LoginRequest,
     PausedRequest,
     QuizSubmit,
     RegisterRequest,
     RunMatchBody,
+    SendCodeRequest,
     ShootRequest,
+    VerifyCodeRequest,
     WechatUpdateRequest,
 )
+import email_service
 
 # --- Security ---
 
@@ -45,11 +51,46 @@ app.add_middleware(
 )
 
 
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    """将 Pydantic 422 错误转换为用户友好的中文提示。"""
+    messages = []
+    for err in exc.errors():
+        field = err.get("loc", [])[-1] if err.get("loc") else ""
+        etype = err.get("type", "")
+        field_names = {
+            "email": "邮箱", "password": "密码", "code": "验证码",
+            "name": "昵称", "campus": "校区", "grade": "年级", "major": "专业",
+        }
+        fname = field_names.get(field, field)
+        if "missing" in etype:
+            messages.append(f"请填写{fname}")
+        elif "too_short" in etype:
+            messages.append(f"{fname}长度不足")
+        elif "too_long" in etype:
+            messages.append(f"{fname}过长")
+        else:
+            messages.append(f"{fname}格式有误")
+    detail = "；".join(messages) if messages else "请求参数有误，请检查后重试"
+    return JSONResponse(status_code=422, content={"detail": detail})
+
+
 # --- Helpers ---
 
 
-def normalize_csu_email(raw: str) -> str:
+def normalize_csu_email(raw: str, no_edu: bool = False) -> str:
     s = raw.strip().lower()
+    if no_edu:
+        if "@" not in s:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="请输入完整的邮箱地址",
+            )
+        return s
     if "@" not in s:
         s = f"{s}@csu.edu.cn"
     if not s.endswith("@csu.edu.cn"):
@@ -96,7 +137,7 @@ def decode_token(token: str) -> int:
 
 
 def get_current_user(
-    creds: Annotated[HTTPAuthorizationCredentials | None, Depends(security)],
+    creds: Annotated[Optional[HTTPAuthorizationCredentials], Depends(security)],
     db: Annotated[Session, Depends(get_db)],
 ) -> User:
     if creds is None or not creds.credentials:
@@ -120,11 +161,11 @@ def current_week_id() -> int:
     return iso.year * 100 + iso.week
 
 
-def ordered_user_pair(a: int, b: int) -> tuple[int, int]:
+def ordered_user_pair(a: int, b: int) -> Tuple[int, int]:
     return (a, b) if a < b else (b, a)
 
 
-def _cross_campus_to_bool(value: str | None) -> bool | None:
+def _cross_campus_to_bool(value: Optional[str]) -> Optional[bool]:
     if value is None:
         return None
     if value == "可以接受":
@@ -169,7 +210,7 @@ def has_weekly_match(db: Session, user_id: int, week_id: int) -> bool:
     )
 
 
-def serialize_user(db: Session, user: User, login_time_ms: int | None = None) -> dict:
+def serialize_user(db: Session, user: User, login_time_ms: Optional[int] = None) -> dict:
     stats = compute_match_stats(db, user.id)
     weekly = has_weekly_match(db, user.id, current_week_id())
     values = user.values_json if isinstance(user.values_json, list) else []
@@ -193,12 +234,12 @@ def serialize_user(db: Session, user: User, login_time_ms: int | None = None) ->
     }
 
 
-def peer_from_match(db: Session, m: Match, me_id: int) -> User | None:
+def peer_from_match(db: Session, m: Match, me_id: int) -> Optional[User]:
     pid = m.user2_id if m.user1_id == me_id else m.user1_id
     return db.query(User).filter(User.id == pid).first()
 
 
-def messages_for_user(rd: dict, me_id: int, peer_id: int) -> tuple[str | None, str | None]:
+def messages_for_user(rd: dict, me_id: int, peer_id: int) -> Tuple[Optional[str], Optional[str]]:
     if not rd:
         return None, None
     by_uid = rd.get("messagesByUserId") or {}
@@ -219,11 +260,189 @@ def read_root():
     return {"message": "CSU Date API 已启动"}
 
 
+@app.get("/api/stats")
+def public_stats(db: Session = Depends(get_db)):
+    total_users = db.query(User).count()
+    quiz_done = db.query(User).filter(User.quiz_completed == True).count()
+    total_matches = db.query(Match).count()
+    return {"totalUsers": total_users, "quizCompleted": quiz_done, "totalMatches": total_matches}
+
+
+def _build_growth_series(db: Session):
+    """构建用户增长时间序列，按小时聚合。"""
+    from sqlalchemy import func as fn
+    rows = (
+        db.query(User.created_at)
+        .filter(User.created_at.isnot(None))
+        .order_by(User.created_at)
+        .all()
+    )
+    if not rows:
+        return {"timestamps": [], "cumUsers": [], "hourlyNew": [], "cumQuiz": []}
+
+    # 累计注册
+    timestamps = []
+    cum_users = []
+    for i, (ts,) in enumerate(rows, 1):
+        timestamps.append(ts.strftime("%Y-%m-%d %H:%M:%S"))
+        cum_users.append(i)
+
+    # 每小时新增
+    from collections import OrderedDict
+    hourly = OrderedDict()
+    for (ts,) in rows:
+        h = ts.strftime("%Y-%m-%d %H:00")
+        hourly[h] = hourly.get(h, 0) + 1
+
+    # 问卷完成累计（按 user id 顺序近似）
+    quiz_ids = (
+        db.query(User.created_at)
+        .filter(User.created_at.isnot(None), User.quiz_completed == True)
+        .order_by(User.created_at)
+        .all()
+    )
+    quiz_ts = []
+    cum_quiz = []
+    for i, (ts,) in enumerate(quiz_ids, 1):
+        quiz_ts.append(ts.strftime("%Y-%m-%d %H:%M:%S"))
+        cum_quiz.append(i)
+
+    return {
+        "timestamps": timestamps,
+        "cumUsers": cum_users,
+        "hourlyLabels": list(hourly.keys()),
+        "hourlyNew": list(hourly.values()),
+        "quizTimestamps": quiz_ts,
+        "cumQuiz": cum_quiz,
+    }
+
+
+@app.get("/api/admin/dashboard-stats")
+def admin_dashboard_stats(db: Session = Depends(get_db)):
+    """管理看板数据：用户统计、分布、匹配概览。"""
+    from sqlalchemy import func, case
+
+    total = db.query(User).count()
+    verified = db.query(User).filter(User.is_verified == True).count()
+    quiz_done = db.query(User).filter(User.quiz_completed == True).count()
+    paused = db.query(User).filter(User.paused == True).count()
+    total_matches = db.query(Match).count()
+
+    # 校区分布
+    campus_rows = (
+        db.query(User.campus, func.count())
+        .filter(User.campus != "")
+        .group_by(User.campus)
+        .order_by(func.count().desc())
+        .all()
+    )
+    campus_dist = [{"name": r[0], "value": r[1]} for r in campus_rows]
+
+    # 年级分布
+    grade_rows = (
+        db.query(User.grade, func.count())
+        .filter(User.grade != "")
+        .group_by(User.grade)
+        .order_by(func.count().desc())
+        .all()
+    )
+    grade_dist = [{"name": r[0], "value": r[1]} for r in grade_rows]
+
+    # 性别分布
+    gender_rows = (
+        db.query(Profile.gender, func.count())
+        .filter(Profile.gender.isnot(None))
+        .group_by(Profile.gender)
+        .order_by(func.count().desc())
+        .all()
+    )
+    gender_dist = [{"name": r[0], "value": r[1]} for r in gender_rows]
+
+    # 性取向分布
+    sexuality_rows = (
+        db.query(Profile.sexuality, func.count())
+        .filter(Profile.sexuality.isnot(None))
+        .group_by(Profile.sexuality)
+        .order_by(func.count().desc())
+        .all()
+    )
+    sexuality_dist = [{"name": r[0], "value": r[1]} for r in sexuality_rows]
+
+    # 专业 Top 10
+    major_rows = (
+        db.query(User.major, func.count())
+        .filter(User.major != "")
+        .group_by(User.major)
+        .order_by(func.count().desc())
+        .limit(10)
+        .all()
+    )
+    major_dist = [{"name": r[0], "value": r[1]} for r in major_rows]
+
+    # 匹配分数分布
+    match_rows = db.query(Match.score).all()
+    score_brackets = {"85+": 0, "80-85": 0, "75-80": 0, "70-75": 0, "<70": 0}
+    for (s,) in match_rows:
+        if s is None:
+            continue
+        if s >= 85:
+            score_brackets["85+"] += 1
+        elif s >= 80:
+            score_brackets["80-85"] += 1
+        elif s >= 75:
+            score_brackets["75-80"] += 1
+        elif s >= 70:
+            score_brackets["70-75"] += 1
+        else:
+            score_brackets["<70"] += 1
+    score_dist = [{"name": k, "value": v} for k, v in score_brackets.items()]
+
+    # 跨校区意愿
+    cross_yes = db.query(Profile).filter(Profile.cross_campus_ok == True).count()
+    cross_no = db.query(Profile).filter(Profile.cross_campus_ok == False).count()
+
+    return {
+        "overview": {
+            "totalUsers": total,
+            "verified": verified,
+            "quizCompleted": quiz_done,
+            "paused": paused,
+            "totalMatches": total_matches,
+            "matchedUsers": total_matches * 2,
+            "unmatchedUsers": quiz_done - paused - total_matches * 2 if quiz_done - paused > total_matches * 2 else 0,
+        },
+        "campusDist": campus_dist,
+        "gradeDist": grade_dist,
+        "genderDist": gender_dist,
+        "sexualityDist": sexuality_dist,
+        "majorDist": major_dist,
+        "scoreDist": score_dist,
+        "crossCampus": {"yes": cross_yes, "no": cross_no},
+        "growth": _build_growth_series(db),
+    }
+
+
+@app.post("/api/auth/send-code")
+def auth_send_code(body: SendCodeRequest):
+    """发送邮箱验证码（注册前调用）。"""
+    email = normalize_csu_email(body.email, no_edu=body.no_edu)
+    ok, msg = email_service.generate_and_send(email)
+    if not ok:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, msg)
+    return {"ok": True, "message": msg}
+
+
 @app.post("/api/auth/register")
 def auth_register(body: RegisterRequest, db: Session = Depends(get_db)):
-    email = normalize_csu_email(body.email)
+    email = normalize_csu_email(body.email, no_edu=body.no_edu)
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "该邮箱已注册")
+
+    # 验证邮箱验证码
+    ok, msg = email_service.verify_code(email, body.code)
+    if not ok:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, msg)
+
     user = User(
         email=email,
         hashed_password=hash_password(body.password),
@@ -236,6 +455,7 @@ def auth_register(body: RegisterRequest, db: Session = Depends(get_db)):
         is_verified=True,
         bio="",
         values_json=[],
+        created_at=datetime.now(timezone.utc),
     )
     db.add(user)
     try:
@@ -255,7 +475,7 @@ def auth_register(body: RegisterRequest, db: Session = Depends(get_db)):
 
 @app.post("/api/auth/login")
 def auth_login(body: LoginRequest, db: Session = Depends(get_db)):
-    email = normalize_csu_email(body.email)
+    email = normalize_csu_email(body.email, no_edu=body.no_edu)
     user = db.query(User).filter(User.email == email).first()
     if not user or not verify_password(body.password, user.hashed_password):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "邮箱或密码错误")
@@ -271,6 +491,25 @@ def auth_login(body: LoginRequest, db: Session = Depends(get_db)):
 @app.get("/api/user/me")
 def get_me(user: CurrentUser, db: Session = Depends(get_db)):
     return serialize_user(db, user)
+
+
+@app.get("/api/user/quiz")
+def get_quiz(user: CurrentUser, db: Session = Depends(get_db)):
+    """返回用户已保存的问卷数据，用于前端回填。"""
+    profile = db.query(Profile).filter(Profile.user_id == user.id).first()
+    if not profile or not profile.raw_quiz_data:
+        return {"saved": False}
+    raw = profile.raw_quiz_data if isinstance(profile.raw_quiz_data, dict) else {}
+    # 把 Profile 表的硬性字段也合并回去
+    raw["gender"] = profile.gender
+    raw["sexuality"] = profile.sexuality
+    raw["campus"] = profile.campus
+    cross = profile.cross_campus_ok
+    if cross is True:
+        raw["crossCampus"] = "可以接受"
+    elif cross is False:
+        raw["crossCampus"] = "不接受"
+    return {"saved": True, "quiz": raw}
 
 
 @app.post("/api/user/wechat")
@@ -303,7 +542,7 @@ def crush_shoot(
     user: CurrentUser,
     db: Session = Depends(get_db),
 ):
-    target_email = normalize_csu_email(body.target_email)
+    target_email = normalize_csu_email(body.target_email, no_edu=("@" in body.target_email and not body.target_email.strip().endswith("@csu.edu.cn")))
     if target_email == user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "不能对自己发射")
 
@@ -391,7 +630,7 @@ def crush_shoot(
 
 @app.get("/api/inbox")
 def get_inbox(user: CurrentUser, db: Session = Depends(get_db)):
-    items: list[dict] = []
+    items = []
 
     matches = (
         db.query(Match)
@@ -450,12 +689,111 @@ def get_inbox(user: CurrentUser, db: Session = Depends(get_db)):
     return {"threads": items}
 
 
+@app.get("/api/match/{match_id}")
+def get_match_report(match_id: int, user: CurrentUser, db: Session = Depends(get_db)):
+    """返回单条匹配的详细报告数据。叙事在 run-match 阶段已批量预生成。"""
+    m = (
+        db.query(Match)
+        .filter(
+            Match.id == match_id,
+            or_(Match.user1_id == user.id, Match.user2_id == user.id),
+        )
+        .first()
+    )
+    if not m:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "匹配记录不存在")
+
+    peer = peer_from_match(db, m, user.id)
+    rd = m.report_data if isinstance(m.report_data, dict) else {}
+    their_msg, your_msg = messages_for_user(rd, user.id, peer.id if peer else 0)
+
+    return {
+        "id": m.id,
+        "weekNumber": m.week_number,
+        "score": int(round(m.score)) if m.score is not None else 0,
+        "kind": rd.get("kind", "algorithm"),
+        "peerName": peer.name if peer else "CSU 用户",
+        "peerEmail": peer.email if peer else "",
+        "peerCampus": (peer.campus or "") if peer else "",
+        "peerGrade": (peer.grade or "") if peer else "",
+        "peerMajor": (peer.major or "") if peer else "",
+        "peerInitial": (peer.name or "?")[:1] if peer else "?",
+        "theirMessage": their_msg,
+        "yourMessage": your_msg,
+        "breakdown": rd.get("breakdown") or {},
+        "evidence": rd.get("evidence") or {},
+        "reportPayload": rd.get("reportPayload") or {},
+        "narrative": rd.get("narrative"),
+    }
+
+
+@app.post("/api/match/{match_id}/greet")
+def send_match_greeting(
+    match_id: int,
+    body: GreetRequest,
+    user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+    """给匹配对象发送一条留言（每人仅限一条）。"""
+    m = (
+        db.query(Match)
+        .filter(
+            Match.id == match_id,
+            or_(Match.user1_id == user.id, Match.user2_id == user.id),
+        )
+        .first()
+    )
+    if not m:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "匹配记录不存在")
+
+    msg = (body.message or "").strip()[:200]
+    if not msg:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "消息不能为空")
+
+    rd = m.report_data if isinstance(m.report_data, dict) else {}
+    by_uid = rd.get("messagesByUserId") or {}
+    uid_key = str(user.id)
+
+    if by_uid.get(uid_key):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "你已经发送过消息了")
+
+    by_uid[uid_key] = msg
+    rd["messagesByUserId"] = by_uid
+    m.report_data = rd
+    flag_modified(m, "report_data")
+    db.commit()
+
+    return {"ok": True, "message": "发送成功"}
+
+
+def is_quiz_locked() -> bool:
+    """周四 16:00 ~ 21:00（UTC+8）期间锁定问卷提交。"""
+    import zoneinfo
+    try:
+        tz = zoneinfo.ZoneInfo("Asia/Shanghai")
+    except Exception:
+        tz = timezone(timedelta(hours=8))
+    now = datetime.now(tz)
+    # weekday(): Monday=0, Thursday=3
+    if now.weekday() == 3:
+        hour = now.hour
+        if 16 <= hour < 21:
+            return True
+    return False
+
+
 @app.post("/api/quiz/submit")
 def submit_quiz(
     payload: QuizSubmit,
     user: CurrentUser,
     db: Session = Depends(get_db),
 ):
+    if is_quiz_locked():
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "问卷提交已锁定（周四 16:00-21:00 为匹配计算窗口），请 21:00 后再修改",
+        )
+
     cross_ok = _cross_campus_to_bool(payload.crossCampus)
 
     profile = db.query(Profile).filter(Profile.user_id == user.id).first()
@@ -483,13 +821,133 @@ def submit_quiz(
     }
 
 
+NARRATIVE_WORKERS = int(os.getenv("NARRATIVE_WORKERS", "5"))
+
+
+def _bg_generate_narratives(week_id: int):
+    """后台线程：并发生成叙事并写入 DB。"""
+    import traceback
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    from database import SessionLocal
+    from llm_report import _load_env
+    _load_env()
+
+    print(f"[narrative_bg] started for week {week_id}, workers={NARRATIVE_WORKERS}", flush=True)
+
+    # 先用一个 session 读出所有待生成的任务参数
+    db = SessionLocal()
+    try:
+        matches = db.query(Match).filter(Match.week_number == week_id).all()
+        tasks = []
+        for m in matches:
+            rd = m.report_data if isinstance(m.report_data, dict) else {}
+            if rd.get("narrative") or rd.get("kind") != "algorithm":
+                continue
+            u1 = db.query(User).filter(User.id == m.user1_id).first()
+            u2 = db.query(User).filter(User.id == m.user2_id).first()
+            if not u1 or not u2:
+                continue
+            tasks.append({
+                "match_id": m.id,
+                "score": int(round(m.score)) if m.score is not None else 0,
+                "u1_name": u1.name or "用户A",
+                "u2_name": u2.name or "用户B",
+                "u2_campus": u2.campus or "",
+                "u2_grade": u2.grade or "",
+                "u2_major": u2.major or "",
+                "breakdown": rd.get("breakdown") or {},
+                "report_payload": rd.get("reportPayload") or {},
+            })
+    finally:
+        db.close()
+
+    print(f"[narrative_bg] {len(tasks)} narratives to generate", flush=True)
+    if not tasks:
+        print("[narrative_bg] nothing to do", flush=True)
+        return
+
+    # 并发调用 LLM（纯 API 调用，无 DB 操作）
+    def call_llm(t):
+        text = generate_narrative(
+            my_name=t["u1_name"],
+            peer_name=t["u2_name"],
+            score=t["score"],
+            breakdown=t["breakdown"],
+            report_payload=t["report_payload"],
+            peer_campus=t["u2_campus"],
+            peer_grade=t["u2_grade"],
+            peer_major=t["u2_major"],
+        )
+        return t["match_id"], text
+
+    results = {}
+    ok = fail = 0
+    with ThreadPoolExecutor(max_workers=NARRATIVE_WORKERS) as pool:
+        futures = {pool.submit(call_llm, t): t["match_id"] for t in tasks}
+        for future in as_completed(futures):
+            mid = futures[future]
+            try:
+                match_id, text = future.result()
+                if text:
+                    results[match_id] = text
+                    ok += 1
+                else:
+                    fail += 1
+                print(f"[narrative_bg] {ok+fail}/{len(tasks)} {'ok' if text else 'FAIL'} (match {mid})", flush=True)
+            except Exception as e:
+                fail += 1
+                print(f"[narrative_bg] {ok+fail}/{len(tasks)} ERROR match {mid}: {e}", flush=True)
+
+    # 单线程写回 DB
+    from sqlalchemy.orm.attributes import flag_modified
+    db = SessionLocal()
+    try:
+        for match_id, text in results.items():
+            m = db.query(Match).filter(Match.id == match_id).first()
+            if m:
+                rd = m.report_data if isinstance(m.report_data, dict) else {}
+                rd["narrative"] = text
+                m.report_data = rd
+                flag_modified(m, "report_data")
+        db.commit()
+        print(f"[narrative_bg] done: ok={ok} fail={fail} saved={len(results)}", flush=True)
+    except Exception as e:
+        print(f"[narrative_bg] DB write error: {e}", flush=True)
+        traceback.print_exc()
+    finally:
+        db.close()
+
+
 @app.post("/api/admin/run-match")
 def admin_run_match(
     body: Optional[RunMatchBody] = None,
     db: Session = Depends(get_db),
 ):
-    """MVP：无鉴权，仅供本地触发周匹配。生产环境务必加管理员校验。"""
+    """MVP：无鉴权。先跑匹配，然后后台线程批量生成 LLM 叙事（不阻塞响应）。"""
+    import threading
+
     week_id = default_week_id()
     if body is not None and body.week_id is not None:
         week_id = body.week_id
-    return run_weekly_matching(db, week_id)
+
+    result = run_weekly_matching(db, week_id)
+
+    # 后台线程生成叙事，不阻塞返回
+    t = threading.Thread(target=_bg_generate_narratives, args=(week_id,), daemon=True)
+    t.start()
+    result["narrative_status"] = "generating_in_background"
+
+    return result
+
+
+@app.get("/api/admin/narrative-progress")
+def narrative_progress(db: Session = Depends(get_db)):
+    """查看当前周叙事生成进度。"""
+    week_id = default_week_id()
+    matches = db.query(Match).filter(Match.week_number == week_id).all()
+    total = len(matches)
+    done = sum(
+        1 for m in matches
+        if isinstance(m.report_data, dict) and m.report_data.get("narrative")
+    )
+    return {"week_id": week_id, "total": total, "done": done, "pending": total - done}
