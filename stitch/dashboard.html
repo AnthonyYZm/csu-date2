@@ -256,6 +256,15 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     <p class="greeting-sub" id="greetingSub"></p>
   </div>
 
+  <!-- Announcement Board -->
+  <div class="announce-card hidden" id="announceCard">
+    <div class="announce-head">
+      <div class="announce-icon"><span class="material-symbols-outlined">campaign</span></div>
+      <h2 class="announce-title">近期更新</h2>
+    </div>
+    <div class="announce-list" id="announceList"></div>
+  </div>
+
   <!-- Edu Email Verification Banner (non-edu users only) -->
   <div class="edu-banner hidden" id="eduBanner">
     <div class="edu-banner-head">
@@ -596,6 +605,30 @@ async function loadAnnouncements(){
     if(!res.ok||!items.length)return;
     var tagMap={update:['修复','tag-update'],feature:['新功能','tag-feature'],notice:['公告','tag-notice']};
     var html='';
+    items.forEach(function(item){
+      var tag=tagMap[item.type]||tagMap.notice;
+      html+='<div class="announce-item">'+
+        '<span class="announce-tag '+tag[1]+'">'+tag[0]+'</span>'+
+        '<div class="announce-body">'+
+        '<div class="announce-item-title">'+esc(item.title)+'</div>'+
+        '<div class="announce-item-desc">'+esc(item.content)+'</div>'+
+        '</div>'+
+        '<span class="announce-date">'+esc(item.date)+'</span>'+
+        '</div>';
+    });
+    document.getElementById('announceList').innerHTML=html;
+    document.getElementById('announceCard').classList.remove('hidden');
+  }catch(e){console.error('公告加载失败',e);}
+}
+
+/* ── Announcements ── */
+async function loadAnnouncements(){
+  try{
+    const res=await csudateFetch('/api/announcements',{method:'GET'});
+    const items=await res.json().catch(function(){return [];});
+    if(!res.ok||!items.length)return;
+    var tagMap={update:['修复','tag-update'],feature:['新功能','tag-feature'],notice:['公告','tag-notice']};
+    var html='';
     items.slice(0,5).forEach(function(item){
       var tag=tagMap[item.type]||tagMap.notice;
       html+='<div class="announce-item">'+
@@ -721,6 +754,7 @@ function renderMatchHistory(threads){
   try{
     applyDashboardUser(u);
     showEduBanner(u);
+    loadAnnouncements();
   }catch(e){window.location.href='login.html';}
 
   // 从 /api/inbox 加载真实匹配数据
