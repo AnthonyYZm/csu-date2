@@ -62,14 +62,14 @@ def _build_code_html(code: str) -> str:
     """构建验证码邮件 HTML 内容。"""
     return f"""
     <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:480px;margin:0 auto;padding:40px 24px;color:#1a1a2e">
-      <h2 style="margin:0 0 8px;font-size:22px">CSU Date 邮箱验证</h2>
-      <p style="color:#666;margin:0 0 24px;font-size:14px">你正在注册 CSU Date 账号，请使用以下验证码完成验证：</p>
+      <h2 style="margin:0 0 8px;font-size:22px">YueluDate 邮箱验证</h2>
+      <p style="color:#666;margin:0 0 24px;font-size:14px">你正在注册 YueluDate 账号，请使用以下验证码完成验证：</p>
       <div style="background:#f5f3ee;border-radius:12px;padding:24px;text-align:center;margin:0 0 24px">
         <span style="font-size:36px;font-weight:700;letter-spacing:8px;color:#1a1a2e">{code}</span>
       </div>
       <p style="color:#999;font-size:12px;margin:0">验证码 10 分钟内有效，请勿泄露给他人。</p>
       <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
-      <p style="color:#bbb;font-size:11px;margin:0">如非本人操作请忽略此邮件。<br>CSU Date · 岳麓山下的匹配实验</p>
+      <p style="color:#bbb;font-size:11px;margin:0">如非本人操作请忽略此邮件。<br>YueluDate · 岳麓山下的匹配实验</p>
     </div>
     """
 
@@ -81,9 +81,9 @@ def _send_via_qq_smtp(to_email: str, code: str) -> bool:
         return False
     try:
         msg = MIMEMultipart("alternative")
-        msg["From"] = f"CSU Date <{QQ_SMTP_EMAIL}>"
+        msg["From"] = f"YueluDate <{QQ_SMTP_EMAIL}>"
         msg["To"] = to_email
-        msg["Subject"] = "【CSU Date】邮箱验证码"
+        msg["Subject"] = "【YueluDate】邮箱验证码"
         msg.attach(MIMEText(_build_code_html(code), "html", "utf-8"))
 
         with smtplib.SMTP_SSL("smtp.qq.com", 465, timeout=10) as s:
@@ -114,7 +114,7 @@ def generate_and_send(email: str):
         r = resend.Emails.send({
             "from": FROM_EMAIL,
             "to": [email],
-            "subject": "【CSU Date】邮箱验证码",
+            "subject": "【YueluDate】邮箱验证码",
             "html": _build_code_html(code),
         })
 

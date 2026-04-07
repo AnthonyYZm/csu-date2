@@ -1,5 +1,5 @@
 /**
- * CSU Date 前端 API 工具
+ * YueluDate 前端 API 工具
  * Token：优先 csudate_token（与 login 一致），兼容旧键 csudate_access_token。
  * API 根：默认 http://127.0.0.1:8888，可 localStorage.setItem('csudate_api_base', url) 覆盖。
  */
@@ -106,8 +106,8 @@
       ? 'linear-gradient(135deg, #dc2626, #b91c1c)'
       : 'linear-gradient(135deg, #f59e0b, #d97706)';
     var msg = blocked
-      ? '你的教育邮箱未验证且已超期，匹配功能已暂停！请立即前往仪表盘验证 @csu.edu.cn 邮箱。'
-      : '你使用的是非教育邮箱注册，请尽快验证 @csu.edu.cn 教育邮箱，否则将无法参与匹配。';
+      ? '你的教育邮箱未验证且已超期，匹配功能已暂停！请立即前往仪表盘验证教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）。'
+      : '你使用的是非教育邮箱注册，请尽快验证教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn），否则将无法参与匹配。';
 
     banner.innerHTML = ''
       + '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">'

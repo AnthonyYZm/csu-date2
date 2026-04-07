@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>首页 · CSU Date</title>
+<title>首页 · YueluDate</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -234,7 +234,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 <!-- ─── Top Bar ─── -->
 <nav class="topbar" id="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="topbar-logo">CSU Date</a>
+    <a href="index.html" class="topbar-logo">YueluDate</a>
     <span class="topbar-spacer"></span>
     <div class="topbar-nav">
       <a href="dashboard.html" class="active">首页</a>
@@ -263,7 +263,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
       <h2 class="edu-banner-title" id="eduBannerTitle">验证教育邮箱</h2>
     </div>
     <p class="edu-banner-desc" id="eduBannerDesc">
-      你使用的是非教育邮箱注册。为保证社区质量，请在 <strong id="eduDeadlineText">3 天内</strong> 绑定你的 <strong>@csu.edu.cn</strong> 教育邮箱，否则将无法参与匹配。
+      你使用的是非教育邮箱注册。为保证社区质量，请在 <strong id="eduDeadlineText">3 天内</strong> 绑定你的教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn），否则将无法参与匹配。
     </p>
     <div class="edu-deadline hidden" id="eduDeadlineRow">
       <span class="material-symbols-outlined">schedule</span>
@@ -272,7 +272,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     <div id="eduFormArea">
       <div class="edu-form">
         <div class="edu-form-row">
-          <input type="text" class="edu-input" id="eduEmailInput" placeholder="学号（将自动补全 @csu.edu.cn）"/>
+          <input type="text" class="edu-input" id="eduEmailInput" placeholder="学号@csu.edu.cn 或 @hnu.edu.cn 或 @hunnu.edu.cn"/>
           <button class="edu-btn edu-btn-send" id="eduSendBtn" onclick="eduSendCode()">发送验证码</button>
         </div>
         <div class="edu-code-row hidden" id="eduCodeRow">
@@ -296,13 +296,13 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
       </div>
       <h3 class="modal-title" style="text-align:center">确认教育邮箱状态</h3>
       <p class="modal-desc" style="text-align:left">
-        验证码将发送至你的 <strong>@csu.edu.cn</strong> 教育邮箱。请确认你已经 <strong>注册并激活</strong> 过该邮箱，否则将无法收到验证码。
+        验证码将发送至你的教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）。请确认你已经 <strong>注册并激活</strong> 过该邮箱，否则将无法收到验证码。
       </p>
       <p style="margin-bottom:1.5rem">
-        <a href="https://mp.weixin.qq.com/s/3EDO2ened4MGuCSNkf8FQg" target="_blank" rel="noopener"
+        <a href="about.html#edu-email-guide" target="_blank" rel="noopener"
            style="display:inline-flex;align-items:center;gap:.375rem;color:var(--coral-hex);font-size:.875rem;font-weight:600;text-decoration:none;padding:.5rem 1rem;border-radius:9999px;background:oklch(48% 0.17 28/0.06);transition:background .2s">
           <span class="material-symbols-outlined" style="font-size:1.1rem">menu_book</span>
-          教育邮箱注册指引
+          各校教育邮箱注册指引
         </a>
       </p>
       <div class="modal-actions" style="justify-content:center">
@@ -316,7 +316,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <div class="onboard-card hidden" id="onboardCard">
     <div class="onboard-icon"><span class="material-symbols-outlined" style="font-size:inherit;color:inherit">edit_note</span></div>
     <h2 class="onboard-title">先完成问卷，开启你的匹配之旅</h2>
-    <p class="onboard-desc">花 5 分钟填写深度问卷，我们会根据你的价值观和生活态度，每周四为你匹配一个最合拍的中南人。</p>
+    <p class="onboard-desc">花 5 分钟填写深度问卷，我们会根据你的价值观和生活态度，每周四为你匹配一个最合拍的人。</p>
     <button class="btn-onboard" onclick="location.href='index.html?startQuiz=true'">
       开始填写问卷
       <span class="material-symbols-outlined">arrow_forward</span>
@@ -424,7 +424,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <div class="modal-body">
     <h3 class="modal-title">Shoot Your Shot</h3>
     <p class="modal-desc">输入 TA 的学校邮箱，悄悄表明心意。如果 TA 也 shoot 了你，立即触发双向匹配。否则 TA 永远不会知道。</p>
-    <input type="email" class="modal-input" id="shootEmail" placeholder="ta@csu.edu.cn"/>
+    <input type="email" class="modal-input" id="shootEmail" placeholder="ta@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn"/>
     <textarea class="modal-textarea" id="shootMsg" placeholder="留一句话（匹配成功后才会送达）" rows="3"></textarea>
     <div class="modal-actions">
       <button class="btn-match btn-primary" onclick="submitShoot()">发射</button>
@@ -470,7 +470,7 @@ function showEduBanner(u){
     // 已超期
     banner.classList.add('blocked');
     document.getElementById('eduBannerTitle').textContent='教育邮箱未验证 — 匹配已暂停';
-    document.getElementById('eduBannerDesc').innerHTML='你使用非教育邮箱注册且已超过 <strong>3 天</strong>未验证，匹配功能已被暂停。请立即绑定 <strong>@csu.edu.cn</strong> 教育邮箱以恢复。';
+    document.getElementById('eduBannerDesc').innerHTML='你使用非教育邮箱注册且已超过 <strong>3 天</strong>未验证，匹配功能已被暂停。请立即绑定教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）以恢复。';
     document.getElementById('eduDeadlineRow').classList.add('hidden');
   }else if(u.eduVerifyDeadline){
     // 显示倒计时
@@ -504,7 +504,7 @@ function eduSendCode(){
   if(!raw){_eduShowMsg('请输入学号或邮箱','err');return;}
   var email=raw;
   if(email.indexOf('@')===-1) email=email+'@csu.edu.cn';
-  if(!email.endsWith('@csu.edu.cn')){_eduShowMsg('必须使用 @csu.edu.cn 教育邮箱','err');return;}
+  if(!email.endsWith('@csu.edu.cn')&&!email.endsWith('@hnu.edu.cn')&&!email.endsWith('@hunnu.edu.cn')){_eduShowMsg('必须使用 @csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn 教育邮箱','err');return;}
   // 弹出确认弹窗
   document.getElementById('eduConfirmModal').classList.add('open');
 }
@@ -633,7 +633,7 @@ function applyDashboardUser(u){
     document.getElementById('statBest').textContent=u.stats.bestScore?u.stats.bestScore+'%':'--';
     document.getElementById('statWeeks').textContent=u.stats.weeks;
   }
-  document.getElementById('greetingSub').innerHTML='这是你在 CSU Date 的第 <strong>'+(u.stats?u.stats.weeks:1)+'</strong> 周';
+  document.getElementById('greetingSub').innerHTML='这是你在 YueluDate 的第 <strong>'+(u.stats?u.stats.weeks:1)+'</strong> 周';
 
   startCountdown();
 }
@@ -790,7 +790,7 @@ function closeShootModal(){document.getElementById('shootModal').classList.remov
 async function submitShoot(){
   const email=document.getElementById('shootEmail').value.trim();
   const msg=document.getElementById('shootMsg').value;
-  if(!email||!email.includes('@csu.edu.cn')){alert('请输入有效的 @csu.edu.cn 邮箱');return;}
+  if(!email||(!email.includes('@csu.edu.cn')&&!email.includes('@hnu.edu.cn')&&!email.includes('@hunnu.edu.cn'))){alert('请输入有效的教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）');return;}
   if(!window.csudateGetToken || !csudateGetToken()){
     alert('请先使用真实账号登录后再使用 Shoot');
     return;

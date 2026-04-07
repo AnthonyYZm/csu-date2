@@ -18,6 +18,7 @@ from config import (
     ADMIN_TOKEN,
     ALGORITHM,
     EDU_DOMAIN,
+    EDU_DOMAINS,
     EDU_VERIFY_DAYS,
     NARRATIVE_WORKERS,
     QUIZ_LOCK_HOUR_END,
@@ -58,7 +59,7 @@ if SECRET_KEY == "dev-csu-date-change-me":
 
 security = HTTPBearer(auto_error=False)
 
-app = FastAPI(title="CSU Date API")
+app = FastAPI(title="YueluDate API")
 
 Base.metadata.create_all(bind=engine)
 
@@ -136,7 +137,7 @@ async def validation_exception_handler(request, exc):
 # --- Helpers ---
 
 
-def normalize_csu_email(raw: str, no_edu: bool = False) -> str:
+def normalize_edu_email(raw: str, no_edu: bool = False) -> str:
     s = raw.strip().lower()
     if no_edu:
         if "@" not in s:
@@ -146,11 +147,13 @@ def normalize_csu_email(raw: str, no_edu: bool = False) -> str:
             )
         return s
     if "@" not in s:
+        # 没有@，默认按中南学号补全
         s = f"{s}{EDU_DOMAIN}"
-    if not s.endswith(EDU_DOMAIN):
+    if not is_edu_email(s):
+        domains = "、".join(EDU_DOMAINS)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"必须使用 {EDU_DOMAIN} 邮箱",
+            detail=f"必须使用受支持的教育邮箱（{domains}）",
         )
     return s
 
@@ -344,7 +347,7 @@ def messages_for_user(rd: dict, me_id: int, peer_id: int) -> Tuple[Optional[str]
 
 @app.get("/")
 def read_root():
-    return {"message": "CSU Date API 已启动"}
+    return {"message": "YueluDate API 已启动"}
 
 
 @app.get("/api/announcements")
@@ -588,7 +591,7 @@ def _build_page_view_stats(db: Session):
 @app.post("/api/auth/send-code")
 def auth_send_code(body: SendCodeRequest):
     """发送邮箱验证码（注册前调用）。"""
-    email = normalize_csu_email(body.email, no_edu=body.no_edu)
+    email = normalize_edu_email(body.email, no_edu=body.no_edu)
     ok, msg = email_service.generate_and_send(email)
     if not ok:
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, msg)
@@ -597,7 +600,7 @@ def auth_send_code(body: SendCodeRequest):
 
 @app.post("/api/auth/register")
 def auth_register(body: RegisterRequest, db: Session = Depends(get_db)):
-    email = normalize_csu_email(body.email, no_edu=body.no_edu)
+    email = normalize_edu_email(body.email, no_edu=body.no_edu)
     if db.query(User).filter(User.email == email).first():
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "该邮箱已注册")
 
@@ -644,7 +647,7 @@ def auth_login(body: LoginRequest, db: Session = Depends(get_db)):
     if "@" in raw:
         candidates.append(raw)
         # 如果不是教育邮箱，也尝试学号格式（以防用户输入了完整教育邮箱）
-        if not raw.endswith(EDU_DOMAIN):
+        if not raw.endswith(tuple(EDU_DOMAINS)):
             candidates.append(f"{raw.split('@')[0]}{EDU_DOMAIN}")
     else:
         # 没有@，按学号处理，拼上教育邮箱后缀
@@ -673,7 +676,7 @@ def auth_reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db
     candidates = []
     if "@" in raw:
         candidates.append(raw)
-        if not raw.endswith(EDU_DOMAIN):
+        if not raw.endswith(tuple(EDU_DOMAINS)):
             candidates.append(f"{raw.split('@')[0]}{EDU_DOMAIN}")
     else:
         candidates.append(f"{raw}{EDU_DOMAIN}")
@@ -778,8 +781,8 @@ def edu_email_send_code(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "你已验证过教育邮箱")
 
     edu_email = body.edu_email.strip().lower()
-    if not edu_email.endswith(EDU_DOMAIN):
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"必须使用 {EDU_DOMAIN} 教育邮箱")
+    if not edu_email.endswith(tuple(EDU_DOMAINS)):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "必须使用受支持的教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）")
 
     ok, msg = email_service.generate_and_send(edu_email)
     if not ok:
@@ -800,8 +803,8 @@ def edu_email_verify(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "你已验证过教育邮箱")
 
     edu_email = body.edu_email.strip().lower()
-    if not edu_email.endswith(EDU_DOMAIN):
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"必须使用 {EDU_DOMAIN} 教育邮箱")
+    if not edu_email.endswith(tuple(EDU_DOMAINS)):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "必须使用受支持的教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）")
 
     # 检查该教育邮箱是否已被其他账号使用或绑定
     existing = db.query(User).filter(
@@ -831,10 +834,10 @@ def crush_shoot(
     if is_edu_blocked(user):
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
-            f"你尚未验证教育邮箱，注册已超过 {EDU_VERIFY_DAYS} 天，无法参与匹配。请先绑定 {EDU_DOMAIN} 教育邮箱。",
+            f"你尚未验证教育邮箱，注册已超过 {EDU_VERIFY_DAYS} 天，无法参与匹配。请先绑定教育邮箱。",
         )
 
-    target_email = normalize_csu_email(body.target_email, no_edu=("@" in body.target_email and not body.target_email.strip().endswith(EDU_DOMAIN)))
+    target_email = normalize_edu_email(body.target_email, no_edu=("@" in body.target_email and not is_edu_email(body.target_email)))
     if target_email == user.email:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "不能对自己发射")
 
@@ -1087,7 +1090,7 @@ def submit_quiz(
     if is_edu_blocked(user):
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
-            f"你尚未验证教育邮箱，注册已超过 {EDU_VERIFY_DAYS} 天，无法提交问卷。请先绑定 {EDU_DOMAIN} 教育邮箱。",
+            f"你尚未验证教育邮箱，注册已超过 {EDU_VERIFY_DAYS} 天，无法提交问卷。请先绑定教育邮箱。",
         )
 
     cross_ok = _cross_campus_to_bool(payload.crossCampus)
@@ -1278,7 +1281,7 @@ def admin_check_email_status(
         r = resend.Emails.send({
             "from": FROM_EMAIL,
             "to": [email_addr],
-            "subject": "【CSU Date】邮件投递测试",
+            "subject": "【YueluDate】邮件投递测试",
             "html": "<p>这是一封测试邮件，用于检查邮件投递状态。如收到请忽略。</p>",
         })
         email_id = r.get("id") if isinstance(r, dict) else getattr(r, "id", None)

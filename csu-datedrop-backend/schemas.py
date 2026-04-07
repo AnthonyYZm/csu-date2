@@ -31,7 +31,7 @@ class QuizSubmit(BaseModel):
 
 
 class RegisterRequest(BaseModel):
-    email: str = Field(..., description="完整邮箱或学号（将自动补全 @csu.edu.cn）")
+    email: str = Field(..., description="完整邮箱或学号（将自动补全 @csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）")
     password: str = Field(..., min_length=6)
     code: str = Field(..., min_length=6, max_length=6, description="邮箱验证码")
     name: str
@@ -86,7 +86,7 @@ class VerifyCodeRequest(BaseModel):
 
 
 class EduEmailSendCodeRequest(BaseModel):
-    edu_email: str = Field(..., description="教育邮箱地址（@csu.edu.cn）")
+    edu_email: str = Field(..., description="教育邮箱地址（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）")
 
 
 class EduEmailVerifyRequest(BaseModel):

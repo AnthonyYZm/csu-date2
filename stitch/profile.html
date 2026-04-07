@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>个人主页 · CSU Date</title>
+<title>个人主页 · YueluDate</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -194,7 +194,7 @@ select.modal-input{cursor:pointer;appearance:none;background-image:url("data:ima
 <!-- ─── Top Bar ─── -->
 <nav class="topbar" id="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="topbar-logo">CSU Date</a>
+    <a href="index.html" class="topbar-logo">YueluDate</a>
     <span class="topbar-spacer"></span>
     <div class="topbar-nav">
       <a href="dashboard.html">首页</a>
@@ -353,11 +353,25 @@ select.modal-input{cursor:pointer;appearance:none;background-image:url("data:ima
       <label class="modal-label" for="editCampus">校区</label>
       <select class="modal-input" id="editCampus">
         <option value="">请选择</option>
-        <option value="新校区">新校区</option>
-        <option value="南校区">南校区</option>
-        <option value="本部">本部</option>
-        <option value="湘雅">湘雅</option>
-        <option value="铁道校区">铁道校区</option>
+        <optgroup label="中南大学">
+          <option value="新校区">新校区</option>
+          <option value="南校区">南校区</option>
+          <option value="本部">本部</option>
+          <option value="湘雅校区">湘雅校区</option>
+          <option value="铁道校区">铁道校区</option>
+        </optgroup>
+        <optgroup label="湖南大学">
+          <option value="南校区(湖大)">南校区(湖大)</option>
+          <option value="财院校区">财院校区</option>
+        </optgroup>
+        <optgroup label="湖南师范大学">
+          <option value="二里半校区">二里半校区</option>
+          <option value="天马校区">天马校区</option>
+          <option value="南院校区">南院校区</option>
+          <option value="咸嘉湖校区">咸嘉湖校区</option>
+          <option value="桃花坪校区">桃花坪校区</option>
+          <option value="张公岭校区">张公岭校区</option>
+        </optgroup>
       </select>
     </div>
     <div class="modal-field">

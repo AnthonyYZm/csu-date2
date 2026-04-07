@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>登录 · CSU Date</title>
+<title>登录 · YueluDate</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -141,14 +141,14 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     <div class="brand-watermark">遇</div>
     <div class="brand-deco">
       <span class="brand-deco-line"></span>
-      <span class="brand-eyebrow">CSU Date</span>
+      <span class="brand-eyebrow">YueluDate</span>
     </div>
     <div class="brand-content">
       <h1 class="brand-tagline">不刷屏，<br>每周遇见<em>一个</em><br>对的人</h1>
-      <p class="brand-desc">中南大学专属校园匹配平台。<br>填写问卷，每周四收到你的专属匹配。</p>
+      <p class="brand-desc">岳麓山高校匹配平台。<br>填写问卷，每周四收到你的专属匹配。</p>
       <div class="brand-stat">
         <span class="pulse"></span>
-        <span>已有 <strong id="activeUsersCount">--</strong> 位中南人加入</span>
+        <span>已有 <strong id="activeUsersCount">--</strong> 位岳麓人加入</span>
       </div>
     </div>
   </div>
@@ -158,7 +158,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     <div class="form-wrapper">
       <div class="form-header">
         <h2 class="form-title" id="formTitle">欢迎回来</h2>
-        <p class="form-subtitle" id="formSubtitle">登录你的 CSU Date 账户</p>
+        <p class="form-subtitle" id="formSubtitle">登录你的 YueluDate 账户</p>
       </div>
 
       <form id="loginForm" onsubmit="handleSubmit(event)">
@@ -222,10 +222,10 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
           <span id="emailHint" style="display:block;margin-top:.4rem;font-size:.7rem;color:var(--text-secondary);opacity:.75">
             非教育邮箱注册的用户，请直接输入完整邮箱地址登录
           </span>
-          <a href="https://mp.weixin.qq.com/s/3EDO2ened4MGuCSNkf8FQg" target="_blank" rel="noopener"
+          <a href="about.html#edu-email-guide" target="_blank" rel="noopener"
              style="display:inline-flex;align-items:center;gap:.25rem;margin-top:.5rem;font-size:.75rem;color:var(--coral-hex);text-decoration:none;font-weight:500">
             <span class="material-symbols-outlined" style="font-size:.875rem">help</span>
-            没有教育邮箱？查看注册指引
+            没有教育邮箱？查看各校注册指引
           </a>
         </div>
 
@@ -349,7 +349,7 @@ function toggleMode(){
   document.getElementById('formError').classList.remove('show');
   const isReg=mode==='register';
   document.getElementById('formTitle').textContent=isReg?'创建账户':'欢迎回来';
-  document.getElementById('formSubtitle').textContent=isReg?'注册 CSU Date，开启每周匹配':'登录你的 CSU Date 账户';
+  document.getElementById('formSubtitle').textContent=isReg?'注册 YueluDate，开启每周匹配':'登录你的 YueluDate 账户';
   document.getElementById('regFields').classList.toggle('show',isReg);
   document.getElementById('codeFields').classList.toggle('show',isReg);
   document.getElementById('loginExtras').style.display=isReg?'none':'flex';
@@ -388,7 +388,7 @@ function exitResetMode(){
   mode='login';
   document.getElementById('formError').classList.remove('show');
   document.getElementById('formTitle').textContent='欢迎回来';
-  document.getElementById('formSubtitle').textContent='登录你的 CSU Date 账户';
+  document.getElementById('formSubtitle').textContent='登录你的 YueluDate 账户';
   document.getElementById('regFields').classList.remove('show');
   document.getElementById('codeFields').classList.remove('show');
   document.getElementById('loginExtras').style.display='flex';

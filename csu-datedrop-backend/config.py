@@ -5,7 +5,13 @@
 
 import os
 
-# ── 教育邮箱 ──
+# ── 教育邮箱（支持多所高校）──
+EDU_DOMAINS = [
+    "@csu.edu.cn",      # 中南大学
+    "@hnu.edu.cn",      # 湖南大学
+    "@hunnu.edu.cn",    # 湖南师范大学
+]
+# 兼容旧代码的默认域名（学号自动补全时使用）
 EDU_DOMAIN = os.getenv("EDU_DOMAIN", "@csu.edu.cn")
 
 # ── 教育邮箱验证 ──
@@ -40,5 +46,6 @@ NARRATIVE_WORKERS = int(os.getenv("NARRATIVE_WORKERS", "5"))
 
 
 def is_edu_email(email: str) -> bool:
-    """判断邮箱是否为教育邮箱。"""
-    return email.strip().lower().endswith(EDU_DOMAIN)
+    """判断邮箱是否为支持的教育邮箱。"""
+    e = email.strip().lower()
+    return any(e.endswith(d) for d in EDU_DOMAINS)
