@@ -437,6 +437,13 @@ function exitResetMode(){
   document.getElementById('formFooter').innerHTML='<p>还没有账户？<a onclick="toggleMode()">立即注册</a></p>';
 }
 
+// 统一处理邮箱：学号自动拼上选中学校的域名
+function resolveEmail(raw){
+  if(!raw) return raw;
+  if(raw.includes('@')) return raw;
+  return raw + selectedDomain;
+}
+
 async function sendCode(){
   const email=document.getElementById('email').value.trim();
   if(!email){
@@ -451,7 +458,7 @@ async function sendCode(){
     const noEdu=document.getElementById('noEdu').checked;
     const res=await csudateFetch('/api/auth/send-code',{
       method:'POST',
-      body:JSON.stringify({email:email,no_edu:noEdu})
+      body:JSON.stringify({email:resolveEmail(email),no_edu:noEdu})
     });
     const data=await res.json().catch(()=>({}));
     if(!res.ok){
@@ -572,7 +579,7 @@ async function handleSubmit(e){
       const noEduReg=document.getElementById('noEdu').checked;
       const res=await csudateFetch('/api/auth/register',{
         method:'POST',
-        body:JSON.stringify({email:email,password:pw,code:code,name:name,campus:campus,grade:grade,major:major,no_edu:noEduReg})
+        body:JSON.stringify({email:resolveEmail(email),password:pw,code:code,name:name,campus:campus,grade:grade,major:major,no_edu:noEduReg})
       });
       const data=await res.json().catch(()=>({}));
       if(!res.ok){
@@ -602,7 +609,7 @@ async function handleSubmit(e){
       const noEduReset=document.getElementById('noEdu').checked;
       const res=await csudateFetch('/api/auth/reset-password',{
         method:'POST',
-        body:JSON.stringify({email:email,new_password:pw,code:code,no_edu:noEduReset})
+        body:JSON.stringify({email:resolveEmail(email),new_password:pw,code:code,no_edu:noEduReset})
       });
       const data=await res.json().catch(()=>({}));
       if(!res.ok){
@@ -620,7 +627,7 @@ async function handleSubmit(e){
       const noEduLogin=document.getElementById('noEdu').checked;
       const res=await csudateFetch('/api/auth/login',{
         method:'POST',
-        body:JSON.stringify({email:email,password:pw,no_edu:noEduLogin})
+        body:JSON.stringify({email:resolveEmail(email),password:pw,no_edu:noEduLogin})
       });
       const data=await res.json().catch(()=>({}));
       if(!res.ok){
