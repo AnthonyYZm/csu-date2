@@ -191,24 +191,36 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 .edu-success .material-symbols-outlined{font-size:1.5rem;color:var(--sage-hex);font-variation-settings:'FILL' 1}
 .edu-success-text{font-size:.875rem;font-weight:600;color:var(--sage-hex)}
 
-/* ── Announcement Board ── */
-.announce-card{background:var(--white-warm);border-radius:2.5rem;padding:clamp(1.75rem,4vw,2.5rem);margin-bottom:clamp(1.5rem,3vw,2.5rem);opacity:0;animation:cardIn .7s cubic-bezier(.16,1,.3,1) .12s forwards}
-.announce-head{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}
-.announce-icon{width:2.5rem;height:2.5rem;border-radius:50%;background:oklch(72% 0.12 75/0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.announce-icon .material-symbols-outlined{font-size:1.125rem;color:var(--gold-hex)}
-.announce-title{font-family:'Noto Serif SC',serif;font-weight:700;font-size:clamp(1.05rem,2.2vw,1.25rem);color:var(--ink-hex)}
-.announce-list{display:flex;flex-direction:column;gap:.75rem}
-.announce-item{display:flex;gap:.875rem;padding:1rem 1.25rem;border-radius:1.5rem;background:var(--cream);transition:background .2s}
+/* ── Countdown Hero ── */
+.cd-hero{background:linear-gradient(135deg,var(--ink-hex),oklch(22% 0.12 275));border-radius:2.5rem;padding:clamp(1.75rem,4vw,2.5rem);margin-bottom:clamp(1.5rem,3vw,2.5rem);text-align:center;color:var(--white-warm);opacity:0;animation:cardIn .7s cubic-bezier(.16,1,.3,1) .15s forwards}
+.cd-hero .cd-hero-label{font-size:.625rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:oklch(80% 0.06 75);margin-bottom:.75rem}
+.cd-hero .countdown-row{display:flex;justify-content:center;gap:clamp(1rem,3vw,1.75rem);margin-bottom:.5rem}
+.cd-hero .cd-unit{text-align:center}
+.cd-hero .cd-num{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(2rem,5vw,3rem);line-height:1.1;color:var(--white-warm);display:block;font-variant-numeric:tabular-nums}
+.cd-hero .cd-unit small{font-size:.625rem;color:oklch(75% 0.03 275);font-weight:500;letter-spacing:.1em}
+.cd-hero .cd-hint{font-size:.75rem;color:oklch(70% 0.03 275)}
+
+/* ── Announcement Board (collapsible) ── */
+.announce-card{background:var(--white-warm);border-radius:2.5rem;padding:clamp(1.25rem,3vw,1.75rem);margin-bottom:clamp(1.5rem,3vw,2.5rem);opacity:0;animation:cardIn .7s cubic-bezier(.16,1,.3,1) .12s forwards}
+.announce-head{display:flex;align-items:center;gap:.75rem;cursor:pointer;user-select:none}
+.announce-icon{width:2rem;height:2rem;border-radius:50%;background:oklch(72% 0.12 75/0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.announce-icon .material-symbols-outlined{font-size:1rem;color:var(--gold-hex)}
+.announce-title{font-family:'Noto Serif SC',serif;font-weight:700;font-size:clamp(.9rem,2vw,1.05rem);color:var(--ink-hex);flex:1}
+.announce-toggle{background:none;border:none;color:var(--text-ghost);cursor:pointer;padding:0;display:flex;transition:transform .3s}
+.announce-toggle.open{transform:rotate(180deg)}
+.announce-count{font-size:.6875rem;color:var(--text-ghost);font-weight:500}
+.announce-list{display:flex;flex-direction:column;gap:.625rem;max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1),margin .3s}
+.announce-list.open{max-height:600px;margin-top:1rem}
+.announce-item{display:flex;gap:.75rem;padding:.875rem 1rem;border-radius:1.25rem;background:var(--cream);transition:background .2s}
 .announce-item:hover{background:var(--cream-mid)}
-.announce-tag{flex-shrink:0;padding:.2rem .625rem;border-radius:9999px;font-size:.625rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;height:fit-content;margin-top:.125rem}
+.announce-tag{flex-shrink:0;padding:.15rem .5rem;border-radius:9999px;font-size:.5625rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;height:fit-content;margin-top:.125rem}
 .tag-update{background:oklch(48% 0.17 28/0.1);color:var(--coral-hex)}
 .tag-feature{background:oklch(65% 0.08 155/0.1);color:var(--sage-hex)}
 .tag-notice{background:oklch(72% 0.12 75/0.1);color:var(--gold-hex)}
 .announce-body{min-width:0;flex:1}
-.announce-item-title{font-weight:600;font-size:.875rem;color:var(--text);margin-bottom:.1875rem}
-.announce-item-desc{font-size:.8125rem;color:var(--text-dim);line-height:1.6}
-.announce-date{flex-shrink:0;font-size:.6875rem;color:var(--text-ghost);margin-top:.125rem}
-.announce-empty{text-align:center;padding:1.5rem;color:var(--text-ghost);font-size:.875rem}
+.announce-item-title{font-weight:600;font-size:.8125rem;color:var(--text);margin-bottom:.125rem}
+.announce-item-desc{font-size:.75rem;color:var(--text-dim);line-height:1.6}
+.announce-date{flex-shrink:0;font-size:.625rem;color:var(--text-ghost);margin-top:.125rem}
 
 /* ── Hidden ── */
 .hidden{display:none!important}
@@ -256,11 +268,25 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     <p class="greeting-sub" id="greetingSub"></p>
   </div>
 
-  <!-- Announcement Board -->
+  <!-- Countdown Hero -->
+  <div class="cd-hero hidden" id="cdHero">
+    <div class="cd-hero-label">下次匹配揭晓</div>
+    <div class="countdown-row">
+      <div class="cd-unit"><span class="cd-num" id="cd-days2">0</span><small>天</small></div>
+      <div class="cd-unit"><span class="cd-num" id="cd-hours2">00</span><small>时</small></div>
+      <div class="cd-unit"><span class="cd-num" id="cd-mins2">00</span><small>分</small></div>
+      <div class="cd-unit"><span class="cd-num" id="cd-secs2">00</span><small>秒</small></div>
+    </div>
+    <p class="cd-hint">每周四晚 21:00 准时揭晓</p>
+  </div>
+
+  <!-- Announcement Board (collapsible) -->
   <div class="announce-card hidden" id="announceCard">
-    <div class="announce-head">
+    <div class="announce-head" onclick="toggleAnnounce()">
       <div class="announce-icon"><span class="material-symbols-outlined">campaign</span></div>
       <h2 class="announce-title">近期更新</h2>
+      <span class="announce-count" id="announceCount"></span>
+      <span class="announce-toggle" id="announceToggle"><span class="material-symbols-outlined" style="font-size:1.25rem">expand_more</span></span>
     </div>
     <div class="announce-list" id="announceList"></div>
   </div>
@@ -597,7 +623,13 @@ function _eduShowMsg(text,type){
 
 function esc(t){if(t==null||t==='')return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
 
-/* ── Announcements ── */
+/* ── Announcements (collapsible) ── */
+function toggleAnnounce(){
+  var list=document.getElementById('announceList');
+  var toggle=document.getElementById('announceToggle');
+  list.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
 async function loadAnnouncements(){
   try{
     const res=await csudateFetch('/api/announcements',{method:'GET'});
@@ -617,6 +649,7 @@ async function loadAnnouncements(){
         '</div>';
     });
     document.getElementById('announceList').innerHTML=html;
+    document.getElementById('announceCount').textContent=items.length+'条更新';
     document.getElementById('announceCard').classList.remove('hidden');
   }catch(e){console.error('公告加载失败',e);}
 }
@@ -653,6 +686,7 @@ function applyDashboardUser(u){
     document.getElementById('onboardCard').classList.remove('hidden');
     document.getElementById('statsRow').classList.add('hidden');
     document.getElementById('dashContent').classList.add('hidden');
+    document.getElementById('cdHero').classList.add('hidden');
     document.getElementById('greetingSub').innerHTML='完成问卷后即可开始每周匹配';
     return;
   }
@@ -660,6 +694,7 @@ function applyDashboardUser(u){
   document.getElementById('onboardCard').classList.add('hidden');
   document.getElementById('statsRow').classList.remove('hidden');
   document.getElementById('dashContent').classList.remove('hidden');
+  document.getElementById('cdHero').classList.remove('hidden');
 
   if(u.stats){
     document.getElementById('statMatches').textContent=u.stats.matches;
@@ -810,10 +845,16 @@ function startCountdown(){
     const ms=target-now;
     const d=Math.floor(ms/864e5),hr=Math.floor(ms%864e5/36e5),mn=Math.floor(ms%36e5/6e4),sc=Math.floor(ms%6e4/1e3);
     const el=id=>document.getElementById(id);
+    // 底部倒计时
     if(el('cd-days'))el('cd-days').textContent=d;
     if(el('cd-hours'))el('cd-hours').textContent=String(hr).padStart(2,'0');
     if(el('cd-mins'))el('cd-mins').textContent=String(mn).padStart(2,'0');
     if(el('cd-secs'))el('cd-secs').textContent=String(sc).padStart(2,'0');
+    // 顶部醒目倒计时
+    if(el('cd-days2'))el('cd-days2').textContent=d;
+    if(el('cd-hours2'))el('cd-hours2').textContent=String(hr).padStart(2,'0');
+    if(el('cd-mins2'))el('cd-mins2').textContent=String(mn).padStart(2,'0');
+    if(el('cd-secs2'))el('cd-secs2').textContent=String(sc).padStart(2,'0');
   }
   tick();setInterval(tick,1000);
 }
