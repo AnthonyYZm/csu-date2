@@ -63,6 +63,33 @@ app = FastAPI(title="YueluDate API")
 
 Base.metadata.create_all(bind=engine)
 
+# 一次性迁移：回填已有用户的 values_json
+def _backfill_values_json():
+    db = next(get_db())
+    try:
+        users = db.query(User).filter(User.quiz_completed == True, User.values_json == None).all()
+        if not users:
+            return
+        count = 0
+        for u in users:
+            profile = db.query(Profile).filter(Profile.user_id == u.id).first()
+            if not profile or not profile.raw_quiz_data:
+                continue
+            raw = profile.raw_quiz_data if isinstance(profile.raw_quiz_data, dict) else {}
+            traits = raw.get("selfTraits", [])
+            if isinstance(traits, list) and traits:
+                u.values_json = [str(t) for t in traits[:5]]
+                count += 1
+        if count:
+            db.commit()
+            logging.getLogger(__name__).info("backfill values_json: %d users updated", count)
+    except Exception as e:
+        logging.getLogger(__name__).warning("backfill values_json failed: %s", e)
+    finally:
+        db.close()
+
+_backfill_values_json()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -1105,6 +1132,13 @@ def submit_quiz(
     profile.campus = payload.campus
     profile.cross_campus_ok = cross_ok
     profile.raw_quiz_data = payload.raw_quiz_data
+
+    # 从问卷数据中提取价值观标签（selfTraits）
+    raw = payload.raw_quiz_data or {}
+    traits = raw.get("selfTraits", [])
+    if isinstance(traits, list) and traits:
+        user.values_json = [str(t) for t in traits[:5]]
+    flag_modified(user, "values_json")
 
     user.quiz_completed = True
     db.commit()
