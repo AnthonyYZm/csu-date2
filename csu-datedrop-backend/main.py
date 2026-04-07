@@ -347,6 +347,17 @@ def read_root():
     return {"message": "CSU Date API 已启动"}
 
 
+@app.get("/api/announcements")
+def get_announcements():
+    """返回公告列表，从 announcements.json 读取。"""
+    import json
+    from pathlib import Path
+    fp = Path(__file__).parent / "announcements.json"
+    if not fp.exists():
+        return []
+    return json.loads(fp.read_text(encoding="utf-8"))
+
+
 @app.get("/api/stats")
 def public_stats(db: Session = Depends(get_db)):
     total_users = db.query(User).count()

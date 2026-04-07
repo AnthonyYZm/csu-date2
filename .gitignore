@@ -27,6 +27,7 @@ logs_*.txt
 *.json
 !stitch/vercel.json
 !csu-datedrop-backend/accounts.json
+!csu-datedrop-backend/announcements.json
 
 # Local scripts
 *.bat

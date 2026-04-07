@@ -191,6 +191,25 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 .edu-success .material-symbols-outlined{font-size:1.5rem;color:var(--sage-hex);font-variation-settings:'FILL' 1}
 .edu-success-text{font-size:.875rem;font-weight:600;color:var(--sage-hex)}
 
+/* ── Announcement Board ── */
+.announce-card{background:var(--white-warm);border-radius:2.5rem;padding:clamp(1.75rem,4vw,2.5rem);margin-bottom:clamp(1.5rem,3vw,2.5rem);opacity:0;animation:cardIn .7s cubic-bezier(.16,1,.3,1) .12s forwards}
+.announce-head{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}
+.announce-icon{width:2.5rem;height:2.5rem;border-radius:50%;background:oklch(72% 0.12 75/0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.announce-icon .material-symbols-outlined{font-size:1.125rem;color:var(--gold-hex)}
+.announce-title{font-family:'Noto Serif SC',serif;font-weight:700;font-size:clamp(1.05rem,2.2vw,1.25rem);color:var(--ink-hex)}
+.announce-list{display:flex;flex-direction:column;gap:.75rem}
+.announce-item{display:flex;gap:.875rem;padding:1rem 1.25rem;border-radius:1.5rem;background:var(--cream);transition:background .2s}
+.announce-item:hover{background:var(--cream-mid)}
+.announce-tag{flex-shrink:0;padding:.2rem .625rem;border-radius:9999px;font-size:.625rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;height:fit-content;margin-top:.125rem}
+.tag-update{background:oklch(48% 0.17 28/0.1);color:var(--coral-hex)}
+.tag-feature{background:oklch(65% 0.08 155/0.1);color:var(--sage-hex)}
+.tag-notice{background:oklch(72% 0.12 75/0.1);color:var(--gold-hex)}
+.announce-body{min-width:0;flex:1}
+.announce-item-title{font-weight:600;font-size:.875rem;color:var(--text);margin-bottom:.1875rem}
+.announce-item-desc{font-size:.8125rem;color:var(--text-dim);line-height:1.6}
+.announce-date{flex-shrink:0;font-size:.6875rem;color:var(--text-ghost);margin-top:.125rem}
+.announce-empty{text-align:center;padding:1.5rem;color:var(--text-ghost);font-size:.875rem}
+
 /* ── Hidden ── */
 .hidden{display:none!important}
 
@@ -235,6 +254,15 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     <div class="greeting-eyebrow" id="greetingTime">下午好</div>
     <h1 class="greeting-title"><em id="greetingName"></em>，欢迎回来</h1>
     <p class="greeting-sub" id="greetingSub"></p>
+  </div>
+
+  <!-- Announcement Board -->
+  <div class="announce-card hidden" id="announceCard">
+    <div class="announce-head">
+      <div class="announce-icon"><span class="material-symbols-outlined">campaign</span></div>
+      <h2 class="announce-title">近期更新</h2>
+    </div>
+    <div class="announce-list" id="announceList"></div>
   </div>
 
   <!-- Edu Email Verification Banner (non-edu users only) -->
@@ -569,6 +597,30 @@ function _eduShowMsg(text,type){
 
 function esc(t){if(t==null||t==='')return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
 
+/* ── Announcements ── */
+async function loadAnnouncements(){
+  try{
+    const res=await csudateFetch('/api/announcements',{method:'GET'});
+    const items=await res.json().catch(function(){return [];});
+    if(!res.ok||!items.length)return;
+    var tagMap={update:['修复','tag-update'],feature:['新功能','tag-feature'],notice:['公告','tag-notice']};
+    var html='';
+    items.slice(0,5).forEach(function(item){
+      var tag=tagMap[item.type]||tagMap.notice;
+      html+='<div class="announce-item">'+
+        '<span class="announce-tag '+tag[1]+'">'+tag[0]+'</span>'+
+        '<div class="announce-body">'+
+        '<div class="announce-item-title">'+esc(item.title)+'</div>'+
+        '<div class="announce-item-desc">'+esc(item.content)+'</div>'+
+        '</div>'+
+        '<span class="announce-date">'+esc(item.date)+'</span>'+
+        '</div>';
+    });
+    document.getElementById('announceList').innerHTML=html;
+    document.getElementById('announceCard').classList.remove('hidden');
+  }catch(e){console.error('公告加载失败',e);}
+}
+
 function applyDashboardUser(u){
   document.getElementById('greetingName').textContent=u.name||'';
   document.getElementById('topAvatar').querySelector('span').textContent=(u.name&&u.name.charAt(0))||'?';
@@ -678,6 +730,7 @@ function renderMatchHistory(threads){
   try{
     applyDashboardUser(u);
     showEduBanner(u);
+    loadAnnouncements();
   }catch(e){window.location.href='login.html';}
 
   // 从 /api/inbox 加载真实匹配数据
