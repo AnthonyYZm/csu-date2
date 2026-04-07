@@ -218,10 +218,12 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
             <span class="material-symbols-outlined field-icon">mail</span>
             <span class="input-suffix" id="emailSuffix">@csu.edu.cn</span>
           </div>
-          <label class="check-label" style="margin-top:.5rem;font-size:.75rem">
-            <input type="checkbox" id="noEdu" onchange="toggleNoEdu()"/>
-            没有教育邮箱？使用其他邮箱注册
-          </label>
+          <input type="checkbox" id="noEdu" style="display:none"/>
+          <a href="https://mp.weixin.qq.com/s/3EDO2ened4MGuCSNkf8FQg" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:.25rem;margin-top:.5rem;font-size:.75rem;color:var(--coral-hex);text-decoration:none;font-weight:500">
+            <span class="material-symbols-outlined" style="font-size:.875rem">help</span>
+            没有教育邮箱？查看注册指引
+          </a>
         </div>
 
         <!-- Verification code (register only) -->

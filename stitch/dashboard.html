@@ -269,6 +269,30 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     </div>
   </div>
 
+  <!-- Edu Email Confirmation Modal -->
+  <div class="modal-overlay" id="eduConfirmModal" onclick="if(event.target===this)closeEduConfirm()">
+    <div class="modal-body" style="text-align:center">
+      <div style="width:3.5rem;height:3.5rem;border-radius:50%;background:oklch(48% 0.17 28/0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
+        <span class="material-symbols-outlined" style="font-size:1.5rem;color:var(--coral-hex)">mark_email_read</span>
+      </div>
+      <h3 class="modal-title" style="text-align:center">确认教育邮箱状态</h3>
+      <p class="modal-desc" style="text-align:left">
+        验证码将发送至你的 <strong>@csu.edu.cn</strong> 教育邮箱。请确认你已经 <strong>注册并激活</strong> 过该邮箱，否则将无法收到验证码。
+      </p>
+      <p style="margin-bottom:1.5rem">
+        <a href="https://mp.weixin.qq.com/s/3EDO2ened4MGuCSNkf8FQg" target="_blank" rel="noopener"
+           style="display:inline-flex;align-items:center;gap:.375rem;color:var(--coral-hex);font-size:.875rem;font-weight:600;text-decoration:none;padding:.5rem 1rem;border-radius:9999px;background:oklch(48% 0.17 28/0.06);transition:background .2s">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">menu_book</span>
+          教育邮箱注册指引
+        </a>
+      </p>
+      <div class="modal-actions" style="justify-content:center">
+        <button class="edu-btn" style="background:var(--cream-deep);color:var(--text-dim)" onclick="closeEduConfirm()">取消</button>
+        <button class="edu-btn edu-btn-verify" onclick="closeEduConfirm();_doEduSendCode()">已注册，发送验证码</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Onboarding (shown when quiz not completed) -->
   <div class="onboard-card hidden" id="onboardCard">
     <div class="onboard-icon"><span class="material-symbols-outlined" style="font-size:inherit;color:inherit">edit_note</span></div>
@@ -456,12 +480,21 @@ function _startEduCountdown(deadlineMs){
   _eduTimer=setInterval(tick,1000);
 }
 
-async function eduSendCode(){
+function eduSendCode(){
   var raw=document.getElementById('eduEmailInput').value.trim();
   if(!raw){_eduShowMsg('请输入学号或邮箱','err');return;}
   var email=raw;
   if(email.indexOf('@')===-1) email=email+'@csu.edu.cn';
   if(!email.endsWith('@csu.edu.cn')){_eduShowMsg('必须使用 @csu.edu.cn 教育邮箱','err');return;}
+  // 弹出确认弹窗
+  document.getElementById('eduConfirmModal').classList.add('open');
+}
+function closeEduConfirm(){document.getElementById('eduConfirmModal').classList.remove('open');}
+
+async function _doEduSendCode(){
+  var raw=document.getElementById('eduEmailInput').value.trim();
+  var email=raw;
+  if(email.indexOf('@')===-1) email=email+'@csu.edu.cn';
 
   var btn=document.getElementById('eduSendBtn');
   btn.disabled=true;

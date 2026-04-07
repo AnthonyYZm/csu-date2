@@ -3,6 +3,7 @@
 验证码存储在内存中（带 TTL），生产环境可换 Redis。
 """
 
+import logging
 import os
 import random
 import time
@@ -12,6 +13,8 @@ import resend
 from dotenv import load_dotenv
 
 load_dotenv()
+
+log = logging.getLogger(__name__)
 
 resend.api_key = os.getenv("RESEND_API_KEY", "")
 
@@ -80,9 +83,29 @@ def generate_and_send(email: str):
             </div>
             """,
         })
+
+        # 检查邮件是否被 Resend 抑制（之前退信/投诉导致）
+        email_id = r.get("id") if isinstance(r, dict) else getattr(r, "id", None)
+        if email_id:
+            try:
+                time.sleep(1)
+                detail = resend.Emails.get(email_id)
+                last_event = detail.get("last_event") if isinstance(detail, dict) else getattr(detail, "last_event", None)
+                if last_event == "suppressed":
+                    log.warning("邮件被 Resend 抑制: %s (email_id=%s)", email, email_id)
+                    _store.pop(email, None)
+                    return False, (
+                        f"邮件发送失败：{email} 已被邮件服务标记为无法送达。"
+                        "请联系管理员解除限制，或尝试使用其他邮箱。"
+                    )
+                log.info("邮件已发送: %s (email_id=%s, status=%s)", email, email_id, last_event)
+            except Exception as check_err:
+                log.warning("检查邮件状态失败: %s", check_err)
+
         return True, "验证码已发送"
     except Exception as e:
         # 发送失败时清除存储的验证码
+        log.error("邮件发送异常: %s -> %s", email, e)
         _store.pop(email, None)
         return False, f"邮件发送失败: {e}"
 

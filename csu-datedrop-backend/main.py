@@ -6,6 +6,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import bcrypt
+import resend
 from jose import JWTError, jwt
 from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
@@ -46,6 +47,7 @@ from schemas import (
     WechatUpdateRequest,
 )
 import email_service
+from email_service import FROM_EMAIL
 
 logger = logging.getLogger(__name__)
 
@@ -1221,3 +1223,103 @@ def narrative_progress(
         if isinstance(m.report_data, dict) and m.report_data.get("narrative")
     )
     return {"week_id": week_id, "total": total, "done": done, "pending": total - done}
+
+
+@app.post("/api/admin/check-email-status")
+def admin_check_email_status(
+    body: dict,
+    _admin: None = Depends(verify_admin_token),
+):
+    """检查某邮箱在 Resend 的投递状态（是否被抑制）。"""
+    email_addr = body.get("email", "").strip()
+    if not email_addr:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "请提供 email 参数")
+
+    try:
+        r = resend.Emails.send({
+            "from": FROM_EMAIL,
+            "to": [email_addr],
+            "subject": "【CSU Date】邮件投递测试",
+            "html": "<p>这是一封测试邮件，用于检查邮件投递状态。如收到请忽略。</p>",
+        })
+        email_id = r.get("id") if isinstance(r, dict) else getattr(r, "id", None)
+        if not email_id:
+            return {"email": email_addr, "status": "unknown", "detail": "未获取到邮件 ID"}
+
+        import time as _time
+        _time.sleep(2)
+        detail = resend.Emails.get(email_id)
+        last_event = detail.get("last_event") if isinstance(detail, dict) else getattr(detail, "last_event", None)
+        return {
+            "email": email_addr,
+            "status": last_event,
+            "email_id": email_id,
+            "suppressed": last_event == "suppressed",
+            "message": "该邮箱已被抑制，请在 Resend 控制台移除抑制" if last_event == "suppressed" else "邮件正常发送",
+        }
+    except Exception as e:
+        return {"email": email_addr, "status": "error", "detail": str(e)}
+
+
+@app.get("/api/admin/user-lookup")
+def admin_user_lookup(
+    q: str,
+    db: Session = Depends(get_db),
+    _admin: None = Depends(verify_admin_token),
+):
+    """按邮箱/学号/昵称模糊查找用户。"""
+    q = q.strip()
+    if not q:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "请提供查询参数 q")
+    users = db.query(User).filter(
+        or_(
+            User.email.contains(q),
+            User.name.contains(q),
+            User.edu_email.contains(q),
+        )
+    ).limit(20).all()
+    return [
+        {
+            "id": u.id,
+            "email": u.email,
+            "name": u.name,
+            "campus": u.campus,
+            "grade": u.grade,
+            "major": u.major,
+            "edu_email": u.edu_email,
+            "edu_email_verified_at": str(u.edu_email_verified_at) if u.edu_email_verified_at else None,
+            "created_at": str(u.created_at) if u.created_at else None,
+        }
+        for u in users
+    ]
+
+
+@app.post("/api/admin/verify-edu-email")
+def admin_verify_edu_email(
+    body: dict,
+    db: Session = Depends(get_db),
+    _admin: None = Depends(verify_admin_token),
+):
+    """管理员手动为用户通过教育邮箱验证。"""
+    user_id = body.get("user_id")
+    edu_email = body.get("edu_email", "").strip().lower()
+    if not user_id or not edu_email:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "需要 user_id 和 edu_email")
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "用户不存在")
+    user.edu_email = edu_email
+    user.edu_email_verified_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(user)
+    return {
+        "ok": True,
+        "message": f"已为 {user.name}({user.email}) 绑定教育邮箱 {edu_email}",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "name": user.name,
+            "edu_email": user.edu_email,
+            "edu_email_verified_at": str(user.edu_email_verified_at),
+        },
+    }
