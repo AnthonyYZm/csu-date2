@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>匹配报告 · CSU Date</title>
+<title>匹配报告 · YueluDate</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -32,7 +32,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 @keyframes fadeUp{from{opacity:0;transform:translateY(.75rem)}to{opacity:1;transform:none}}
 
 /* ── Page ── */
-.rpt{max-width:48rem;margin:0 auto;padding:clamp(2rem,5vw,4rem) clamp(1.5rem,4vw,3rem) 6rem}
+.rpt{max-width:56rem;margin:0 auto;padding:clamp(2rem,5vw,4rem) clamp(1.5rem,4vw,3rem) 6rem}
 
 /* ── Hero: Score ── */
 .rpt-hero{display:grid;grid-template-columns:1fr auto;gap:clamp(2rem,5vw,4rem);align-items:end;margin-bottom:clamp(3rem,7vw,5rem);padding-bottom:clamp(2rem,5vw,3rem);opacity:0;animation:fadeUp .7s cubic-bezier(.16,1,.3,1) .1s forwards}
@@ -57,6 +57,9 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 .rpt-section:nth-of-type(4){animation-delay:.4s}
 .rpt-section:nth-of-type(5){animation-delay:.5s}
 .rpt-section:nth-of-type(6){animation-delay:.6s}
+.rpt-section:nth-of-type(7){animation-delay:.65s}
+.rpt-section:nth-of-type(8){animation-delay:.7s}
+.rpt-section:nth-of-type(9){animation-delay:.75s}
 .section-label{font-size:.5625rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--coral-hex);margin-bottom:clamp(.75rem,2vw,1.25rem)}
 .section-heading{font-family:'Noto Serif SC',serif;font-weight:700;font-size:clamp(1.25rem,3vw,1.625rem);color:var(--ink-hex);margin-bottom:clamp(1rem,2.5vw,1.5rem);line-height:1.25}
 
@@ -89,10 +92,260 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 .diff-you strong,.diff-them strong{display:block;font-weight:600;color:var(--ink-hex);font-size:.875rem}
 .diff-vs{font-family:'Instrument Serif',serif;font-style:italic;font-size:.875rem;color:var(--text-ghost);text-align:center}
 
-/* ── Narrative ── */
-.narrative{padding:clamp(2rem,5vw,3rem);background:var(--white-warm);border-radius:2.5rem}
-.narrative-text{font-family:'Noto Serif SC',serif;font-weight:400;font-size:clamp(1rem,2.2vw,1.1875rem);line-height:2;color:var(--ink-hex);letter-spacing:.02em}
-.narrative-text em{font-style:normal;color:var(--coral-hex);font-weight:600}
+/* ── Radar Chart ── */
+.radar-wrap{display:flex;justify-content:center;margin-bottom:2rem}
+.radar-wrap svg{width:min(100%,22rem);height:auto}
+.radar-grid{fill:none;stroke:var(--cream-deep);stroke-width:.5}
+.radar-axis{stroke:var(--cream-deep);stroke-width:.3}
+.radar-shape{fill:oklch(48% 0.17 28/0.12);stroke:var(--coral-hex);stroke-width:1.5;stroke-linejoin:round;transition:d .8s cubic-bezier(.16,1,.3,1)}
+.radar-dot{fill:var(--coral-hex);r:3;transition:cx .8s,cy .8s}
+.radar-label{font-family:'Outfit',sans-serif;font-size:.6875rem;font-weight:600;fill:var(--text-dim);text-anchor:middle;dominant-baseline:central}
+
+/* ── Risk Flags ── */
+.risk-list{display:flex;flex-direction:column;gap:.75rem}
+.risk-item{display:flex;align-items:flex-start;gap:.75rem;padding:clamp(1rem,2.5vw,1.25rem);background:var(--white-warm);border-radius:1.5rem;border-left:3px solid var(--text-ghost)}
+.risk-item.risk-severe{border-left-color:var(--coral-hex)}
+.risk-item.risk-moderate{border-left-color:var(--gold-hex)}
+.risk-item.risk-soft{border-left-color:var(--cream-deep)}
+.risk-icon{flex-shrink:0;width:2rem;height:2rem;border-radius:.625rem;display:flex;align-items:center;justify-content:center;font-size:.875rem}
+.risk-severe .risk-icon{background:oklch(48% 0.17 28/0.1);color:var(--coral-hex)}
+.risk-moderate .risk-icon{background:oklch(72% 0.12 75/0.15);color:var(--gold-hex)}
+.risk-soft .risk-icon{background:var(--cream-mid);color:var(--text-dim)}
+.risk-body{min-width:0}
+.risk-title{font-weight:600;font-size:.8125rem;color:var(--ink-hex);margin-bottom:.125rem}
+.risk-desc{font-size:.75rem;color:var(--text-dim);line-height:1.5}
+.risk-badge{display:inline-block;padding:.125rem .5rem;border-radius:9999px;font-size:.625rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-left:.5rem}
+.risk-severe .risk-badge{background:oklch(48% 0.17 28/0.1);color:var(--coral-hex)}
+.risk-moderate .risk-badge{background:oklch(72% 0.12 75/0.15);color:var(--gold-hex)}
+.risk-soft .risk-badge{background:var(--cream-mid);color:var(--text-dim)}
+
+/* ── Directional Reasons ── */
+.dir-cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,3vw,1.5rem)}
+.dir-col{padding:clamp(1.25rem,3vw,1.5rem);background:var(--white-warm);border-radius:1.75rem}
+.dir-col-title{font-weight:600;font-size:.8125rem;color:var(--ink-hex);margin-bottom:.75rem;display:flex;align-items:center;gap:.375rem}
+.dir-col-title .material-symbols-outlined{font-size:1rem;color:var(--coral-hex)}
+.dir-reason{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+.dir-reason:last-child{margin-bottom:0}
+.dir-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dir-dot-high{background:var(--sage-hex)}
+.dir-dot-mid{background:var(--gold-hex)}
+.dir-dot-low{background:var(--cream-deep)}
+.dir-reason-text{font-size:.8125rem;color:var(--text-dim);line-height:1.4}
+.dir-reason-score{font-family:'Noto Serif SC',serif;font-weight:700;font-size:.75rem;color:var(--ink-hex);margin-left:auto;flex-shrink:0}
+
+/* ── Chemistry Stats ── */
+.chem-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:clamp(.75rem,2vw,1rem)}
+.chem-stat{text-align:center;padding:clamp(1rem,2.5vw,1.5rem);background:var(--white-warm);border-radius:1.5rem}
+.chem-val{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(1.5rem,3.5vw,2rem);color:var(--ink-hex);line-height:1;margin-bottom:.25rem}
+.chem-label{font-size:.6875rem;font-weight:600;color:var(--text-dim);letter-spacing:.05em}
+
+/* ══════ Narrative Card: 3D Physical Soul Report ══════ */
+
+/* Perspective wrapper — gives children 3D space */
+.narr-stage{perspective:1200px;margin-bottom:clamp(2.5rem,6vw,4rem);opacity:0;animation:fadeUp .8s cubic-bezier(.16,1,.3,1) .15s forwards}
+
+/* The card itself — tilted on the desk, thick with layered shadows */
+.narr-card{
+  position:relative;
+  background:#FAF7F0;
+  border-radius:14px;
+  overflow:hidden;
+  transform-style:preserve-3d;
+  transform:rotate(-1.8deg) rotateX(1deg) rotateY(-0.5deg);
+  will-change:transform,box-shadow;
+  transition:transform .55s cubic-bezier(.22,1,.36,1),box-shadow .55s cubic-bezier(.22,1,.36,1);
+  /* Thick card edge — multiple shadows simulate physical depth */
+  box-shadow:
+    0 1px 0 #E8E2D6,
+    0 2px 0 #E2DCD0,
+    0 3px 0 #DBD5C9,
+    0 4px 0 #D5CFC3,
+    0 8px 16px rgba(44,36,28,0.10),
+    0 20px 50px rgba(44,36,28,0.08),
+    0 2px 6px rgba(44,36,28,0.06);
+}
+.narr-card:hover{
+  transform:rotate(0deg) rotateX(0deg) rotateY(0deg) translateY(-8px) scale(1.008);
+  box-shadow:
+    0 1px 0 #E8E2D6,
+    0 2px 0 #E2DCD0,
+    0 3px 0 #DBD5C9,
+    0 4px 0 #D5CFC3,
+    0 5px 0 #CFC9BD,
+    0 16px 32px rgba(44,36,28,0.14),
+    0 32px 72px rgba(44,36,28,0.10),
+    0 4px 10px rgba(44,36,28,0.07);
+}
+
+/* Paper grain texture overlay */
+.narr-card::before{
+  content:'';position:absolute;inset:0;z-index:4;pointer-events:none;border-radius:inherit;
+  opacity:.35;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size:180px;
+}
+
+/* Vintage vignette — darkened edges for aged paper feel */
+.narr-card::after{
+  content:'';position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(ellipse 75% 70% at 50% 45%,transparent 55%,rgba(44,36,28,0.04) 80%,rgba(44,36,28,0.09) 100%);
+}
+
+/* Ink-wash watermark aura — top right, bleeds past inner frame */
+.narr-watermark{position:absolute;top:-10%;right:-10%;width:55%;height:65%;pointer-events:none;z-index:2}
+.narr-watermark::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 40%,oklch(78% 0.06 75/0.12),oklch(82% 0.04 75/0.06) 45%,transparent 70%);filter:blur(42px)}
+.narr-watermark::after{content:'';position:absolute;top:18%;left:8%;width:75%;height:65%;background:radial-gradient(ellipse 60% 50% at 40% 50%,oklch(85% 0.04 30/0.08),transparent 60%);filter:blur(30px)}
+
+.narr-inner{position:relative;z-index:1;padding:clamp(10px,2vw,14px)}
+
+/* ── Inner Frame: champagne gold double-rule ── */
+.narr-frame{position:relative;border:1.5px solid #D4C49C;outline:1px solid rgba(212,196,156,0.25);outline-offset:3px;border-top:none;padding:0 clamp(1.5rem,3.5vw,2.5rem) clamp(1.75rem,4vw,2.5rem)}
+
+/* Top border — splits around the crest */
+.narr-frame-top{position:absolute;top:0;left:0;right:0;height:0;pointer-events:none}
+.narr-frame-top::before,.narr-frame-top::after{content:'';position:absolute;top:-1px;height:1.5px;background:linear-gradient(90deg,#D4C49C,#C9B888)}
+.narr-frame-top::before{left:0;width:calc(50% - 4.5rem)}
+.narr-frame-top::after{right:0;width:calc(50% - 4.5rem)}
+
+/* Corner ornaments — SVG flourish curls */
+.narr-corner{position:absolute;pointer-events:none;width:40px;height:40px;opacity:.55}
+.narr-corner svg{width:100%;height:100%;fill:none;stroke:#C9B888;stroke-width:1.2;stroke-linecap:round}
+.narr-corner-tl{top:-4px;left:-4px}
+.narr-corner-tr{top:-4px;right:-4px;transform:scaleX(-1)}
+.narr-corner-bl{bottom:-4px;left:-4px;transform:scaleY(-1)}
+.narr-corner-br{bottom:-4px;right:-4px;transform:scale(-1)}
+
+/* Filigree side borders — repeating pattern along left & right edges */
+.narr-filigree-l,.narr-filigree-r{position:absolute;top:60px;bottom:60px;width:12px;pointer-events:none;z-index:0;opacity:.3}
+.narr-filigree-l{left:-1px}
+.narr-filigree-r{right:-1px;transform:scaleX(-1)}
+.narr-filigree-l::before,.narr-filigree-r::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='48' viewBox='0 0 12 48'%3E%3Cpath d='M6 0 C6 8,1 12,1 16 S6 20,6 24 S1 32,1 36 S6 40,6 48' fill='none' stroke='%23C9B888' stroke-width='1'/%3E%3Ccircle cx='6' cy='24' r='1.5' fill='%23C9B888'/%3E%3C/svg%3E") repeat-y center;
+}
+
+/* ── Crest: rose-gold medallion with filigree wings ── */
+.narr-crest{text-align:center;padding-top:clamp(1.5rem,3.5vw,2.25rem);margin-bottom:clamp(1rem,2.5vw,1.5rem);position:relative;z-index:5}
+
+/* Filigree wings flanking the crest icon */
+.narr-crest-wings{position:relative;display:inline-block;margin-bottom:.5rem}
+.narr-crest-wings::before,.narr-crest-wings::after{
+  content:'';position:absolute;top:50%;width:clamp(2.5rem,6vw,4rem);height:24px;margin-top:-12px;opacity:.4;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 24'%3E%3Cpath d='M62 12 C50 12,44 4,36 4 S24 12,18 12 S8 8,2 12' fill='none' stroke='%23C9B888' stroke-width='1' stroke-linecap='round'/%3E%3Cpath d='M62 12 C50 12,44 20,36 20 S24 12,18 12 S8 16,2 12' fill='none' stroke='%23C9B888' stroke-width='1' stroke-linecap='round'/%3E%3Ccircle cx='2' cy='12' r='1.5' fill='%23C9B888'/%3E%3C/svg%3E") no-repeat center/contain;
+}
+.narr-crest-wings::before{right:calc(100% + 8px)}
+.narr-crest-wings::after{left:calc(100% + 8px);transform:scaleX(-1)}
+
+.narr-crest-icon{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:3.25rem;height:3.25rem;border-radius:50%;
+  background:linear-gradient(145deg,#F5EDE0,#EDE2D0);
+  border:1.5px solid #D4C49C;
+  box-shadow:0 0 0 3px #FAF7F0,0 0 0 4.5px rgba(212,196,156,0.4),0 2px 8px rgba(180,160,120,0.12);
+}
+.narr-crest-icon span{font-family:'Instrument Serif',serif;font-style:italic;font-size:.8125rem;color:#9C7C5C;line-height:1}
+.narr-crest-heart{color:#C9A07C;font-size:.4375rem;margin-left:.1rem;vertical-align:super}
+.narr-crest-sub{font-family:'Outfit',sans-serif;font-size:.4375rem;font-weight:600;letter-spacing:.35em;text-transform:uppercase;color:#C4B48C;margin-bottom:.1875rem}
+.narr-crest-label{display:flex;align-items:center;justify-content:center;gap:.5rem;font-family:'Outfit',sans-serif;font-size:.5rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:#C9B888}
+.narr-crest-label::before,.narr-crest-label::after{content:'';width:clamp(2rem,7vw,4.5rem);height:1px;background:linear-gradient(90deg,transparent,#D4C49C 30%,#D4C49C 70%,transparent)}
+
+/* ── Title: warm bronze ink ── */
+.narr-title{
+  font-family:'Noto Serif SC',serif;font-weight:900;
+  font-size:clamp(1.5rem,4vw,2rem);line-height:1.2;
+  letter-spacing:-.02em;color:#5C4A3A;text-align:center;
+  margin-bottom:clamp(.5rem,1.2vw,.625rem);
+  position:relative;z-index:5;
+}
+/* Decorative underline — rose gold shimmer */
+.narr-title::after{
+  content:'';display:block;width:clamp(2.5rem,6vw,4rem);height:1px;margin:clamp(.375rem,1vw,.5rem) auto 0;
+  background:linear-gradient(90deg,transparent,#D4C49C 20%,#C9A07C 50%,#D4C49C 80%,transparent);
+}
+
+/* ── Subtitle: soft italic ── */
+.narr-subtitle{
+  font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;
+  font-size:clamp(.8125rem,1.6vw,.875rem);color:#A89880;
+  text-align:center;line-height:1.6;
+  margin-bottom:clamp(1rem,2.5vw,1.25rem);
+}
+
+/* ── Tags: soft champagne badges ── */
+.narr-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-bottom:clamp(1.25rem,3vw,1.75rem)}
+.narr-tag{
+  padding:.1875rem .625rem;border-radius:2px;
+  font-family:'Outfit',sans-serif;font-size:.625rem;font-weight:600;
+  letter-spacing:.04em;color:#8C7460;
+  background:linear-gradient(135deg,#F5EDE0,#EDE2D0);
+  border:1px solid rgba(212,196,156,0.35);
+}
+
+/* ── Flourish divider: ornate scroll ── */
+.narr-rule{display:flex;align-items:center;justify-content:center;margin:0 auto clamp(1.25rem,3vw,1.75rem);height:20px;width:clamp(10rem,40vw,16rem);opacity:.5;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20'%3E%3Cpath d='M0 10 H60 C65 10,68 4,75 4 S85 10,90 10 H100' fill='none' stroke='%23C9B888' stroke-width='1'/%3E%3Cpath d='M200 10 H140 C135 10,132 4,125 4 S115 10,110 10 H100' fill='none' stroke='%23C9B888' stroke-width='1'/%3E%3Ccircle cx='100' cy='10' r='2.5' fill='none' stroke='%23C9B888' stroke-width='1'/%3E%3Ccircle cx='100' cy='10' r='1' fill='%23C9B888'/%3E%3Ccircle cx='75' cy='10' r='1' fill='%23C9B888'/%3E%3Ccircle cx='125' cy='10' r='1' fill='%23C9B888'/%3E%3C/svg%3E") no-repeat center/contain;
+}
+.narr-rule-dot{display:none}
+
+/* ── Bottom ornament before footer ── */
+.narr-bottom-ornament{text-align:center;margin-top:clamp(1.5rem,3.5vw,2rem);opacity:.4;height:16px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 16'%3E%3Cpath d='M20 8 C30 8,35 2,42 2 S52 8,60 8 S68 2,78 2 S88 8,100 8' fill='none' stroke='%23C9B888' stroke-width='1' stroke-linecap='round'/%3E%3Cpath d='M20 8 C30 8,35 14,42 14 S52 8,60 8 S68 14,78 14 S88 8,100 8' fill='none' stroke='%23C9B888' stroke-width='1' stroke-linecap='round'/%3E%3Ccircle cx='60' cy='8' r='2' fill='%23D4C49C'/%3E%3Ccircle cx='20' cy='8' r='1.2' fill='%23C9B888'/%3E%3Ccircle cx='100' cy='8' r='1.2' fill='%23C9B888'/%3E%3C/svg%3E") no-repeat center/contain;
+}
+
+/* ── Body: warm amber text, drop cap ── */
+.narr-body{display:flex;flex-direction:column;gap:clamp(1rem,2.5vw,1.25rem);position:relative;z-index:5}
+.narr-para{
+  font-family:'Outfit',sans-serif;font-weight:400;
+  font-size:clamp(.8125rem,1.6vw,.875rem);line-height:1.9;
+  color:#7A6E60;letter-spacing:.01em;
+}
+.narr-para:first-child::first-letter{
+  font-family:'Noto Serif SC',serif;font-weight:900;
+  font-size:2.5em;float:left;line-height:.82;
+  margin-right:.125em;margin-top:.05em;
+  color:#C9A07C;
+}
+.narr-para strong{color:#5C4A3A;font-weight:700}
+.narr-fallback{font-family:'Outfit',sans-serif;font-weight:400;font-size:clamp(.8125rem,1.6vw,.875rem);line-height:1.9;color:#7A6E60}
+
+/* ── Footer: warm cream-gold band ── */
+.narr-footer{
+  background:linear-gradient(180deg,#F0E8D8,#E8DCC8);
+  padding:clamp(1.25rem,3vw,1.75rem) clamp(1.5rem,3.5vw,2.5rem);
+  display:flex;align-items:center;justify-content:space-between;
+  border-radius:0 0 14px 14px;position:relative;z-index:5;
+  border-top:1px solid rgba(212,196,156,0.5);
+}
+.narr-footer-left{}
+.narr-footer-brand{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:1.0625rem;color:#7A6850;margin-bottom:.25rem;letter-spacing:-.01em}
+.narr-footer-slogan{font-family:'Outfit',sans-serif;font-weight:400;font-size:.5625rem;color:#A89880;margin-bottom:.125rem}
+.narr-footer-url{font-family:'Outfit',sans-serif;font-size:.5rem;color:#C4B48C;letter-spacing:.08em}
+.narr-footer-badge{
+  width:3rem;height:3rem;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(145deg,#F5EDE0,#EDE2D0);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Noto Serif SC',serif;font-weight:900;font-size:.625rem;
+  color:#9C7C5C;letter-spacing:.06em;
+  border:1.5px solid #D4C49C;
+  box-shadow:0 2px 8px rgba(180,160,120,0.1);
+}
+
+@media(max-width:768px){
+  .narr-card{transform:rotate(-1deg)}
+  .narr-card:hover{transform:rotate(0deg) translateY(-6px)}
+  .narr-inner{padding:8px}
+  .narr-frame{padding:0 clamp(1rem,3vw,1.5rem) clamp(1.25rem,4vw,1.75rem);outline-offset:2px}
+  .narr-crest{padding-top:clamp(1.5rem,4vw,2rem)}
+  .narr-footer{flex-direction:column;gap:1rem;text-align:center}
+  .narr-watermark{width:65%;height:50%;top:-4%;right:-10%}
+  .narr-frame-top::before{width:calc(50% - 3.5rem)}
+  .narr-frame-top::after{width:calc(50% - 3.5rem)}
+  .narr-para:first-child::first-letter{font-size:2.25em}
+}
+@media(prefers-reduced-motion:reduce){
+  .narr-card{transform:none;transition:none}
+  .narr-card:hover{transform:none}
+}
 
 /* ── Actions ── */
 .rpt-actions{display:flex;gap:.75rem;justify-content:center;margin-top:clamp(2rem,5vw,3rem);opacity:0;animation:fadeUp .6s cubic-bezier(.16,1,.3,1) .7s forwards}
@@ -130,6 +383,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   .diff-item{grid-template-columns:1fr;text-align:center;gap:.5rem}
   .diff-you{text-align:center}
   .topbar-back span:last-child{display:none}
+  .dir-cols{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
@@ -141,7 +395,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 
 <nav class="topbar" id="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="topbar-logo">CSU Date</a>
+    <a href="index.html" class="topbar-logo">YueluDate</a>
     <span class="topbar-spacer"></span>
     <a href="dashboard.html" class="topbar-back">
       <span class="material-symbols-outlined">arrow_back</span>
@@ -150,135 +404,8 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   </div>
 </nav>
 
-<main class="rpt">
-
-  <!-- Hero -->
-  <section class="rpt-hero">
-    <div class="rpt-hero-text">
-      <div class="rpt-eyebrow">第 7 周 · 匹配报告</div>
-      <h1 class="rpt-title">你与<em>陈屿辰</em>的<br>灵魂共鸣报告</h1>
-      <p class="rpt-meta">潇湘校区 · 大三 · 建筑学 · 8209190233@csu.edu.cn<br>基于你们各自的问卷数据生成</p>
-    </div>
-    <div class="rpt-score">
-      <div class="rpt-score-ring">
-        <svg viewBox="0 0 100 100">
-          <circle class="track" cx="50" cy="50" r="45"/>
-          <circle class="fill" id="scoreRing" cx="50" cy="50" r="45"/>
-        </svg>
-        <div class="rpt-score-num">
-          <strong id="scoreNum">0</strong>
-          <small>契合度</small>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Dimensions -->
-  <section class="rpt-section">
-    <div class="section-label">维度分析</div>
-    <h2 class="section-heading">你们在哪些方面最合拍</h2>
-    <div class="dim-list">
-      <div class="dim-item">
-        <span class="dim-name">价值观契合</span>
-        <div class="dim-bar"><div class="dim-bar-fill dbf-coral" data-w="92"></div></div>
-        <span class="dim-pct">92%</span>
-      </div>
-      <div class="dim-item">
-        <span class="dim-name">生活方式</span>
-        <div class="dim-bar"><div class="dim-bar-fill dbf-ink" data-w="84"></div></div>
-        <span class="dim-pct">84%</span>
-      </div>
-      <div class="dim-item">
-        <span class="dim-name">性格互补</span>
-        <div class="dim-bar"><div class="dim-bar-fill dbf-sage" data-w="78"></div></div>
-        <span class="dim-pct">78%</span>
-      </div>
-      <div class="dim-item">
-        <span class="dim-name">兴趣重叠</span>
-        <div class="dim-bar"><div class="dim-bar-fill dbf-gold" data-w="88"></div></div>
-        <span class="dim-pct">88%</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Common Ground -->
-  <section class="rpt-section">
-    <div class="section-label">共同点</div>
-    <h2 class="section-heading">你们的交集</h2>
-    <div class="common-grid">
-      <div class="common-item">
-        <div class="common-icon"><span class="material-symbols-outlined">auto_stories</span></div>
-        <div class="common-title">经世致用</div>
-        <div class="common-desc">你们都选择了这个价值观，相信知识应该服务于实践</div>
-      </div>
-      <div class="common-item">
-        <div class="common-icon"><span class="material-symbols-outlined">explore</span></div>
-        <div class="common-title">城市探索</div>
-        <div class="common-desc">你爱跑岳麓山，TA 骑车去橘子洲——都喜欢在长沙的角落冒险</div>
-      </div>
-      <div class="common-item">
-        <div class="common-icon"><span class="material-symbols-outlined">schedule</span></div>
-        <div class="common-title">作息节奏</div>
-        <div class="common-desc">都是早睡型选手，十一点前安静入眠</div>
-      </div>
-      <div class="common-item">
-        <div class="common-icon"><span class="material-symbols-outlined">restaurant</span></div>
-        <div class="common-title">微辣同盟</div>
-        <div class="common-desc">对辣度的忍耐力惊人地一致——能吃但不疯狂</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Differences -->
-  <section class="rpt-section">
-    <div class="section-label">互补之处</div>
-    <h2 class="section-heading">不同，才有火花</h2>
-    <div class="diff-list">
-      <div class="diff-item">
-        <div class="diff-you"><strong>你</strong>偏向内向，享受独处充电</div>
-        <div class="diff-vs">&amp;</div>
-        <div class="diff-them"><strong>陈屿辰</strong>偏向外向，从社交中获得能量</div>
-      </div>
-      <div class="diff-item">
-        <div class="diff-you"><strong>你</strong>习惯计划，喜欢确定性</div>
-        <div class="diff-vs">&amp;</div>
-        <div class="diff-them"><strong>陈屿辰</strong>更随性，享受随机的惊喜</div>
-      </div>
-      <div class="diff-item">
-        <div class="diff-you"><strong>你</strong>更偏理科思维，逻辑先行</div>
-        <div class="diff-vs">&amp;</div>
-        <div class="diff-them"><strong>陈屿辰</strong>更感性，靠直觉做决定</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Narrative -->
-  <section class="rpt-section">
-    <div class="section-label">匹配叙事</div>
-    <h2 class="section-heading">为什么是你们</h2>
-    <div class="narrative">
-      <div class="portraits">
-        <div class="portrait"><span>林</span></div>
-        <span class="portrait-link">&</span>
-        <div class="portrait"><span>陈</span></div>
-      </div>
-      <p class="narrative-text">
-        你们的匹配不是因为相似，而是因为<em>共鸣</em>。在价值观的核心地带，你们都相信行动比空谈重要；在生活的边缘地带，你们一个安静一个活泼，刚好能把对方拉进一个更完整的世界。TA 对建筑的热爱和你对代码的执着，本质上是同一种东西——<em>用结构表达美</em>。也许你们的第一次见面，会是在岳麓山的某个转弯处。
-      </p>
-    </div>
-  </section>
-
-  <!-- Actions -->
-  <div class="rpt-actions">
-    <a href="greet.html" class="btn-rpt btn-rpt-primary">
-      <span class="material-symbols-outlined" style="font-size:1.125rem">waving_hand</span>
-      打个招呼
-    </a>
-    <a href="dashboard.html" class="btn-rpt btn-rpt-ghost">
-      回到首页
-    </a>
-  </div>
-
+<main class="rpt" id="reportMain">
+  <p id="reportLoading" style="text-align:center;padding:4rem 0;color:var(--text-ghost)">加载报告中…</p>
 </main>
 
 <nav class="mobile-nav">
@@ -298,64 +425,391 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   </div>
 </nav>
 
+<script src="api.js"></script>
 <script>
 // Auth guard
 (function(){
-  const raw=localStorage.getItem('csudate_user');
+  var raw=localStorage.getItem('csudate_user');
   if(!raw){window.location.href='login.html';return;}
-  try{const u=JSON.parse(raw);if(!u.loggedIn)window.location.href='login.html';}
+  try{var u=JSON.parse(raw);if(!u.loggedIn)window.location.href='login.html';}
   catch(e){window.location.href='login.html';}
 })();
-
 // Scroll shadow
-(function(){
-  const tb=document.getElementById('topbar');
-  let t=false;
-  window.addEventListener('scroll',()=>{if(!t){requestAnimationFrame(()=>{tb.classList.toggle('scrolled',scrollY>8);t=false;});t=true;}},{passive:true});
-})();
+(function(){var tb=document.getElementById('topbar');var t=false;window.addEventListener('scroll',function(){if(!t){requestAnimationFrame(function(){tb.classList.toggle('scrolled',scrollY>8);t=false;});t=true;}},{passive:true});})();
 
-// Animate score ring
-(function(){
-  const score=86;
-  const ring=document.getElementById('scoreRing');
-  const num=document.getElementById('scoreNum');
-  const circumference=2*Math.PI*45;
-  ring.style.strokeDasharray=circumference;
-  ring.style.strokeDashoffset=circumference;
+function esc(t){if(t==null||t==='')return'';var d=document.createElement('div');d.textContent=t;return d.innerHTML;}
 
-  const io=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        const offset=circumference-(score/100)*circumference;
-        ring.style.strokeDashoffset=offset;
-        // Animate number
-        let c=0;
-        const inc=score/40;
-        const t=setInterval(()=>{
-          c+=inc;
-          if(c>=score){c=score;clearInterval(t);}
-          num.textContent=Math.round(c)+'%';
-        },25);
-        io.unobserve(e.target);
-      }
+var FIELD_LABELS={
+  citylife:'城市偏好',marriage:'婚姻观',goodness:'善良观',idealism:'理想主义',
+  family_career:'家庭vs事业',process_result:'过程vs结果',novelty:'新鲜感',conflict:'冲突处理',
+  sleep:'作息节律',tidy:'整洁度',canteen:'饮食习惯',spicy:'辣度接受',
+  datespot:'约会地点',together:'黏人程度',travel:'旅行风格',consume:'消费观',
+  reply_anxiety:'回复焦虑',ritual:'仪式感',opposite_friend:'异性好友',dominance:'主导性',
+  caretaker:'照顾倾向',intimacy_pace:'亲密节奏',social_pda:'秀恩爱',
+  hustle:'上进心',logic_feel:'理性vs感性',introvert:'内向vs外向',
+  smoke:'吸烟态度',drink:'饮酒态度',appearance:'外貌气质',
+  spending:'消费风格',diet:'饮食要求',studyspot:'自习偏好',meet_freq:'见面频率',
+  traits:'核心特质',interests:'兴趣爱好',
+  money_attitude:'经济观',conflict_response:'冲突回应',depend_comfort:'依赖舒适度',
+  attachment:'依恋模式'
+};
+var DIM_ICONS={
+  preference_hit:'favorite',value_alignment:'balance',lifestyle_alignment:'routine',
+  shared_interests:'interests',shared_traits:'psychology',partner_trait_hit:'thumb_up',
+  safe_complement:'swap_horiz'
+};
+
+function labelOf(field){return FIELD_LABELS[field]||field;}
+function safeLabel(item){return FIELD_LABELS[item.field]||item.label||item.field;}
+
+function parseNarrative(raw,score,shared,complement,risks){
+  var result={title:'',subtitle:'',tags:[],paragraphs:[],fallback:''};
+  if(!raw||!raw.trim()){
+    result.title='灵魂共鸣报告';
+    var fb='你们的综合契合度为 '+score+'%。';
+    if(shared&&shared.length) fb+='在 '+shared.length+' 个维度上高度一致';
+    if(complement&&complement.length) fb+=(shared&&shared.length?'，':'')+'同时有 '+complement.length+' 处互补差异带来新鲜感';
+    fb+='。';
+    if(risks&&risks.length) fb+='需要留意的潜在摩擦点有 '+risks.length+' 个，坦诚沟通是最好的润滑剂。';
+    result.fallback=fb;
+    return result;
+  }
+  // Strip leading **title** markers
+  var lines=raw.split('\n').map(function(l){return l.trim();}).filter(function(l){return l.length>0;});
+  var idx=0;
+  // Line 1: title (may be wrapped in **)
+  if(idx<lines.length){
+    result.title=lines[idx].replace(/^\*\*(.+?)\*\*$/,'$1').replace(/^#+\s*/,'');
+    idx++;
+  }
+  // Line 2: subtitle (may be italic or plain)
+  if(idx<lines.length && !lines[idx].match(/[｜|]/)){
+    result.subtitle=lines[idx].replace(/^\*\*(.+?)\*\*$/,'$1');
+    idx++;
+  }
+  // Line with ｜ or |: tags
+  if(idx<lines.length && lines[idx].match(/[｜|]/)){
+    result.tags=lines[idx].split(/[｜|]/).map(function(t){return t.trim();}).filter(function(t){return t.length>0;});
+    idx++;
+  }
+  // Remaining: body paragraphs
+  var paras=[];var cur='';
+  for(var i=idx;i<lines.length;i++){
+    var l=lines[i];
+    if(l===''&&cur){paras.push(cur);cur='';}
+    else{cur+=(cur?' ':'')+l;}
+  }
+  if(cur) paras.push(cur);
+  result.paragraphs=paras;
+  if(!result.title&&paras.length) result.title='灵魂共鸣报告';
+  return result;
+}
+
+function renderReport(d){
+  var myName='我';
+  try{var u=JSON.parse(localStorage.getItem('csudate_user')||'{}');myName=u.name||'我';}catch(e){}
+  var myInitial=(myName||'我').charAt(0);
+  var score=d.score||0;
+  var weekLabel=d.weekNumber===0?'Shoot 双向匹配':('第 '+d.weekNumber+' 周');
+  var breakdown=d.breakdown||{};
+  var rp=d.reportPayload||{};
+  var shared=rp.shared_points||[];
+  var complement=rp.complementary_points||[];
+  var risks=rp.risk_flags||[];
+  var dirReasons=rp.directional_reasons||{};
+  var chemDetail=rp.chemistry_detail||{};
+  var mutualProfile=rp.mutual_profile||{};
+
+  // -- Dimensions from breakdown --
+  var dims=[
+    {name:'偏好匹配',key:'preference_fit',icon:'favorite',color:'dbf-coral'},
+    {name:'价值观契合',key:'value_alignment',icon:'balance',color:'dbf-ink'},
+    {name:'生活方式',key:'lifestyle_fit',icon:'routine',color:'dbf-sage'},
+    {name:'特质匹配',key:'trait_fit',icon:'psychology',color:'dbf-gold'},
+    {name:'兴趣重叠',key:'interest_fit',icon:'interests',color:'dbf-coral'},
+    {name:'化学反应',key:'chemistry',icon:'local_fire_department',color:'dbf-ink'},
+  ];
+  dims.forEach(function(dim){dim.val=Math.round((breakdown[dim.key]||0)*100);});
+
+  var html='';
+
+  // Hero
+  html+='<section class="rpt-hero"><div class="rpt-hero-text">';
+  html+='<div class="rpt-eyebrow">'+esc(weekLabel)+' · 匹配报告</div>';
+  html+='<h1 class="rpt-title">你与<em>'+esc(d.peerName)+'</em>的<br>灵魂共鸣报告</h1>';
+  html+='<p class="rpt-meta">'+esc((d.peerCampus||'')+(d.peerGrade?' · '+d.peerGrade:'')+(d.peerMajor?' · '+d.peerMajor:'')+(d.peerEmail?' · '+d.peerEmail:''))+'<br>基于你们各自的问卷数据生成</p>';
+  html+='</div><div class="rpt-score"><div class="rpt-score-ring"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="45"/><circle class="fill" id="scoreRing" cx="50" cy="50" r="45"/></svg><div class="rpt-score-num"><strong id="scoreNum">0</strong><small>契合度</small></div></div></div></section>';
+
+  // ====== Narrative Card — Soul Report ======
+  var narrativeText=d.narrative||'';
+  var parsed=parseNarrative(narrativeText,score,shared,complement,risks);
+
+  html+='<div class="narr-stage"><div class="narr-card">';
+
+  // Fluid watermark — ink-wash aura, overflows inner frame
+  html+='<div class="narr-watermark"></div>';
+
+  // White inner area with inner frame
+  html+='<div class="narr-inner"><div class="narr-frame">';
+  // Top border with center gap for crest
+  html+='<div class="narr-frame-top"></div>';
+  // Filigree side borders
+  html+='<div class="narr-filigree-l"></div><div class="narr-filigree-r"></div>';
+  // Four corner flourish ornaments (SVG curls)
+  var cornerSvg='<svg viewBox="0 0 40 40"><path d="M2 38 C2 20,6 12,14 8 S28 6,38 2"/><path d="M2 38 C10 34,14 28,14 20"/><path d="M2 38 C6 32,12 30,20 30"/><circle cx="14" cy="20" r="1.2"/><circle cx="20" cy="30" r="1.2"/></svg>';
+  html+='<div class="narr-corner narr-corner-tl">'+cornerSvg+'</div>';
+  html+='<div class="narr-corner narr-corner-tr">'+cornerSvg+'</div>';
+  html+='<div class="narr-corner narr-corner-bl">'+cornerSvg+'</div>';
+  html+='<div class="narr-corner narr-corner-br">'+cornerSvg+'</div>';
+
+  // Crest with filigree wings
+  html+='<div class="narr-crest">';
+  html+='<div class="narr-crest-wings"><div class="narr-crest-icon"><span>YL<span class="narr-crest-heart">\u2665</span></span></div></div>';
+  html+='<div class="narr-crest-sub">YueluDate · 灵魂匹配</div>';
+  html+='<div class="narr-crest-label">SOUL REPORT</div>';
+  html+='</div>';
+
+  // Title
+  html+='<h2 class="narr-title">'+esc(parsed.title)+'</h2>';
+  if(parsed.subtitle) html+='<p class="narr-subtitle">'+esc(parsed.subtitle)+'</p>';
+
+  // Tags
+  if(parsed.tags.length){
+    html+='<div class="narr-tags">';
+    parsed.tags.forEach(function(t){html+='<span class="narr-tag">'+esc(t)+'</span>';});
+    html+='</div>';
+  }
+
+  // Ornamental flourish divider
+  html+='<div class="narr-rule"><div class="narr-rule-dot"></div></div>';
+
+  // Body paragraphs
+  if(parsed.paragraphs.length){
+    html+='<div class="narr-body">';
+    parsed.paragraphs.forEach(function(p,i){
+      var safe=esc(p).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+      html+='<p class="narr-para">'+safe+'</p>';
     });
-  },{threshold:0.3});
-  io.observe(ring.closest('.rpt-score'));
-})();
+    html+='</div>';
+  }else{
+    html+='<p class="narr-fallback">'+esc(parsed.fallback).replace(/\n/g,'<br>')+'</p>';
+  }
 
-// Animate dimension bars
-const bars=document.querySelectorAll('.dim-bar-fill');
-const barIO=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
-      const w=e.target.dataset.w;
-      e.target.style.width='0';
-      requestAnimationFrame(()=>requestAnimationFrame(()=>{e.target.style.width=w+'%';}));
-      barIO.unobserve(e.target);
+  // Bottom ornament
+  html+='<div class="narr-bottom-ornament"></div>';
+
+  html+='</div></div>'; // close narr-frame, narr-inner
+
+  // Footer
+  html+='<div class="narr-footer">';
+  html+='<div class="narr-footer-left"><div class="narr-footer-brand">YueluDate</div><div class="narr-footer-slogan">不刷屏，每周遇见一个对的人</div><div class="narr-footer-url">yueludate.cn</div></div>';
+  html+='<div class="narr-footer-badge">'+esc(myInitial)+' & '+esc(d.peerInitial||'?')+'</div>';
+  html+='</div>';
+
+  html+='</div></div>'; // close narr-card, narr-stage
+
+  // ====== Radar Chart ======
+  var radarDims=dims.filter(function(d){return d.val>0;});
+  if(radarDims.length>=3){
+    html+='<section class="rpt-section"><div class="section-label">全景雷达</div><h2 class="section-heading">六维契合全景</h2><div class="radar-wrap">';
+    html+=buildRadarSVG(radarDims);
+    html+='</div></section>';
+  }
+
+  // ====== Dimension Bars ======
+  html+='<section class="rpt-section"><div class="section-label">维度分析</div><h2 class="section-heading">你们在哪些方面最合拍</h2><div class="dim-list">';
+  dims.forEach(function(dim){
+    if(dim.val>0){
+      html+='<div class="dim-item"><span class="dim-name"><span class="material-symbols-outlined" style="font-size:.875rem;vertical-align:-2px;margin-right:.25rem;color:var(--text-ghost)">'+dim.icon+'</span>'+esc(dim.name)+'</span><div class="dim-bar"><div class="dim-bar-fill '+dim.color+'" data-w="'+dim.val+'"></div></div><span class="dim-pct">'+dim.val+'%</span></div>';
     }
   });
-},{threshold:0.2});
-bars.forEach(b=>barIO.observe(b));
+  html+='</div></section>';
+
+  // ====== Chemistry Stats ======
+  var hasChemData=chemDetail.shared_interest_jaccard!=null||chemDetail.shared_trait_jaccard!=null||chemDetail.complement_score!=null;
+  if(hasChemData){
+    html+='<section class="rpt-section"><div class="section-label">化学反应</div><h2 class="section-heading">兴趣、特质与互补指数</h2><div class="chem-grid">';
+    if(chemDetail.shared_interest_jaccard!=null)
+      html+='<div class="chem-stat"><div class="chem-val">'+Math.round(chemDetail.shared_interest_jaccard*100)+'%</div><div class="chem-label">兴趣重叠率</div></div>';
+    if(chemDetail.shared_trait_jaccard!=null)
+      html+='<div class="chem-stat"><div class="chem-val">'+Math.round(chemDetail.shared_trait_jaccard*100)+'%</div><div class="chem-label">特质相似度</div></div>';
+    if(chemDetail.complement_score!=null)
+      html+='<div class="chem-stat"><div class="chem-val">'+Math.round(chemDetail.complement_score*100)+'%</div><div class="chem-label">互补指数</div></div>';
+    if(mutualProfile.confidence!=null)
+      html+='<div class="chem-stat"><div class="chem-val">'+Math.round(mutualProfile.confidence*100)+'%</div><div class="chem-label">数据置信度</div></div>';
+    html+='</div></section>';
+  }
+
+  // ====== Shared Points ======
+  if(shared.length){
+    html+='<section class="rpt-section"><div class="section-label">共同点</div><h2 class="section-heading">你们的交集</h2><div class="common-grid">';
+    shared.forEach(function(p){
+      var icon=DIM_ICONS[p.type]||'check_circle';
+      var title=labelOf(p.field);
+      var desc='';
+      if(p.items&&p.items.length) desc='你们都选择了：'+p.items.join('、');
+      else desc='在「'+title+'」维度高度一致 ('+Math.round((p.score||0)*100)+'%)';
+      html+='<div class="common-item"><div class="common-icon"><span class="material-symbols-outlined">'+icon+'</span></div><div class="common-title">'+esc(title)+'</div><div class="common-desc">'+esc(desc)+'</div></div>';
+    });
+    html+='</div></section>';
+  }
+
+  // ====== Complement Points ======
+  if(complement.length){
+    html+='<section class="rpt-section"><div class="section-label">互补之处</div><h2 class="section-heading">不同，才有火花</h2><div class="diff-list">';
+    complement.forEach(function(p){
+      var title=labelOf(p.field);
+      html+='<div class="diff-item"><div class="diff-you"><strong>你</strong>'+esc(title)+'：'+esc(String(p.a_value||''))+'</div><div class="diff-vs">&amp;</div><div class="diff-them"><strong>'+esc(d.peerName)+'</strong>'+esc(title)+'：'+esc(String(p.b_value||''))+'</div></div>';
+    });
+    html+='</div></section>';
+  }
+
+  // ====== Directional Reasons ======
+  var forA=dirReasons.forA||[];
+  var forB=dirReasons.forB||[];
+  if(forA.length||forB.length){
+    html+='<section class="rpt-section"><div class="section-label">双向视角</div><h2 class="section-heading">匹配的双向理由</h2><div class="dir-cols">';
+    if(forA.length){
+      html+='<div class="dir-col"><div class="dir-col-title"><span class="material-symbols-outlined">arrow_forward</span>你喜欢 TA 的理由</div>';
+      forA.forEach(function(r){
+        var pct=Math.round((r.score||0)*100);
+        var dotClass=pct>=80?'dir-dot-high':(pct>=60?'dir-dot-mid':'dir-dot-low');
+        html+='<div class="dir-reason"><span class="dir-dot '+dotClass+'"></span><span class="dir-reason-text">'+esc(safeLabel(r))+'</span><span class="dir-reason-score">'+pct+'%</span></div>';
+      });
+      html+='</div>';
+    }
+    if(forB.length){
+      html+='<div class="dir-col"><div class="dir-col-title"><span class="material-symbols-outlined">arrow_back</span>TA 喜欢你的理由</div>';
+      forB.forEach(function(r){
+        var pct=Math.round((r.score||0)*100);
+        var dotClass=pct>=80?'dir-dot-high':(pct>=60?'dir-dot-mid':'dir-dot-low');
+        html+='<div class="dir-reason"><span class="dir-dot '+dotClass+'"></span><span class="dir-reason-text">'+esc(safeLabel(r))+'</span><span class="dir-reason-score">'+pct+'%</span></div>';
+      });
+      html+='</div>';
+    }
+    html+='</div></section>';
+  }
+
+  // ====== Risk Flags ======
+  if(risks.length){
+    var severityLabel={'severe':'需要重视','moderate':'值得留意','soft':'小摩擦'};
+    var severityIcon={'severe':'warning','moderate':'info','soft':'chat_bubble'};
+    html+='<section class="rpt-section"><div class="section-label">潜在摩擦</div><h2 class="section-heading">可能的挑战与成长点</h2><div class="risk-list">';
+    risks.forEach(function(r){
+      var sev=r.severity||'soft';
+      var icon=severityIcon[sev]||'info';
+      var label=severityLabel[sev]||'留意';
+      var fieldLabel=safeLabel(r);
+      var desc='';
+      if(r.wanted!=null&&r.actual!=null) desc='你期望 '+r.wanted+'，对方为 '+r.actual;
+      else if(r.a_value!=null&&r.b_value!=null) desc='你：'+r.a_value+'，对方：'+r.b_value;
+      else desc='该维度存在差异（匹配分 '+Math.round((r.score||0)*100)+'%）';
+      html+='<div class="risk-item risk-'+sev+'"><div class="risk-icon"><span class="material-symbols-outlined" style="font-size:1rem">'+icon+'</span></div><div class="risk-body"><div class="risk-title">'+esc(fieldLabel)+'<span class="risk-badge">'+esc(label)+'</span></div><div class="risk-desc">'+esc(desc)+'</div></div></div>';
+    });
+    html+='</div></section>';
+  }
+
+  // Actions
+  html+='<div class="rpt-actions"><a href="inbox.html" class="btn-rpt btn-rpt-primary"><span class="material-symbols-outlined" style="font-size:1.125rem">mail</span> 去信箱</a><a href="dashboard.html" class="btn-rpt btn-rpt-ghost">回到首页</a></div>';
+
+  document.getElementById('reportMain').innerHTML=html;
+
+  // Animate score ring
+  setTimeout(function(){
+    var ring=document.getElementById('scoreRing');
+    var num=document.getElementById('scoreNum');
+    if(!ring)return;
+    var circ=2*Math.PI*45;
+    ring.style.strokeDasharray=circ;
+    ring.style.strokeDashoffset=circ;
+    var offset=circ-(score/100)*circ;
+    ring.style.strokeDashoffset=offset;
+    var c=0;var inc=score/40;
+    var t=setInterval(function(){c+=inc;if(c>=score){c=score;clearInterval(t);}num.textContent=Math.round(c)+'%';},25);
+  },100);
+
+  // Animate dimension bars
+  setTimeout(function(){
+    var bars=document.querySelectorAll('.dim-bar-fill');
+    var barIO=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          var w=e.target.dataset.w;
+          e.target.style.width='0';
+          requestAnimationFrame(function(){requestAnimationFrame(function(){e.target.style.width=w+'%';});});
+          barIO.unobserve(e.target);
+        }
+      });
+    },{threshold:0.2});
+    bars.forEach(function(b){barIO.observe(b);});
+  },150);
+}
+
+/* ═══════ RADAR CHART BUILDER ═══════ */
+function buildRadarSVG(dims){
+  var cx=150,cy=150,R=110,n=dims.length;
+  var rings=[0.25,0.5,0.75,1.0];
+  var svg='<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">';
+  // Grid rings
+  rings.forEach(function(r){
+    var pts=[];
+    for(var i=0;i<n;i++){
+      var a=Math.PI*2*i/n-Math.PI/2;
+      pts.push((cx+Math.cos(a)*R*r).toFixed(1)+','+(cy+Math.sin(a)*R*r).toFixed(1));
+    }
+    svg+='<polygon class="radar-grid" points="'+pts.join(' ')+'"/>';
+  });
+  // Axes
+  for(var i=0;i<n;i++){
+    var a=Math.PI*2*i/n-Math.PI/2;
+    svg+='<line class="radar-axis" x1="'+cx+'" y1="'+cy+'" x2="'+(cx+Math.cos(a)*R).toFixed(1)+'" y2="'+(cy+Math.sin(a)*R).toFixed(1)+'"/>';
+  }
+  // Data shape
+  var dataPts=[],dots=[];
+  for(var i=0;i<n;i++){
+    var a=Math.PI*2*i/n-Math.PI/2;
+    var v=Math.max(dims[i].val/100,0.05);
+    var px=(cx+Math.cos(a)*R*v).toFixed(1);
+    var py=(cy+Math.sin(a)*R*v).toFixed(1);
+    dataPts.push(px+','+py);
+    dots.push('<circle class="radar-dot" cx="'+px+'" cy="'+py+'"/>');
+  }
+  svg+='<polygon class="radar-shape" points="'+dataPts.join(' ')+'"/>';
+  svg+=dots.join('');
+  // Labels
+  for(var i=0;i<n;i++){
+    var a=Math.PI*2*i/n-Math.PI/2;
+    var lx=(cx+Math.cos(a)*(R+18)).toFixed(1);
+    var ly=(cy+Math.sin(a)*(R+18)).toFixed(1);
+    svg+='<text class="radar-label" x="'+lx+'" y="'+ly+'">'+dims[i].name+' '+dims[i].val+'%</text>';
+  }
+  svg+='</svg>';
+  return svg;
+}
+
+// Load report data
+(async function(){
+  var params=new URLSearchParams(window.location.search);
+  var matchId=params.get('id');
+  if(!matchId){
+    document.getElementById('reportMain').innerHTML='<p style="text-align:center;padding:4rem 0;color:var(--text-ghost)">缺少匹配 ID 参数。请从信箱或首页进入报告页。</p>';
+    return;
+  }
+  if(!window.csudateGetToken||!csudateGetToken()){
+    window.location.href='login.html';return;
+  }
+  try{
+    var res=await csudateFetch('/api/match/'+matchId,{method:'GET'});
+    var data=await res.json().catch(function(){return {};});
+    if(!res.ok){
+      document.getElementById('reportMain').innerHTML='<p style="text-align:center;padding:4rem 0;color:var(--coral-hex)">'+esc(data.detail||'加载失败')+'</p>';
+      return;
+    }
+    renderReport(data);
+  }catch(e){
+    document.getElementById('reportMain').innerHTML='<p style="text-align:center;padding:4rem 0;color:var(--coral-hex)">网络错误，无法加载报告</p>';
+  }
+})();
 </script>
 
 </body>

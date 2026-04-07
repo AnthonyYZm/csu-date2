@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+<title>YueluDate Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="api.js"></script>
+<style>
+:root {
+  --bg: #0f1117; --card: #1a1d27; --card-border: #2a2d3a;
+  --text: #e4e4e7; --text-dim: #8b8d98;
+  --accent: #6366f1; --accent2: #f59e0b; --green: #22c55e; --red: #ef4444; --pink: #ec4899;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(1rem + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  overflow-x: hidden;
+}
+.header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(15,17,23,.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  padding: .875rem 1.25rem; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--card-border);
+}
+.header h1 { font-size: 1.125rem; font-weight: 700; }
+.header .refresh-btn {
+  background: none; border: none; color: var(--text-dim); font-size: 1.25rem;
+  cursor: pointer; padding: .25rem; border-radius: .375rem;
+}
+.header .refresh-btn:active { transform: scale(.9); color: var(--accent); }
+.header .refresh-btn.spinning { animation: spin .8s ease; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.header .status { font-size: .7rem; color: var(--green); display: flex; align-items: center; gap: .25rem; }
+.header .status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.container { max-width: 480px; margin: 0 auto; padding: .75rem; }
+
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-bottom: .75rem; }
+.kpi {
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: .75rem; padding: .75rem .5rem; text-align: center;
+}
+.kpi .num {
+  font-size: 1.5rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.kpi .num.gold { background: linear-gradient(135deg, var(--accent2), #fbbf24); -webkit-background-clip: text; background-clip: text; }
+.kpi .num.green { background: linear-gradient(135deg, var(--green), #4ade80); -webkit-background-clip: text; background-clip: text; }
+.kpi .label { font-size: .6875rem; color: var(--text-dim); margin-top: .125rem; font-weight: 500; }
+
+/* Sections */
+.section {
+  background: var(--card); border: 1px solid var(--card-border);
+  border-radius: .75rem; padding: 1rem; margin-bottom: .75rem;
+}
+.section-title {
+  font-size: .8125rem; font-weight: 600; color: var(--text-dim);
+  margin-bottom: .75rem; display: flex; align-items: center; gap: .375rem;
+}
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: .75rem; }
+.chart-box { background: var(--card); border: 1px solid var(--card-border); border-radius: .75rem; padding: .875rem; }
+.chart-box .section-title { margin-bottom: .5rem; }
+.chart-wrap { position: relative; width: 100%; }
+.chart-wrap.doughnut { max-width: 180px; margin: 0 auto; }
+
+/* Bar list */
+.bar-list { display: flex; flex-direction: column; gap: .375rem; }
+.bar-item { display: flex; align-items: center; gap: .5rem; font-size: .75rem; }
+.bar-item .name { width: 5rem; text-align: right; color: var(--text-dim); flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-item .track { flex: 1; height: 1.25rem; background: rgba(99,102,241,.1); border-radius: .25rem; overflow: hidden; position: relative; }
+.bar-item .fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--pink)); border-radius: .25rem; transition: width .6s ease; }
+.bar-item .val { position: absolute; right: .375rem; top: 50%; transform: translateY(-50%); font-size: .6875rem; font-weight: 600; }
+
+/* Funnel */
+.funnel { display: flex; flex-direction: column; align-items: center; gap: .25rem; }
+.funnel-step { width: 100%; padding: .625rem; border-radius: .5rem; text-align: center; font-size: .8125rem; font-weight: 600; }
+.funnel-step .pct { font-size: .6875rem; font-weight: 400; opacity: .7; margin-left: .25rem; }
+.funnel-arrow { color: var(--text-dim); font-size: .75rem; }
+
+.timer { font-size: .6875rem; color: var(--text-dim); text-align: center; padding: .5rem; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>YueluDate Dashboard</h1>
+    <div class="status" id="status">Loading...</div>
+  </div>
+  <button class="refresh-btn" id="refreshBtn" onclick="refresh()">&#x21bb;</button>
+</div>
+
+<div class="container">
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi"><div class="num" id="kTotal">--</div><div class="label">Total Users</div></div>
+    <div class="kpi"><div class="num gold" id="kQuiz">--</div><div class="label">Quiz Done</div></div>
+    <div class="kpi"><div class="num green" id="kMatch">--</div><div class="label">Matches</div></div>
+    <div class="kpi"><div class="num" id="kPaused">--</div><div class="label">Paused</div></div>
+    <div class="kpi"><div class="num gold" id="kMatched">--</div><div class="label">Matched</div></div>
+    <div class="kpi"><div class="num green" id="kUnmatched">--</div><div class="label">Unmatched</div></div>
+  </div>
+
+  <!-- Page Views KPI -->
+  <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="kpi"><div class="num" id="kPvTotal">--</div><div class="label">Total PV</div></div>
+    <div class="kpi"><div class="num gold" id="kPvToday">--</div><div class="label">Today PV</div></div>
+    <div class="kpi"><div class="num green" id="kUvTotal">--</div><div class="label">Total UV</div></div>
+    <div class="kpi"><div class="num" id="kUvToday">--</div><div class="label">Today UV</div></div>
+  </div>
+
+  <!-- Growth Curve (hero) -->
+  <div class="section">
+    <div class="section-title"><span>&#x1F4C8;</span> User Growth</div>
+    <div class="chart-wrap" style="height:260px;"><canvas id="chartGrowth"></canvas></div>
+  </div>
+
+  <!-- Hourly new -->
+  <div class="section">
+    <div class="section-title"><span>&#x23F0;</span> Hourly Registrations</div>
+    <div class="chart-wrap" style="height:200px;"><canvas id="chartHourly"></canvas></div>
+  </div>
+
+  <!-- Funnel -->
+  <div class="section">
+    <div class="section-title"><span>&#x1F4CA;</span> Conversion Funnel</div>
+    <div class="funnel" id="funnel"></div>
+  </div>
+
+  <!-- Gender + Sexuality -->
+  <div class="chart-row">
+    <div class="chart-box">
+      <div class="section-title"><span>&#x1F464;</span> Gender</div>
+      <div class="chart-wrap doughnut"><canvas id="chartGender"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="section-title"><span>&#x2764;</span> Sexuality</div>
+      <div class="chart-wrap doughnut"><canvas id="chartSexuality"></canvas></div>
+    </div>
+  </div>
+
+  <!-- School -->
+  <div class="section">
+    <div class="section-title"><span>&#x1F393;</span> School</div>
+    <div class="chart-wrap" style="height:180px;"><canvas id="chartSchool"></canvas></div>
+  </div>
+
+  <!-- Campus -->
+  <div class="section">
+    <div class="section-title"><span>&#x1F3EB;</span> Campus</div>
+    <div class="chart-wrap" style="height:200px;"><canvas id="chartCampus"></canvas></div>
+  </div>
+
+  <!-- Grade -->
+  <div class="section">
+    <div class="section-title"><span>&#x1F393;</span> Grade</div>
+    <div class="chart-wrap" style="height:180px;"><canvas id="chartGrade"></canvas></div>
+  </div>
+
+  <!-- Major Top 10 -->
+  <div class="section">
+    <div class="section-title"><span>&#x1F4D6;</span> Top 10 Majors</div>
+    <div class="bar-list" id="majorBars"></div>
+  </div>
+
+  <!-- Match Score -->
+  <div class="section" id="scoreSection" style="display:none;">
+    <div class="section-title"><span>&#x1F4AF;</span> Match Scores</div>
+    <div class="chart-wrap" style="height:180px;"><canvas id="chartScore"></canvas></div>
+  </div>
+
+  <!-- Traffic Hourly -->
+  <div class="section" id="trafficSection" style="display:none;">
+    <div class="section-title"><span>&#x1F4C8;</span> Hourly Traffic</div>
+    <div class="chart-wrap" style="height:200px;"><canvas id="chartTraffic"></canvas></div>
+  </div>
+
+  <!-- Page Distribution -->
+  <div class="section" id="pageDistSection" style="display:none;">
+    <div class="section-title"><span>&#x1F4C4;</span> Page Views</div>
+    <div class="bar-list" id="pageBars"></div>
+  </div>
+
+  <!-- API Calls Top 10 -->
+  <div class="section" id="apiDistSection" style="display:none;">
+    <div class="section-title"><span>&#x26A1;</span> API Calls Top 10</div>
+    <div class="bar-list" id="apiBars"></div>
+  </div>
+
+  <!-- Cross Campus -->
+  <div class="section">
+    <div class="section-title"><span>&#x1F310;</span> Cross Campus</div>
+    <div class="chart-wrap doughnut" style="max-width:200px;"><canvas id="chartCross"></canvas></div>
+  </div>
+
+  <div class="timer" id="timer"></div>
+</div>
+
+<script>
+const API = CSU_DATE_API_BASE();
+
+const C = {
+  campus: ['#6366f1','#f59e0b','#22c55e','#ec4899','#8b5cf6','#14b8a6'],
+  grade: ['#f59e0b','#6366f1','#22c55e','#ec4899','#8b5cf6','#ef4444'],
+  gender: ['#6366f1','#ec4899','#8b5cf6'],
+  sexuality: ['#6366f1','#ec4899','#f59e0b','#22c55e'],
+  score: ['#22c55e','#6366f1','#f59e0b','#ec4899','#ef4444'],
+};
+
+let charts = {};
+const REFRESH_SEC = 30;
+let countdown = REFRESH_SEC, timer;
+
+Chart.defaults.color = '#8b8d98';
+Chart.defaults.borderColor = 'rgba(42,45,58,.5)';
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif";
+Chart.defaults.font.size = 11;
+
+function destroy(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function animateNum(el, target) {
+  const start = parseInt(el.textContent) || 0;
+  if (start === target) return;
+  const t0 = performance.now();
+  (function tick(now) {
+    const p = Math.min((now - t0) / 600, 1);
+    el.textContent = Math.round(start + (target - start) * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(tick);
+  })(t0);
+}
+
+/* ── Growth chart ── */
+function renderGrowth(g) {
+  destroy('chartGrowth');
+  if (!g.timestamps || !g.timestamps.length) return;
+
+  // Convert UTC strings to local Date objects with +8h offset
+  const toLocal = s => {
+    const d = new Date(s.replace(' ', 'T') + 'Z');
+    return d;
+  };
+
+  const regData = g.timestamps.map((t, i) => ({ x: toLocal(t), y: g.cumUsers[i] }));
+  const quizData = g.quizTimestamps.map((t, i) => ({ x: toLocal(t), y: g.cumQuiz[i] }));
+
+  charts['chartGrowth'] = new Chart(document.getElementById('chartGrowth'), {
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          label: 'Registered',
+          data: regData,
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99,102,241,.1)',
+          fill: true,
+          tension: .3,
+          borderWidth: 2.5,
+          pointRadius: 0,
+          pointHitRadius: 8,
+        },
+        {
+          label: 'Quiz Done',
+          data: quizData,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34,197,94,.08)',
+          fill: true,
+          tension: .3,
+          borderWidth: 2.5,
+          pointRadius: 0,
+          pointHitRadius: 8,
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: {
+          type: 'time',
+          time: { unit: 'hour', displayFormats: { hour: 'M/d HH:mm' }, tooltipFormat: 'M/d HH:mm' },
+          grid: { display: false },
+          ticks: { maxRotation: 45, font: { size: 9 } },
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(42,45,58,.3)' },
+          ticks: { font: { size: 10 } },
+        }
+      },
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 12, padding: 8, font: { size: 10 } } },
+        tooltip: {
+          backgroundColor: 'rgba(26,29,39,.95)', titleColor: '#e4e4e7', bodyColor: '#e4e4e7',
+          borderColor: '#2a2d3a', borderWidth: 1, padding: 10,
+          callbacks: {
+            title: ctx => ctx[0].label,
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}`
+          }
+        }
+      }
+    }
+  });
+}
+
+/* ── Hourly bar chart ── */
+function renderHourly(g) {
+  destroy('chartHourly');
+  if (!g.hourlyLabels || !g.hourlyLabels.length) return;
+
+  // Format labels to show only hour
+  const labels = g.hourlyLabels.map(s => {
+    const parts = s.split(' ');
+    const datePart = parts[0].split('-');
+    const hour = parts[1].replace(':00','h');
+    return `${parseInt(datePart[1])}/${parseInt(datePart[2])} ${hour}`;
+  });
+
+  charts['chartHourly'] = new Chart(document.getElementById('chartHourly'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: g.hourlyNew,
+        backgroundColor: g.hourlyNew.map(v => v >= 15 ? '#f59e0b' : v >= 8 ? '#6366f1' : 'rgba(99,102,241,.5)'),
+        borderRadius: 3, borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxRotation: 60, font: { size: 8 } } },
+        y: { beginAtZero: true, grid: { color: 'rgba(42,45,58,.3)' }, ticks: { font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+/* ── Helpers ── */
+function doughnut(id, labels, data, colors) {
+  destroy(id);
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 4 }] },
+    options: { responsive: true, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 6, font: { size: 10 } } } } }
+  });
+}
+function bar(id, labels, data, colors) {
+  destroy(id);
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 4, borderSkipped: false }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 10 } } }, y: { grid: { color: 'rgba(42,45,58,.3)' }, ticks: { font: { size: 10 } } } } }
+  });
+}
+
+function renderFunnel(ov) {
+  const el = document.getElementById('funnel');
+  const steps = [
+    { label: 'Registered', value: ov.totalUsers, color: 'rgba(99,102,241,.2)', text: '#6366f1' },
+    { label: 'Quiz Done', value: ov.quizCompleted, color: 'rgba(245,158,11,.2)', text: '#f59e0b' },
+    { label: 'Matched', value: ov.matchedUsers, color: 'rgba(34,197,94,.2)', text: '#22c55e' },
+  ];
+  el.innerHTML = steps.map((s, i) => {
+    const pct = i > 0 ? ((s.value / steps[i-1].value) * 100).toFixed(0) : '100';
+    const w = 60 + (40 * (steps.length - i) / steps.length);
+    return (i > 0 ? '<div class="funnel-arrow">&#x25BC;</div>' : '') +
+      `<div class="funnel-step" style="background:${s.color};color:${s.text};width:${w}%">${s.label}: ${s.value} <span class="pct">${pct}%</span></div>`;
+  }).join('');
+}
+
+function renderBarList(elId, data) {
+  const el = document.getElementById(elId);
+  const max = data.length ? data[0].value : 1;
+  el.innerHTML = data.map(d =>
+    `<div class="bar-item"><span class="name">${d.name}</span><div class="track"><div class="fill" style="width:${(d.value/max*100).toFixed(0)}%"></div><span class="val">${d.value}</span></div></div>`
+  ).join('');
+}
+function renderMajors(data) { renderBarList('majorBars', data); }
+
+/* ── Load ── */
+async function loadData() {
+  try {
+    const d = await (await fetch(API + '/api/admin/dashboard-stats')).json();
+    const ov = d.overview;
+
+    animateNum(document.getElementById('kTotal'), ov.totalUsers);
+    animateNum(document.getElementById('kQuiz'), ov.quizCompleted);
+    animateNum(document.getElementById('kMatch'), ov.totalMatches);
+    animateNum(document.getElementById('kPaused'), ov.paused);
+    animateNum(document.getElementById('kMatched'), ov.matchedUsers);
+    animateNum(document.getElementById('kUnmatched'), ov.unmatchedUsers);
+
+    renderGrowth(d.growth);
+    renderHourly(d.growth);
+    renderFunnel(ov);
+
+    doughnut('chartSchool', d.schoolDist.map(x=>x.name), d.schoolDist.map(x=>x.value), ['#6366f1','#f59e0b','#22c55e']);
+    doughnut('chartGender', d.genderDist.map(x=>x.name), d.genderDist.map(x=>x.value), C.gender);
+    doughnut('chartSexuality', d.sexualityDist.map(x=>x.name), d.sexualityDist.map(x=>x.value), C.sexuality);
+    bar('chartCampus', d.campusDist.map(x=>x.name), d.campusDist.map(x=>x.value), C.campus);
+    bar('chartGrade', d.gradeDist.map(x=>x.name), d.gradeDist.map(x=>x.value), C.grade);
+    renderMajors(d.majorDist);
+
+    const hasScores = d.scoreDist.some(x => x.value > 0);
+    document.getElementById('scoreSection').style.display = hasScores ? '' : 'none';
+    if (hasScores) bar('chartScore', d.scoreDist.map(x=>x.name), d.scoreDist.map(x=>x.value), C.score);
+
+    doughnut('chartCross', ['Willing','Not willing'], [d.crossCampus.yes, d.crossCampus.no], ['#22c55e','#ef4444']);
+
+    // Page Views
+    if (d.pageViews) {
+      const pv = d.pageViews;
+      animateNum(document.getElementById('kPvTotal'), pv.totalViews || 0);
+      animateNum(document.getElementById('kPvToday'), pv.todayViews || 0);
+      animateNum(document.getElementById('kUvTotal'), pv.uniqueIPs || 0);
+      animateNum(document.getElementById('kUvToday'), pv.todayUniqueIPs || 0);
+
+      // Hourly traffic chart
+      if (pv.hourlyLabels && pv.hourlyLabels.length) {
+        document.getElementById('trafficSection').style.display = '';
+        const tLabels = pv.hourlyLabels.map(s => {
+          const parts = s.split(' ');
+          const dp = parts[0].split('-');
+          const hour = parts[1].replace(':00','h');
+          return `${parseInt(dp[1])}/${parseInt(dp[2])} ${hour}`;
+        });
+        destroy('chartTraffic');
+        charts['chartTraffic'] = new Chart(document.getElementById('chartTraffic'), {
+          type: 'bar',
+          data: {
+            labels: tLabels,
+            datasets: [{
+              data: pv.hourlyViews,
+              backgroundColor: pv.hourlyViews.map(v => v >= 50 ? '#f59e0b' : v >= 20 ? '#6366f1' : 'rgba(99,102,241,.5)'),
+              borderRadius: 3, borderSkipped: false,
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { maxRotation: 60, font: { size: 8 } } },
+              y: { beginAtZero: true, grid: { color: 'rgba(42,45,58,.3)' }, ticks: { font: { size: 10 } } }
+            }
+          }
+        });
+      }
+
+      // Page distribution bars
+      if (pv.pageDist && pv.pageDist.length) {
+        document.getElementById('pageDistSection').style.display = '';
+        renderBarList('pageBars', pv.pageDist);
+      }
+
+      // API distribution bars
+      if (pv.apiDist && pv.apiDist.length) {
+        document.getElementById('apiDistSection').style.display = '';
+        renderBarList('apiBars', pv.apiDist);
+      }
+    }
+
+    document.getElementById('status').textContent = 'Live \u00b7 ' + new Date().toLocaleTimeString();
+    document.getElementById('status').style.color = '';
+  } catch (e) {
+    document.getElementById('status').textContent = 'Error: ' + e.message;
+    document.getElementById('status').style.color = '#ef4444';
+  }
+}
+
+function refresh() {
+  document.getElementById('refreshBtn').classList.add('spinning');
+  setTimeout(() => document.getElementById('refreshBtn').classList.remove('spinning'), 800);
+  countdown = REFRESH_SEC;
+  loadData();
+}
+
+function startTimer() {
+  if (timer) clearInterval(timer);
+  countdown = REFRESH_SEC;
+  timer = setInterval(() => {
+    countdown--;
+    document.getElementById('timer').textContent = `Auto refresh in ${countdown}s`;
+    if (countdown <= 0) { countdown = REFRESH_SEC; loadData(); }
+  }, 1000);
+}
+
+loadData();
+startTimer();
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) clearInterval(timer);
+  else { loadData(); startTimer(); }
+});
+</script>
+</body>
+</html>

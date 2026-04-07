@@ -33,9 +33,14 @@ class User(Base):
     quiz_completed = Column(Boolean, default=False)
     paused = Column(Boolean, default=False)
     wechat = Column(String, default="")
+    created_at = Column(DateTime, nullable=True)
 
     bio = Column(String, default="")
     values_json = Column(JSON, nullable=True)
+
+    # 教育邮箱验证（非edu邮箱注册用户需在3天内绑定）
+    edu_email = Column(String, nullable=True)
+    edu_email_verified_at = Column(DateTime, nullable=True)
 
     profile = relationship("Profile", back_populates="user", uselist=False)
     sent_crushes = relationship("Crush", back_populates="sender")
@@ -68,6 +73,16 @@ class Crush(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     sender = relationship("User", back_populates="sent_crushes")
+
+
+class PageView(Base):
+    __tablename__ = "page_views"
+
+    id = Column(Integer, primary_key=True, index=True)
+    path = Column(String, nullable=False, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    ip = Column(String, nullable=True)
+    user_agent = Column(String, nullable=True)
 
 
 class Match(Base):

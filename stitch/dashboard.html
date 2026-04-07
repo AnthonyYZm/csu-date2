@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>首页 · CSU Date</title>
+<title>首页 · YueluDate</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -163,6 +163,65 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 .modal-actions{display:flex;gap:.75rem;margin-top:1.25rem}
 .modal-actions .btn-match{flex:1}
 
+/* ── Edu Email Verification Banner ── */
+.edu-banner{background:linear-gradient(135deg,oklch(48% 0.17 28/0.06),oklch(72% 0.12 75/0.06));border:1.5px solid oklch(48% 0.17 28/0.15);border-radius:2.5rem;padding:clamp(1.75rem,4vw,2.5rem);margin-bottom:clamp(1.5rem,3vw,2.5rem);opacity:0;animation:cardIn .7s cubic-bezier(.16,1,.3,1) .15s forwards}
+.edu-banner.blocked{background:linear-gradient(135deg,oklch(55% 0.2 25/0.08),oklch(45% 0.15 25/0.06));border-color:oklch(48% 0.17 28/0.25)}
+.edu-banner-head{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.edu-banner-icon{width:2.75rem;height:2.75rem;border-radius:50%;background:oklch(48% 0.17 28/0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.edu-banner-icon .material-symbols-outlined{font-size:1.25rem;color:var(--coral-hex)}
+.edu-banner-title{font-family:'Noto Serif SC',serif;font-weight:700;font-size:clamp(1rem,2.2vw,1.25rem);color:var(--ink-hex)}
+.edu-banner-desc{color:var(--text-dim);font-size:.875rem;line-height:1.7;margin-bottom:1.25rem}
+.edu-banner-desc strong{color:var(--coral-hex);font-weight:600}
+.edu-deadline{display:inline-flex;align-items:center;gap:.375rem;padding:.375rem 1rem;border-radius:9999px;background:oklch(48% 0.17 28/0.08);font-size:.8125rem;font-weight:600;color:var(--coral-hex);margin-bottom:1.25rem}
+.edu-deadline .material-symbols-outlined{font-size:1rem}
+.edu-form{display:flex;flex-direction:column;gap:.75rem;max-width:24rem}
+.edu-form-row{display:flex;gap:.5rem}
+.edu-input{flex:1;padding:.75rem 1rem;border:1.5px solid oklch(18% 0.09 275/0.08);border-radius:1.25rem;background:var(--white-warm);color:var(--text);font-family:'Outfit',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s}
+.edu-input:focus{border-color:oklch(48% 0.17 28/0.3)}
+.edu-btn{padding:.75rem 1.5rem;border-radius:9999px;font-family:'Outfit',sans-serif;font-weight:600;font-size:.8125rem;border:none;cursor:pointer;transition:transform .25s,opacity .2s;white-space:nowrap}
+.edu-btn:active{transform:scale(.97)}
+.edu-btn:disabled{opacity:.5;cursor:not-allowed}
+.edu-btn-send{background:var(--ink-hex);color:var(--white-warm)}
+.edu-btn-verify{background:linear-gradient(135deg,var(--coral-hex),oklch(52% 0.15 30));color:var(--white-warm);box-shadow:0 4px 16px oklch(48% 0.17 28/0.15)}
+.edu-code-row{display:flex;gap:.5rem}
+.edu-msg{font-size:.8125rem;margin-top:.25rem;font-weight:500}
+.edu-msg.ok{color:var(--sage-hex)}
+.edu-msg.err{color:var(--coral-hex)}
+.edu-success{display:flex;align-items:center;gap:.75rem;padding:1rem 1.5rem;border-radius:1.5rem;background:oklch(65% 0.08 155/0.08);border:1.5px solid oklch(65% 0.08 155/0.15)}
+.edu-success .material-symbols-outlined{font-size:1.5rem;color:var(--sage-hex);font-variation-settings:'FILL' 1}
+.edu-success-text{font-size:.875rem;font-weight:600;color:var(--sage-hex)}
+
+/* ── Countdown Hero ── */
+.cd-hero{background:linear-gradient(135deg,var(--ink-hex),oklch(22% 0.12 275));border-radius:2.5rem;padding:clamp(1.75rem,4vw,2.5rem);margin-bottom:clamp(1.5rem,3vw,2.5rem);text-align:center;color:var(--white-warm);opacity:0;animation:cardIn .7s cubic-bezier(.16,1,.3,1) .15s forwards}
+.cd-hero .cd-hero-label{font-size:.625rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:oklch(80% 0.06 75);margin-bottom:.75rem}
+.cd-hero .countdown-row{display:flex;justify-content:center;gap:clamp(1rem,3vw,1.75rem);margin-bottom:.5rem}
+.cd-hero .cd-unit{text-align:center}
+.cd-hero .cd-num{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(2rem,5vw,3rem);line-height:1.1;color:var(--white-warm);display:block;font-variant-numeric:tabular-nums}
+.cd-hero .cd-unit small{font-size:.625rem;color:oklch(75% 0.03 275);font-weight:500;letter-spacing:.1em}
+.cd-hero .cd-hint{font-size:.75rem;color:oklch(70% 0.03 275)}
+
+/* ── Announcement Board (collapsible) ── */
+.announce-card{background:var(--white-warm);border-radius:2.5rem;padding:clamp(1.25rem,3vw,1.75rem);margin-bottom:clamp(1.5rem,3vw,2.5rem);opacity:0;animation:cardIn .7s cubic-bezier(.16,1,.3,1) .12s forwards}
+.announce-head{display:flex;align-items:center;gap:.75rem;cursor:pointer;user-select:none}
+.announce-icon{width:2rem;height:2rem;border-radius:50%;background:oklch(72% 0.12 75/0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.announce-icon .material-symbols-outlined{font-size:1rem;color:var(--gold-hex)}
+.announce-title{font-family:'Noto Serif SC',serif;font-weight:700;font-size:clamp(.9rem,2vw,1.05rem);color:var(--ink-hex);flex:1}
+.announce-toggle{background:none;border:none;color:var(--text-ghost);cursor:pointer;padding:0;display:flex;transition:transform .3s}
+.announce-toggle.open{transform:rotate(180deg)}
+.announce-count{font-size:.6875rem;color:var(--text-ghost);font-weight:500}
+.announce-list{display:flex;flex-direction:column;gap:.625rem;max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1),margin .3s}
+.announce-list.open{max-height:600px;margin-top:1rem}
+.announce-item{display:flex;gap:.75rem;padding:.875rem 1rem;border-radius:1.25rem;background:var(--cream);transition:background .2s}
+.announce-item:hover{background:var(--cream-mid)}
+.announce-tag{flex-shrink:0;padding:.15rem .5rem;border-radius:9999px;font-size:.5625rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;height:fit-content;margin-top:.125rem}
+.tag-update{background:oklch(48% 0.17 28/0.1);color:var(--coral-hex)}
+.tag-feature{background:oklch(65% 0.08 155/0.1);color:var(--sage-hex)}
+.tag-notice{background:oklch(72% 0.12 75/0.1);color:var(--gold-hex)}
+.announce-body{min-width:0;flex:1}
+.announce-item-title{font-weight:600;font-size:.8125rem;color:var(--text);margin-bottom:.125rem}
+.announce-item-desc{font-size:.75rem;color:var(--text-dim);line-height:1.6}
+.announce-date{flex-shrink:0;font-size:.625rem;color:var(--text-ghost);margin-top:.125rem}
+
 /* ── Hidden ── */
 .hidden{display:none!important}
 
@@ -187,14 +246,14 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 <!-- ─── Top Bar ─── -->
 <nav class="topbar" id="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="topbar-logo">CSU Date</a>
+    <a href="index.html" class="topbar-logo">YueluDate</a>
     <span class="topbar-spacer"></span>
     <div class="topbar-nav">
       <a href="dashboard.html" class="active">首页</a>
       <a href="inbox.html">信箱</a>
       <a href="profile.html">我的</a>
       <span class="topbar-sep"></span>
-      <a href="profile.html" class="topbar-avatar" id="topAvatar"><span>林</span></a>
+      <a href="profile.html" class="topbar-avatar" id="topAvatar"><span></span></a>
     </div>
   </div>
 </nav>
@@ -205,15 +264,94 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <!-- Greeting -->
   <div class="greeting" id="greeting">
     <div class="greeting-eyebrow" id="greetingTime">下午好</div>
-    <h1 class="greeting-title"><em id="greetingName">晓霜</em>，欢迎回来</h1>
-    <p class="greeting-sub">这是你在 CSU Date 的第 <strong>7</strong> 周</p>
+    <h1 class="greeting-title"><em id="greetingName"></em>，欢迎回来</h1>
+    <p class="greeting-sub" id="greetingSub"></p>
+  </div>
+
+  <!-- Countdown Hero -->
+  <div class="cd-hero hidden" id="cdHero">
+    <div class="cd-hero-label">下次匹配揭晓</div>
+    <div class="countdown-row">
+      <div class="cd-unit"><span class="cd-num" id="cd-days2">0</span><small>天</small></div>
+      <div class="cd-unit"><span class="cd-num" id="cd-hours2">00</span><small>时</small></div>
+      <div class="cd-unit"><span class="cd-num" id="cd-mins2">00</span><small>分</small></div>
+      <div class="cd-unit"><span class="cd-num" id="cd-secs2">00</span><small>秒</small></div>
+    </div>
+    <p class="cd-hint">每周四晚 21:00 准时揭晓</p>
+  </div>
+
+  <!-- Announcement Board (collapsible) -->
+  <div class="announce-card hidden" id="announceCard">
+    <div class="announce-head" onclick="toggleAnnounce()">
+      <div class="announce-icon"><span class="material-symbols-outlined">campaign</span></div>
+      <h2 class="announce-title">近期更新</h2>
+      <span class="announce-count" id="announceCount"></span>
+      <span class="announce-toggle" id="announceToggle"><span class="material-symbols-outlined" style="font-size:1.25rem">expand_more</span></span>
+    </div>
+    <div class="announce-list" id="announceList"></div>
+  </div>
+
+  <!-- Edu Email Verification Banner (non-edu users only) -->
+  <div class="edu-banner hidden" id="eduBanner">
+    <div class="edu-banner-head">
+      <div class="edu-banner-icon"><span class="material-symbols-outlined">school</span></div>
+      <h2 class="edu-banner-title" id="eduBannerTitle">验证教育邮箱</h2>
+    </div>
+    <p class="edu-banner-desc" id="eduBannerDesc">
+      你使用的是非教育邮箱注册。为保证社区质量，请在 <strong id="eduDeadlineText">3 天内</strong> 绑定你的教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn），否则将无法参与匹配。
+    </p>
+    <div class="edu-deadline hidden" id="eduDeadlineRow">
+      <span class="material-symbols-outlined">schedule</span>
+      <span id="eduDeadlineCountdown">剩余 --</span>
+    </div>
+    <div id="eduFormArea">
+      <div class="edu-form">
+        <div class="edu-form-row">
+          <input type="text" class="edu-input" id="eduEmailInput" placeholder="学号@csu.edu.cn 或 @hnu.edu.cn 或 @hunnu.edu.cn"/>
+          <button class="edu-btn edu-btn-send" id="eduSendBtn" onclick="eduSendCode()">发送验证码</button>
+        </div>
+        <div class="edu-code-row hidden" id="eduCodeRow">
+          <input type="text" class="edu-input" id="eduCodeInput" placeholder="输入 6 位验证码" maxlength="6"/>
+          <button class="edu-btn edu-btn-verify" onclick="eduVerifyCode()">验证</button>
+        </div>
+        <div class="edu-msg hidden" id="eduMsg"></div>
+      </div>
+    </div>
+    <div class="edu-success hidden" id="eduSuccess">
+      <span class="material-symbols-outlined">verified</span>
+      <span class="edu-success-text">教育邮箱已验证</span>
+    </div>
+  </div>
+
+  <!-- Edu Email Confirmation Modal -->
+  <div class="modal-overlay" id="eduConfirmModal" onclick="if(event.target===this)closeEduConfirm()">
+    <div class="modal-body" style="text-align:center">
+      <div style="width:3.5rem;height:3.5rem;border-radius:50%;background:oklch(48% 0.17 28/0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem">
+        <span class="material-symbols-outlined" style="font-size:1.5rem;color:var(--coral-hex)">mark_email_read</span>
+      </div>
+      <h3 class="modal-title" style="text-align:center">确认教育邮箱状态</h3>
+      <p class="modal-desc" style="text-align:left">
+        验证码将发送至你的教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）。请确认你已经 <strong>注册并激活</strong> 过该邮箱，否则将无法收到验证码。
+      </p>
+      <p style="margin-bottom:1.5rem">
+        <a href="about.html#edu-email-guide" target="_blank" rel="noopener"
+           style="display:inline-flex;align-items:center;gap:.375rem;color:var(--coral-hex);font-size:.875rem;font-weight:600;text-decoration:none;padding:.5rem 1rem;border-radius:9999px;background:oklch(48% 0.17 28/0.06);transition:background .2s">
+          <span class="material-symbols-outlined" style="font-size:1.1rem">menu_book</span>
+          各校教育邮箱注册指引
+        </a>
+      </p>
+      <div class="modal-actions" style="justify-content:center">
+        <button class="edu-btn" style="background:var(--cream-deep);color:var(--text-dim)" onclick="closeEduConfirm()">取消</button>
+        <button class="edu-btn edu-btn-verify" onclick="closeEduConfirm();_doEduSendCode()">已注册，发送验证码</button>
+      </div>
+    </div>
   </div>
 
   <!-- Onboarding (shown when quiz not completed) -->
   <div class="onboard-card hidden" id="onboardCard">
     <div class="onboard-icon"><span class="material-symbols-outlined" style="font-size:inherit;color:inherit">edit_note</span></div>
     <h2 class="onboard-title">先完成问卷，开启你的匹配之旅</h2>
-    <p class="onboard-desc">花 5 分钟填写深度问卷，我们会根据你的价值观和生活态度，每周四为你匹配一个最合拍的中南人。</p>
+    <p class="onboard-desc">花 5 分钟填写深度问卷，我们会根据你的价值观和生活态度，每周四为你匹配一个最合拍的人。</p>
     <button class="btn-onboard" onclick="location.href='index.html?startQuiz=true'">
       开始填写问卷
       <span class="material-symbols-outlined">arrow_forward</span>
@@ -223,15 +361,15 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <!-- Stats (hidden when quiz not completed) -->
   <div class="stats-row" id="statsRow">
     <div class="stat-card">
-      <div class="stat-number sn-ink" id="statMatches">12</div>
+      <div class="stat-number sn-ink" id="statMatches">--</div>
       <div class="stat-label">累计匹配</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number sn-coral" id="statBest">89%</div>
+      <div class="stat-number sn-coral" id="statBest">--</div>
       <div class="stat-label">最高契合</div>
     </div>
     <div class="stat-card">
-      <div class="stat-number sn-sage" id="statWeeks">7</div>
+      <div class="stat-number sn-sage" id="statWeeks">--</div>
       <div class="stat-label">活跃周数</div>
     </div>
   </div>
@@ -239,8 +377,8 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <!-- Content (hidden when quiz not completed) -->
   <div id="dashContent">
 
-  <!-- This Week's Match: Success -->
-  <div class="card" id="matchSuccess">
+  <!-- This Week's Match: Success (动态填充) -->
+  <div class="card hidden" id="matchSuccess">
     <div class="card-head">
       <h2 class="card-title">本周匹配</h2>
       <span class="card-action" style="cursor:default;color:var(--sage-hex)">
@@ -248,27 +386,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
         已揭晓
       </span>
     </div>
-    <div class="match-hero">
-      <div class="match-hero-avatar">
-        <span>陈</span>
-        <div class="match-hero-score">86%</div>
-      </div>
-      <div class="match-hero-info">
-        <div class="match-hero-name">陈屿辰</div>
-        <div class="match-hero-meta">潇湘校区 · 大三 · 建筑学 · 8209190233@csu.edu.cn</div>
-        <div class="match-hero-bio">热爱设计，最近在研究长沙的老建筑。周末喜欢骑车去橘子洲。如果你也喜欢探索城市角落，我们一定有话聊。</div>
-        <div class="match-actions">
-          <a href="greet.html" class="btn-match btn-primary" style="text-decoration:none">
-            <span class="material-symbols-outlined" style="font-size:1.125rem">waving_hand</span>
-            打个招呼
-          </a>
-          <a href="report.html" class="btn-match btn-ghost" style="text-decoration:none">
-            <span class="material-symbols-outlined" style="font-size:1.125rem">visibility</span>
-            查看报告
-          </a>
-        </div>
-      </div>
-    </div>
+    <div class="match-hero" id="matchHeroContent"></div>
   </div>
 
   <!-- This Week's Match: No Match -->
@@ -293,78 +411,24 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     </div>
   </div>
 
-  <!-- Match History -->
-  <div class="card">
+  <!-- Match History (动态填充) -->
+  <div class="card" id="historyCard" style="display:none">
     <div class="card-head">
       <h2 class="card-title">匹配历史</h2>
-      <button class="card-action">
+      <a href="inbox.html" class="card-action" style="text-decoration:none">
         查看全部
         <span class="material-symbols-outlined">arrow_forward</span>
-      </button>
+      </a>
     </div>
-    <div class="history-list">
-      <div class="history-item">
-        <div class="history-avatar"><span>陈</span></div>
-        <div class="history-info">
-          <div class="history-name">陈屿辰</div>
-          <div class="history-meta">第 7 周 · 潇湘校区 · 建筑学</div>
-        </div>
-        <div class="history-score">86%</div>
-      </div>
-      <div class="history-item">
-        <div class="history-avatar"><span>苏</span></div>
-        <div class="history-info">
-          <div class="history-name">苏晚宁</div>
-          <div class="history-meta">第 6 周 · 岳麓山校区 · 中文系</div>
-        </div>
-        <div class="history-score">82%</div>
-      </div>
-      <div class="history-item">
-        <div class="history-avatar"><span>贺</span></div>
-        <div class="history-info">
-          <div class="history-name">贺子衿</div>
-          <div class="history-meta">第 5 周 · 岳麓山校区 · 临床医学</div>
-        </div>
-        <div class="history-score">89%</div>
-      </div>
-      <div class="history-item">
-        <div class="history-avatar"><span>张</span></div>
-        <div class="history-info">
-          <div class="history-name">张逸舟</div>
-          <div class="history-meta">第 4 周 · 潇湘校区 · 材料科学</div>
-        </div>
-        <div class="history-score">74%</div>
-      </div>
-    </div>
+    <div class="history-list" id="historyList"></div>
   </div>
 
-  <!-- Insights -->
-  <div class="card">
+  <!-- Insights (动态填充) -->
+  <div class="card" id="insightCard" style="display:none">
     <div class="card-head">
       <h2 class="card-title">匹配洞察</h2>
     </div>
-    <div class="insight-grid">
-      <div class="insight-item">
-        <div class="insight-label">平均契合度</div>
-        <div class="insight-value">81%</div>
-        <div class="insight-bar"><div class="insight-bar-fill ibf-coral" style="width:81%"></div></div>
-      </div>
-      <div class="insight-item">
-        <div class="insight-label">价值观重合率</div>
-        <div class="insight-value">73%</div>
-        <div class="insight-bar"><div class="insight-bar-fill ibf-sage" style="width:73%"></div></div>
-      </div>
-      <div class="insight-item">
-        <div class="insight-label">最常匹配校区</div>
-        <div class="insight-value">潇湘校区</div>
-        <div class="insight-bar"><div class="insight-bar-fill ibf-gold" style="width:58%"></div></div>
-      </div>
-      <div class="insight-item">
-        <div class="insight-label">互动回复率</div>
-        <div class="insight-value">67%</div>
-        <div class="insight-bar"><div class="insight-bar-fill ibf-ink" style="width:67%"></div></div>
-      </div>
-    </div>
+    <div class="insight-grid" id="insightGrid"></div>
   </div>
 
   <!-- Countdown + Shoot Your Shot -->
@@ -395,7 +459,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <div class="modal-body">
     <h3 class="modal-title">Shoot Your Shot</h3>
     <p class="modal-desc">输入 TA 的学校邮箱，悄悄表明心意。如果 TA 也 shoot 了你，立即触发双向匹配。否则 TA 永远不会知道。</p>
-    <input type="email" class="modal-input" id="shootEmail" placeholder="ta@csu.edu.cn"/>
+    <input type="email" class="modal-input" id="shootEmail" placeholder="ta@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn"/>
     <textarea class="modal-textarea" id="shootMsg" placeholder="留一句话（匹配成功后才会送达）" rows="3"></textarea>
     <div class="modal-actions">
       <button class="btn-match btn-primary" onclick="submitShoot()">发射</button>
@@ -424,40 +488,290 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 
 <script src="api.js"></script>
 <script>
+/* ── Edu Email Verification ── */
+var _eduCooldown=0;
+var _eduTimer=null;
+
+function showEduBanner(u){
+  // 教育邮箱用户或已验证：不显示
+  if(u.eduEmailVerified){
+    document.getElementById('eduBanner').classList.add('hidden');
+    return;
+  }
+  var banner=document.getElementById('eduBanner');
+  banner.classList.remove('hidden');
+
+  if(u.eduBlocked){
+    // 已超期
+    banner.classList.add('blocked');
+    document.getElementById('eduBannerTitle').textContent='教育邮箱未验证 — 匹配已暂停';
+    document.getElementById('eduBannerDesc').innerHTML='你使用非教育邮箱注册且已超过 <strong>3 天</strong>未验证，匹配功能已被暂停。请立即绑定教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）以恢复。';
+    document.getElementById('eduDeadlineRow').classList.add('hidden');
+  }else if(u.eduVerifyDeadline){
+    // 显示倒计时
+    document.getElementById('eduDeadlineRow').classList.remove('hidden');
+    _startEduCountdown(u.eduVerifyDeadline);
+  }
+}
+
+function _startEduCountdown(deadlineMs){
+  function tick(){
+    var now=Date.now();
+    var diff=deadlineMs-now;
+    if(diff<=0){
+      document.getElementById('eduDeadlineCountdown').textContent='已到期';
+      // 刷新用户状态
+      location.reload();
+      return;
+    }
+    var h=Math.floor(diff/36e5);
+    var m=Math.floor(diff%36e5/6e4);
+    var s=Math.floor(diff%6e4/1e3);
+    document.getElementById('eduDeadlineCountdown').textContent='剩余 '+h+'时'+String(m).padStart(2,'0')+'分'+String(s).padStart(2,'0')+'秒';
+  }
+  tick();
+  if(_eduTimer) clearInterval(_eduTimer);
+  _eduTimer=setInterval(tick,1000);
+}
+
+function eduSendCode(){
+  var raw=document.getElementById('eduEmailInput').value.trim();
+  if(!raw){_eduShowMsg('请输入学号或邮箱','err');return;}
+  var email=raw;
+  if(email.indexOf('@')===-1) email=email+'@csu.edu.cn';
+  if(!email.endsWith('@csu.edu.cn')&&!email.endsWith('@hnu.edu.cn')&&!email.endsWith('@hunnu.edu.cn')){_eduShowMsg('必须使用 @csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn 教育邮箱','err');return;}
+  // 弹出确认弹窗
+  document.getElementById('eduConfirmModal').classList.add('open');
+}
+function closeEduConfirm(){document.getElementById('eduConfirmModal').classList.remove('open');}
+
+async function _doEduSendCode(){
+  var raw=document.getElementById('eduEmailInput').value.trim();
+  var email=raw;
+  if(email.indexOf('@')===-1) email=email+'@csu.edu.cn';
+
+  var btn=document.getElementById('eduSendBtn');
+  btn.disabled=true;
+  btn.textContent='发送中...';
+  try{
+    var res=await csudateFetch('/api/user/edu-email/send-code',{
+      method:'POST',
+      body:JSON.stringify({edu_email:email})
+    });
+    var data=await res.json().catch(function(){return {};});
+    if(!res.ok){
+      _eduShowMsg(csudateApiErrorMessage(data),'err');
+      btn.disabled=false;btn.textContent='发送验证码';
+      return;
+    }
+    _eduShowMsg('验证码已发送至 '+email,'ok');
+    document.getElementById('eduCodeRow').classList.remove('hidden');
+    // 60秒冷却
+    _eduCooldown=60;
+    btn.disabled=true;
+    var cd=setInterval(function(){
+      _eduCooldown--;
+      if(_eduCooldown<=0){clearInterval(cd);btn.disabled=false;btn.textContent='重新发送';return;}
+      btn.textContent=_eduCooldown+'s';
+    },1000);
+  }catch(e){
+    _eduShowMsg('网络错误','err');
+    btn.disabled=false;btn.textContent='发送验证码';
+  }
+}
+
+async function eduVerifyCode(){
+  var raw=document.getElementById('eduEmailInput').value.trim();
+  var email=raw;
+  if(email.indexOf('@')===-1) email=email+'@csu.edu.cn';
+  var code=document.getElementById('eduCodeInput').value.trim();
+  if(!code||code.length!==6){_eduShowMsg('请输入 6 位验证码','err');return;}
+
+  try{
+    var res=await csudateFetch('/api/user/edu-email/verify',{
+      method:'POST',
+      body:JSON.stringify({edu_email:email,code:code})
+    });
+    var data=await res.json().catch(function(){return {};});
+    if(!res.ok){
+      _eduShowMsg(csudateApiErrorMessage(data),'err');
+      return;
+    }
+    // 验证成功
+    if(data.user) localStorage.setItem('csudate_user',JSON.stringify(data.user));
+    document.getElementById('eduFormArea').classList.add('hidden');
+    document.getElementById('eduDeadlineRow').classList.add('hidden');
+    document.getElementById('eduSuccess').classList.remove('hidden');
+    document.getElementById('eduBannerTitle').textContent='教育邮箱已验证';
+    document.getElementById('eduBannerDesc').innerHTML='你的教育邮箱 <strong>'+email+'</strong> 已验证成功，匹配功能正常使用。';
+    var banner=document.getElementById('eduBanner');
+    banner.classList.remove('blocked');
+    if(_eduTimer){clearInterval(_eduTimer);_eduTimer=null;}
+    _eduShowMsg('','ok');
+  }catch(e){
+    _eduShowMsg('网络错误','err');
+  }
+}
+
+function _eduShowMsg(text,type){
+  var el=document.getElementById('eduMsg');
+  if(!text){el.classList.add('hidden');return;}
+  el.classList.remove('hidden','ok','err');
+  el.classList.add(type);
+  el.textContent=text;
+}
+
+function esc(t){if(t==null||t==='')return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
+
+/* ── Announcements (collapsible) ── */
+function toggleAnnounce(){
+  var list=document.getElementById('announceList');
+  var toggle=document.getElementById('announceToggle');
+  list.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+async function loadAnnouncements(){
+  try{
+    const res=await csudateFetch('/api/announcements',{method:'GET'});
+    const items=await res.json().catch(function(){return [];});
+    if(!res.ok||!items.length)return;
+    var tagMap={update:['修复','tag-update'],feature:['新功能','tag-feature'],notice:['公告','tag-notice']};
+    var html='';
+    items.forEach(function(item){
+      var tag=tagMap[item.type]||tagMap.notice;
+      html+='<div class="announce-item">'+
+        '<span class="announce-tag '+tag[1]+'">'+tag[0]+'</span>'+
+        '<div class="announce-body">'+
+        '<div class="announce-item-title">'+esc(item.title)+'</div>'+
+        '<div class="announce-item-desc">'+esc(item.content)+'</div>'+
+        '</div>'+
+        '<span class="announce-date">'+esc(item.date)+'</span>'+
+        '</div>';
+    });
+    document.getElementById('announceList').innerHTML=html;
+    document.getElementById('announceCount').textContent=items.length+'条更新';
+    document.getElementById('announceCard').classList.remove('hidden');
+  }catch(e){console.error('公告加载失败',e);}
+}
+
+/* ── Announcements ── */
+async function loadAnnouncements(){
+  try{
+    const res=await csudateFetch('/api/announcements',{method:'GET'});
+    const items=await res.json().catch(function(){return [];});
+    if(!res.ok||!items.length)return;
+    var tagMap={update:['修复','tag-update'],feature:['新功能','tag-feature'],notice:['公告','tag-notice']};
+    var html='';
+    items.slice(0,5).forEach(function(item){
+      var tag=tagMap[item.type]||tagMap.notice;
+      html+='<div class="announce-item">'+
+        '<span class="announce-tag '+tag[1]+'">'+tag[0]+'</span>'+
+        '<div class="announce-body">'+
+        '<div class="announce-item-title">'+esc(item.title)+'</div>'+
+        '<div class="announce-item-desc">'+esc(item.content)+'</div>'+
+        '</div>'+
+        '<span class="announce-date">'+esc(item.date)+'</span>'+
+        '</div>';
+    });
+    document.getElementById('announceList').innerHTML=html;
+    document.getElementById('announceCard').classList.remove('hidden');
+  }catch(e){console.error('公告加载失败',e);}
+}
+
 function applyDashboardUser(u){
-  const firstName=(u.name&&u.name.length>1)?u.name.slice(1):(u.name||'');
-  document.getElementById('greetingName').textContent=firstName;
+  document.getElementById('greetingName').textContent=u.name||'';
   document.getElementById('topAvatar').querySelector('span').textContent=(u.name&&u.name.charAt(0))||'?';
 
   if(!u.quizCompleted){
     document.getElementById('onboardCard').classList.remove('hidden');
     document.getElementById('statsRow').classList.add('hidden');
     document.getElementById('dashContent').classList.add('hidden');
-    document.querySelector('.greeting-sub').innerHTML='完成问卷后即可开始每周匹配';
+    document.getElementById('cdHero').classList.add('hidden');
+    document.getElementById('greetingSub').innerHTML='完成问卷后即可开始每周匹配';
     return;
   }
 
   document.getElementById('onboardCard').classList.add('hidden');
   document.getElementById('statsRow').classList.remove('hidden');
   document.getElementById('dashContent').classList.remove('hidden');
+  document.getElementById('cdHero').classList.remove('hidden');
 
   if(u.stats){
     document.getElementById('statMatches').textContent=u.stats.matches;
     document.getElementById('statBest').textContent=u.stats.bestScore?u.stats.bestScore+'%':'--';
     document.getElementById('statWeeks').textContent=u.stats.weeks;
   }
-  document.querySelector('.greeting-sub').innerHTML='这是你在 CSU Date 的第 <strong>'+(u.stats?u.stats.weeks:1)+'</strong> 周';
-
-  const matched=u.weeklyMatch!==false;
-  if(!matched){
-    document.getElementById('matchSuccess').classList.add('hidden');
-    document.getElementById('matchEmpty').classList.remove('hidden');
-  }else{
-    document.getElementById('matchSuccess').classList.remove('hidden');
-    document.getElementById('matchEmpty').classList.add('hidden');
-  }
+  document.getElementById('greetingSub').innerHTML='这是你在 YueluDate 的第 <strong>'+(u.stats?u.stats.weeks:1)+'</strong> 周';
 
   startCountdown();
+}
+
+function renderWeeklyMatch(thread){
+  var el=document.getElementById('matchHeroContent');
+  var scoreText=thread.score!=null?thread.score+'%':'';
+  el.innerHTML=
+    '<div class="match-hero-avatar"><span>'+esc(thread.peerInitial||'?')+'</span>'+(scoreText?'<div class="match-hero-score">'+esc(scoreText)+'</div>':'')+'</div>'+
+    '<div class="match-hero-info">'+
+    '<div class="match-hero-name">'+esc(thread.peerName)+'</div>'+
+    '<div class="match-hero-meta">'+esc((thread.peerCampus||'')+(thread.peerGrade?' · '+thread.peerGrade:'')+(thread.peerMajor?' · '+thread.peerMajor:'')+(thread.peerEmail?' · '+thread.peerEmail:''))+'</div>'+
+    '<div class="match-actions">'+
+    '<a href="report.html?id='+thread.id+'" class="btn-match btn-primary" style="text-decoration:none"><span class="material-symbols-outlined" style="font-size:1.125rem">visibility</span> 查看报告</a>'+
+    (thread.yourMessage?'<a href="inbox.html" class="btn-match btn-ghost" style="text-decoration:none"><span class="material-symbols-outlined" style="font-size:1.125rem">mail</span> 信箱</a>':'<a href="greet.html?id='+thread.id+'" class="btn-match btn-ghost" style="text-decoration:none"><span class="material-symbols-outlined" style="font-size:1.125rem">edit</span> 留言</a>')+
+    '</div></div>';
+  document.getElementById('matchSuccess').classList.remove('hidden');
+  document.getElementById('matchEmpty').classList.add('hidden');
+}
+
+function renderInsights(mutuals){
+  if(!mutuals.length){document.getElementById('insightCard').style.display='none';return;}
+  document.getElementById('insightCard').style.display='';
+  // 平均契合度
+  var scores=mutuals.filter(function(t){return t.score!=null;}).map(function(t){return t.score;});
+  var avg=scores.length?Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length):0;
+  // 最高契合度
+  var best=scores.length?Math.max.apply(null,scores):0;
+  // 最常匹配校区
+  var campusCount={};
+  mutuals.forEach(function(t){if(t.peerCampus){campusCount[t.peerCampus]=(campusCount[t.peerCampus]||0)+1;}});
+  var topCampus='—';var topCampusN=0;
+  for(var c in campusCount){if(campusCount[c]>topCampusN){topCampusN=campusCount[c];topCampus=c;}}
+  var campusPct=mutuals.length?Math.round(topCampusN/mutuals.length*100):0;
+  // 累计匹配周数
+  var weeks=new Set();
+  mutuals.forEach(function(t){if(t.weekNumber&&t.weekNumber>0)weeks.add(t.weekNumber);});
+
+  var items=[
+    {label:'平均契合度',value:avg+'%',pct:avg,cls:'ibf-coral'},
+    {label:'最高契合度',value:best+'%',pct:best,cls:'ibf-sage'},
+    {label:'最常匹配校区',value:topCampus,pct:campusPct,cls:'ibf-gold'},
+    {label:'累计匹配',value:mutuals.length+'人 / '+weeks.size+'周',pct:Math.min(100,mutuals.length*10),cls:'ibf-ink'},
+  ];
+  var html='';
+  items.forEach(function(it){
+    html+='<div class="insight-item"><div class="insight-label">'+esc(it.label)+'</div><div class="insight-value">'+esc(it.value)+'</div><div class="insight-bar"><div class="insight-bar-fill '+it.cls+'" style="width:'+it.pct+'%"></div></div></div>';
+  });
+  document.getElementById('insightGrid').innerHTML=html;
+}
+
+function renderMatchHistory(threads){
+  var mutuals=threads.filter(function(t){return t.type==='mutual';});
+  if(!mutuals.length){
+    document.getElementById('historyCard').style.display='none';
+    return;
+  }
+  document.getElementById('historyCard').style.display='';
+  var html='';
+  mutuals.forEach(function(t){
+    var wk=t.weekNumber===0?'Shoot':('第 '+t.weekNumber+' 周');
+    var scoreText=t.score!=null?t.score+'%':'—';
+    html+='<div class="history-item">'+
+      '<div class="history-avatar"><span>'+esc(t.peerInitial||'?')+'</span></div>'+
+      '<div class="history-info">'+
+      '<div class="history-name">'+esc(t.peerName)+'</div>'+
+      '<div class="history-meta">'+esc(wk+(t.peerCampus?' · '+t.peerCampus:'')+(t.peerMajor?' · '+t.peerMajor:''))+'</div>'+
+      '</div><div class="history-score">'+esc(scoreText)+'</div></div>';
+  });
+  document.getElementById('historyList').innerHTML=html;
 }
 
 (async function(){
@@ -474,7 +788,38 @@ function applyDashboardUser(u){
 
   try{
     applyDashboardUser(u);
+    showEduBanner(u);
+    loadAnnouncements();
   }catch(e){window.location.href='login.html';}
+
+  // 从 /api/inbox 加载真实匹配数据
+  if(window.csudateGetToken && csudateGetToken()){
+    try{
+      const res=await csudateFetch('/api/inbox',{method:'GET'});
+      const data=await res.json().catch(function(){return {};});
+      if(res.ok && data.threads){
+        const mutuals=data.threads.filter(function(t){return t.type==='mutual';});
+        // 找本周匹配（weekNumber 最大且 > 0 的算法匹配）
+        const weekly=mutuals.filter(function(t){return t.weekNumber>0;}).sort(function(a,b){return b.weekNumber-a.weekNumber;});
+        if(weekly.length>0){
+          renderWeeklyMatch(weekly[0]);
+        }else if(!u.weeklyMatch){
+          document.getElementById('matchSuccess').classList.add('hidden');
+          document.getElementById('matchEmpty').classList.remove('hidden');
+        }
+        renderMatchHistory(mutuals);
+        renderInsights(mutuals);
+      }
+    }catch(e){
+      console.error('加载匹配数据失败',e);
+    }
+  }else{
+    // 离线模式：无 token 时显示无匹配
+    if(!u.weeklyMatch){
+      document.getElementById('matchSuccess').classList.add('hidden');
+      document.getElementById('matchEmpty').classList.remove('hidden');
+    }
+  }
 })();
 
 // Dynamic greeting
@@ -500,10 +845,16 @@ function startCountdown(){
     const ms=target-now;
     const d=Math.floor(ms/864e5),hr=Math.floor(ms%864e5/36e5),mn=Math.floor(ms%36e5/6e4),sc=Math.floor(ms%6e4/1e3);
     const el=id=>document.getElementById(id);
+    // 底部倒计时
     if(el('cd-days'))el('cd-days').textContent=d;
     if(el('cd-hours'))el('cd-hours').textContent=String(hr).padStart(2,'0');
     if(el('cd-mins'))el('cd-mins').textContent=String(mn).padStart(2,'0');
     if(el('cd-secs'))el('cd-secs').textContent=String(sc).padStart(2,'0');
+    // 顶部醒目倒计时
+    if(el('cd-days2'))el('cd-days2').textContent=d;
+    if(el('cd-hours2'))el('cd-hours2').textContent=String(hr).padStart(2,'0');
+    if(el('cd-mins2'))el('cd-mins2').textContent=String(mn).padStart(2,'0');
+    if(el('cd-secs2'))el('cd-secs2').textContent=String(sc).padStart(2,'0');
   }
   tick();setInterval(tick,1000);
 }
@@ -514,7 +865,7 @@ function closeShootModal(){document.getElementById('shootModal').classList.remov
 async function submitShoot(){
   const email=document.getElementById('shootEmail').value.trim();
   const msg=document.getElementById('shootMsg').value;
-  if(!email||!email.includes('@csu.edu.cn')){alert('请输入有效的 @csu.edu.cn 邮箱');return;}
+  if(!email||(!email.includes('@csu.edu.cn')&&!email.includes('@hnu.edu.cn')&&!email.includes('@hunnu.edu.cn'))){alert('请输入有效的教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）');return;}
   if(!window.csudateGetToken || !csudateGetToken()){
     alert('请先使用真实账号登录后再使用 Shoot');
     return;
@@ -549,19 +900,20 @@ async function submitShoot(){
   },{passive:true});
 })();
 
-// Animate insight bars on scroll
-const bars=document.querySelectorAll('.insight-bar-fill');
-const io=new IntersectionObserver(entries=>{
+// Animate insight bars on scroll (uses MutationObserver to catch dynamic bars)
+const insightIO=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
     if(e.isIntersecting){
       const w=e.target.style.width;
       e.target.style.width='0';
       requestAnimationFrame(()=>requestAnimationFrame(()=>{e.target.style.width=w;}));
-      io.unobserve(e.target);
+      insightIO.unobserve(e.target);
     }
   });
 },{threshold:0.3});
-bars.forEach(b=>io.observe(b));
+new MutationObserver(function(){
+  document.querySelectorAll('.insight-bar-fill').forEach(b=>insightIO.observe(b));
+}).observe(document.getElementById('insightGrid')||document.body,{childList:true,subtree:true});
 </script>
 
 </body>

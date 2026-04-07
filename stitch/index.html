@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>CSU Date · 中南大学校园匹配平台</title>
-<meta name="description" content="中南大学专属校园匹配平台。不刷屏，每周为你匹配一个最合拍的中南人。仅限 @csu.edu.cn 邮箱注册。">
-<meta name="keywords" content="中南大学,CSU,校园匹配,约会,Date,大学社交">
-<meta property="og:title" content="CSU Date · 不刷屏，每周遇见一个对的人">
-<meta property="og:description" content="中南大学专属校园匹配平台，每周四给你发送最佳匹配。">
+<title>YueluDate · 岳麓山高校匹配平台</title>
+<meta name="description" content="岳麓山下三校匹配平台。不刷屏，每周为你匹配一个最合拍的人。支持中南大学、湖南大学、湖南师范大学教育邮箱注册。">
+<meta name="keywords" content="岳麓山,中南大学,湖南大学,湖南师范大学,校园匹配,YueluDate">
+<meta property="og:title" content="YueluDate · 不刷屏，每周遇见一个对的人">
+<meta property="og:description" content="岳麓山下三校匹配平台，每周四给你发送最佳匹配。">
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -59,19 +59,28 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 
 /* ══════════ HERO ══════════ */
 .hero{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:7rem 1.5rem 4rem;position:relative;overflow:hidden;background:radial-gradient(ellipse at 70% 30%,oklch(95% 0.02 30) 0%,transparent 50%),radial-gradient(ellipse at 20% 80%,oklch(95% 0.015 250) 0%,transparent 45%),var(--cream)}
-.hero-content{max-width:72rem;margin:0 auto;width:100%;text-align:center}
+/* ── Hero background slides ── */
+.hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.hero-bg-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1s cubic-bezier(.16,1,.3,1)}
+.hero-bg-slide.active{opacity:1}
+.hero-bg-slide::after{display:none}
+.scene-autumn{background-image:url('Picture/1.png')}
+.scene-moon{background-image:url('Picture/2.jpg')}
+.scene-mountain{background-image:url('Picture/3.png')}
+.scene-scholar{background-image:url('Picture/4.jpg')}
+.hero-content{max-width:72rem;margin:0 auto;width:100%;text-align:center;position:relative;z-index:2}
 .hero-eyebrow{display:flex;align-items:center;justify-content:center;gap:1rem;margin-bottom:clamp(1.5rem,4vw,2.5rem);opacity:0;animation:heroReveal .7s cubic-bezier(.16,1,.3,1) .05s forwards}
-.hero-eyebrow .section-label{margin:0}
+.hero-eyebrow .section-label{margin:0;text-shadow:0 1px 6px rgba(255,255,255,0.95),0 0 16px rgba(255,255,255,0.7),0 0 32px rgba(255,255,255,0.4)}
 .hero-eyebrow .accent-line{transform:scaleX(0);transform-origin:left center;animation:lineGrow .8s cubic-bezier(.16,1,.3,1) .3s forwards}
 @keyframes lineGrow{to{transform:scaleX(1)}}
 @keyframes heroReveal{to{opacity:1;transform:none}}
-.hero-desc{max-width:34ch;margin:0 auto;color:var(--text-dim);font-size:clamp(.9375rem,1.2vw,1.0625rem);line-height:1.85;font-weight:350;margin-bottom:2rem;opacity:0;animation:heroReveal .7s cubic-bezier(.16,1,.3,1) .5s forwards}
+.hero-desc{max-width:34ch;margin:0 auto;color:var(--text-dim);text-shadow:0 1px 6px rgba(255,255,255,0.95),0 0 16px rgba(255,255,255,0.7),0 0 32px rgba(255,255,255,0.4);font-size:clamp(.9375rem,1.2vw,1.0625rem);line-height:1.85;font-weight:350;margin-bottom:2rem;opacity:0;animation:heroReveal .7s cubic-bezier(.16,1,.3,1) .5s forwards}
 .hero-actions{display:flex;align-items:center;justify-content:center;gap:1.5rem;flex-wrap:wrap;opacity:0;animation:heroReveal .7s cubic-bezier(.16,1,.3,1) .62s forwards}
 .live-indicator{display:inline-flex;align-items:center;gap:.5rem;color:var(--text-dim);font-size:.8125rem;font-weight:500;background:var(--cream-mid);padding:.5rem 1rem .5rem .75rem;border-radius:9999px}
 .live-indicator strong{font-weight:700;color:var(--ink-hex);font-size:.9375rem;font-variant-numeric:tabular-nums}
 .pulse-dot{width:7px;height:7px;border-radius:50%;background:#3da35d;box-shadow:0 0 0 0 rgba(61,163,93,.35);animation:pulseRing 2s cubic-bezier(.4,0,.2,1) infinite}
 @keyframes pulseRing{0%{box-shadow:0 0 0 0 rgba(61,163,93,.35)}70%{box-shadow:0 0 0 6px rgba(61,163,93,0)}100%{box-shadow:0 0 0 0 rgba(61,163,93,0)}}
-.hero-watermark{position:absolute;font-family:'Noto Serif SC',serif;font-weight:200;font-size:clamp(16rem,38vw,32rem);line-height:.85;color:oklch(18% 0.09 275/0.03);pointer-events:none;user-select:none;right:-6%;top:8%;z-index:0;animation:watermarkDrift 20s ease-in-out infinite alternate}
+.hero-watermark{position:absolute;font-family:'Noto Serif SC',serif;font-weight:200;font-size:clamp(16rem,38vw,32rem);line-height:.85;color:oklch(18% 0.09 275/0.03);pointer-events:none;user-select:none;right:-6%;top:8%;z-index:1;animation:watermarkDrift 20s ease-in-out infinite alternate}
 @keyframes watermarkDrift{0%{transform:translate(0,0) rotate(0deg)}100%{transform:translate(-12px,8px) rotate(-1.5deg)}}
 
 /* Hero slogans */
@@ -80,11 +89,11 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 .slogan-item{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:translateY(12px);transition:opacity .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1)}
 .slogan-item.active{opacity:1;transform:none}
 .slogan-item.exit{opacity:0;transform:translateY(-12px)}
-.slogan-main-text{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(2.2rem,8vw,5.5rem);color:var(--ink-hex);line-height:1.15;letter-spacing:-.02em;text-wrap:balance}
-.slogan-sub-text{font-family:'Instrument Serif',serif;font-style:italic;font-size:clamp(.8125rem,1.5vw,1.0625rem);color:var(--text-ghost);margin-top:clamp(.375rem,1vw,.75rem)}
+.slogan-main-text{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(2.2rem,8vw,5.5rem);color:var(--ink-hex);line-height:1.15;letter-spacing:-.02em;text-wrap:balance;text-shadow:0 1px 8px rgba(255,255,255,0.9),0 0 20px rgba(255,255,255,0.7),0 0 40px rgba(255,255,255,0.4)}
+.slogan-sub-text{font-family:'Instrument Serif',serif;font-style:italic;font-size:clamp(.8125rem,1.5vw,1.0625rem);color:var(--text-dim);margin-top:clamp(.375rem,1vw,.75rem);text-shadow:0 1px 6px rgba(255,255,255,0.9),0 0 16px rgba(255,255,255,0.6),0 0 30px rgba(255,255,255,0.3)}
 .slogan-dots{display:flex;gap:.375rem;align-items:center;justify-content:center}
-.slogan-dot{width:6px;height:6px;border-radius:50%;background:oklch(18% 0.09 275/0.12);transition:all .4s;cursor:pointer}
-.slogan-dot.on{background:oklch(18% 0.09 275/0.35);width:18px;border-radius:3px}
+.slogan-dot{width:6px;height:6px;border-radius:50%;background:oklch(18% 0.09 275/0.12);transition:all .4s;cursor:pointer;box-shadow:0 0 3px rgba(255,255,255,0.3)}
+.slogan-dot.on{background:oklch(18% 0.09 275/0.35);width:18px;border-radius:3px;box-shadow:0 0 4px rgba(255,255,255,0.35)}
 @media(max-width:768px){.slogan-display{height:clamp(6rem,22vw,8rem)}}
 
 /* ══════════ MANIFESTO ══════════ */
@@ -136,6 +145,25 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 .testimonial-cite-line{width:3rem;height:2px;background:linear-gradient(90deg,oklch(48% 0.17 28/0.5),transparent);transform-origin:left;transform:scaleX(0)}
 .reveal.visible .testimonial-cite-line{transform:scaleX(1);transition:transform .8s cubic-bezier(.16,1,.3,1) .4s}
 .testimonial-cite-text{color:rgba(255,255,255,.35);font-size:.625rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase}
+
+/* ══════════ FAQ ══════════ */
+.faq-section{padding:clamp(5rem,12vw,10rem) 1.5rem;background:linear-gradient(180deg,var(--cream-sky),var(--cream))}
+.faq-inner{max-width:48rem;margin:0 auto}
+.faq-header{padding-left:4%;margin-bottom:clamp(3rem,6vw,4rem)}
+.faq-title{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(2.2rem,6vw,4rem);line-height:1.08;color:var(--ink-hex);letter-spacing:-.02em}
+.faq-category{margin-bottom:clamp(2rem,4vw,3rem)}
+.faq-category-label{font-size:.625rem;font-weight:700;letter-spacing:.35em;text-transform:uppercase;color:var(--coral-hex);margin-bottom:1.25rem;padding-left:.25rem}
+.faq-item{background:var(--white-warm);border-radius:1.5rem;margin-bottom:.75rem;overflow:hidden;transition:box-shadow .3s}
+.faq-item:hover{box-shadow:0 4px 16px oklch(18% 0.09 275/0.04)}
+.faq-question{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1.25rem 1.5rem;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'Noto Serif SC',serif;font-weight:700;font-size:clamp(.9375rem,1.5vw,1.0625rem);color:var(--ink-hex);line-height:1.5;transition:color .2s}
+.faq-question:hover{color:var(--coral-hex)}
+.faq-question .material-symbols-outlined{font-size:1.25rem;color:var(--text-ghost);transition:transform .35s cubic-bezier(.16,1,.3,1);flex-shrink:0}
+.faq-item.open .faq-question .material-symbols-outlined{transform:rotate(180deg);color:var(--coral-hex)}
+.faq-answer{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1),padding .3s}
+.faq-item.open .faq-answer{max-height:30rem;padding:0 1.5rem 1.5rem}
+.faq-answer p{color:var(--text-dim);font-size:.875rem;line-height:1.9}
+.faq-answer p+p{margin-top:.75rem}
+.faq-answer strong{color:var(--text);font-weight:600}
 
 /* ══════════ CTA ══════════ */
 .cta-section{padding:clamp(5rem,14vw,12rem) 1.5rem;position:relative;overflow:hidden}
@@ -294,28 +322,70 @@ input[type="range"]::-moz-range-track{background:transparent;height:4px;border:n
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.reveal{opacity:1!important;transform:none!important}.reveal .accent-line{transform:none!important}.step-num{opacity:1!important;transform:none!important}.hero-eyebrow{opacity:1!important}.hero-eyebrow .accent-line{transform:none!important}.hero-desc,.hero-actions,.hero-slogans{opacity:1!important}.hero-watermark,.quote-mark{animation:none!important}.why-image img{transform:none!important}.testimonial-cite-line{transform:none!important}}
 @media(max-width:375px){.opt-btn{padding:.6875rem .375rem;font-size:.8125rem}.val-tag{padding:.5rem .5rem;font-size:.75rem}}
 @media(max-width:639px){.btn-primary{width:100%;max-width:20rem}}
+
+/* ══════════ QUIZ-DONE MODAL ══════════ */
+.modal-overlay{position:fixed;inset:0;z-index:200;background:oklch(18% 0.09 275/0.4);display:none;align-items:center;justify-content:center;padding:1.5rem;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.modal-overlay.open{display:flex}
+.modal-body{background:var(--cream);border-radius:2rem;padding:2rem;max-width:28rem;width:100%;box-shadow:0 24px 64px oklch(18% 0.09 275/0.15);animation:pageIn .35s cubic-bezier(.16,1,.3,1)}
+.modal-icon{font-size:2.5rem;margin-bottom:.75rem}
+.modal-title{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1.25rem;color:var(--ink-hex);margin-bottom:.5rem}
+.modal-desc{color:var(--text-dim);font-size:.875rem;margin-bottom:1.5rem;line-height:1.7}
+.modal-actions{display:flex;gap:.75rem;margin-top:.25rem}
+.modal-actions .btn-primary,.modal-actions .btn-secondary{flex:1;text-align:center}
+
+/* ══════════ TOP ANNOUNCEMENT BANNER ══════════ */
+.announce-banner{position:fixed;top:0;left:0;right:0;z-index:999;background:var(--ink-hex);color:var(--white-warm);transform:translateY(-100%);transition:transform .4s cubic-bezier(.16,1,.3,1);overflow:hidden}
+.announce-banner.show{transform:translateY(0)}
+.announce-banner-inner{max-width:72rem;margin:0 auto;padding:.625rem 1.5rem;display:flex;align-items:center;gap:.75rem;font-size:.8125rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.announce-banner-inner::-webkit-scrollbar{display:none}
+.announce-banner .ann-icon{flex-shrink:0;font-size:1rem;color:var(--gold-hex)}
+.announce-banner .ann-items{display:flex;align-items:center;gap:1.5rem;flex:1;min-width:0;white-space:nowrap}
+.announce-banner .ann-entry{display:inline-flex;align-items:center;gap:.5rem;animation:annScroll 20s linear infinite}
+.announce-banner .ann-tag{padding:.125rem .5rem;border-radius:9999px;font-size:.5625rem;font-weight:700;letter-spacing:.05em;flex-shrink:0}
+.ann-tag-update{background:oklch(48% 0.17 28/0.3);color:#fca5a5}
+.ann-tag-feature{background:oklch(65% 0.08 155/0.3);color:#86efac}
+.ann-tag-notice{background:oklch(72% 0.12 75/0.3);color:#fde68a}
+.announce-banner .ann-text{opacity:.9}
+.announce-banner .ann-close{flex-shrink:0;background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:.25rem;display:flex;align-items:center;transition:color .2s}
+.announce-banner .ann-close:hover{color:#fff}
+.announce-banner .ann-close .material-symbols-outlined{font-size:1.125rem}
 </style>
 </head>
 
 <body>
 
+<!-- Top Announcement Banner -->
+<div class="announce-banner" id="announceBanner">
+  <div class="announce-banner-inner">
+    <span class="material-symbols-outlined ann-icon">campaign</span>
+    <div class="ann-items" id="annItems"></div>
+    <button class="ann-close" onclick="closeAnnBanner()"><span class="material-symbols-outlined">close</span></button>
+  </div>
+</div>
+
 <!-- ═══════════════════════ PAGE: LANDING ═══════════════════════ -->
 <div id="page-landing" class="page active">
   <header class="site-header" id="site-header">
     <div class="header-inner">
-      <a href="#" class="header-logo" onclick="navigateTo('page-landing');return false">CSU Date</a>
-      <span class="header-tag">中南大学</span>
+      <a href="#" class="header-logo" onclick="navigateTo('page-landing');return false">YueluDate</a>
+      <span class="header-tag">岳麓山大学城</span>
       <span style="flex:1"></span>
       <a id="header-auth" href="login.html" style="display:inline-flex;align-items:center;gap:.375rem;padding:.375rem .875rem;border-radius:9999px;font-size:.8125rem;font-weight:500;color:var(--text-dim);text-decoration:none;transition:background .2s;background:var(--cream-mid)">登录</a>
     </div>
   </header>
   <main>
   <section class="hero">
+    <div class="hero-bg" id="hero-bg">
+      <div class="hero-bg-slide scene-autumn active"></div>
+      <div class="hero-bg-slide scene-moon"></div>
+      <div class="hero-bg-slide scene-mountain"></div>
+      <div class="hero-bg-slide scene-scholar"></div>
+    </div>
     <span class="hero-watermark" aria-hidden="true">缘</span>
     <div class="hero-content">
       <div class="hero-eyebrow">
         <span class="accent-line"></span>
-        <span class="section-label">中南大学 · 岳麓山下的匹配实验</span>
+        <span class="section-label">岳麓山下的匹配实验</span>
       </div>
       <div class="hero-slogans">
         <h1><div id="slogan-main" class="slogan-display"></div></h1>
@@ -338,17 +408,103 @@ input[type="range"]::-moz-range-track{background:transparent;height:4px;border:n
     </div>
   </div></section>
   <section class="why-section"><div class="why-inner">
-    <div class="why-left"><div class="reveal"><span class="accent-line" style="margin-bottom:1.25rem"></span><p class="section-label" style="margin-bottom:1.25rem"><span class="font-display" style="font-size:.8125rem;letter-spacing:.15em;font-style:italic">Why CSU Date</span></p><h2 class="why-title">为什么中南人<br>选择<br><em>CSU Date</em>？</h2></div><div class="why-image reveal d1"><img alt="校园图书馆" loading="lazy" src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80"/></div></div>
+    <div class="why-left"><div class="reveal"><span class="accent-line" style="margin-bottom:1.25rem"></span><p class="section-label" style="margin-bottom:1.25rem"><span class="font-display" style="font-size:.8125rem;letter-spacing:.15em;font-style:italic">Why YueluDate</span></p><h2 class="why-title">为什么岳麓人<br>选择<br><em>YueluDate</em>？</h2></div><div class="why-image reveal d1"><img alt="校园图书馆" loading="lazy" src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80"/></div></div>
     <div class="why-features">
-      <div class="reveal"><span class="accent-line" style="margin-bottom:1rem"></span><h4 class="feature-heading">实名制与邮箱验证</h4><p class="feature-desc">仅限 @csu.edu.cn 邮箱验证的中南学生加入，确保社区环境纯净安全。</p></div>
+      <div class="reveal"><span class="accent-line" style="margin-bottom:1rem"></span><h4 class="feature-heading">实名制与邮箱验证</h4><p class="feature-desc">支持 @csu.edu.cn、@hnu.edu.cn、@hunnu.edu.cn 邮箱验证的岳麓山高校学生加入，确保社区环境纯净安全。</p></div>
       <div class="reveal"><span class="accent-line" style="margin-bottom:1rem"></span><h4 class="feature-heading">算法精准匹配</h4><p class="feature-desc">基于心理学模型深入分析灵魂共鸣度，而非单纯的地理距离。</p></div>
       <div class="reveal"><span class="accent-line" style="margin-bottom:1rem"></span><h4 class="feature-heading">深度社交体验</h4><p class="feature-desc">一次只认识一个人，并认真了解&thinsp;TA——这是我们对"浪漫"最朴素的理解。</p></div>
     </div>
   </div></section>
-  <section class="testimonial"><div class="testimonial-inner reveal"><span class="quote-mark" aria-hidden="true">"</span><blockquote class="testimonial-quote">在这里我没有遇到一百个人，但我遇到了一个在后湖散步时能和我讨论加缪的人。CSU Date 像一封来自岳麓山的情书。</blockquote><div class="testimonial-cite"><span class="testimonial-cite-line"></span><span class="testimonial-cite-text">中南大学 · 湘雅医学院研究生</span></div></div></section>
-  <section class="cta-section"><div class="cta-inner reveal"><span class="accent-line accent-line-center" style="margin-bottom:1.5rem"></span><h2 class="cta-title">准备好开启<br>周四惊喜了吗？</h2><p class="cta-desc">加入中南人的行列，寻找那个不仅能一起看电影，还能一起爬岳麓山讨论人生的人。</p><button onclick="startQuiz()" class="btn-primary btn-lg">立即开启匹配 →</button></div></section>
+  <section class="testimonial"><div class="testimonial-inner reveal"><span class="quote-mark" aria-hidden="true">"</span><blockquote class="testimonial-quote">在这里我没有遇到一百个人，但我遇到了一个在后湖散步时能和我讨论加缪的人。YueluDate 像一封来自岳麓山的情书。</blockquote><div class="testimonial-cite"><span class="testimonial-cite-line"></span><span class="testimonial-cite-text">岳麓山下 · 湘雅医学院研究生</span></div></div></section>
+  <section class="faq-section" id="faq">
+    <div class="faq-inner">
+      <div class="faq-header reveal"><span class="accent-line" style="margin-bottom:1.25rem"></span><p class="section-label" style="margin-bottom:1.25rem"><span class="font-display" style="font-size:.8125rem;letter-spacing:.15em;font-style:italic">FAQ</span></p><h2 class="faq-title">常见问题</h2></div>
+
+      <div class="faq-category reveal">
+        <div class="faq-category-label">Getting Started · 入门</div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">YueluDate 是什么？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p>YueluDate 是岳麓山下三校共享的校园匹配平台。我们不做刷屏式的左滑右滑，而是通过一份深度问卷了解你的价值观、生活方式和性格特质，<strong>每周四晚 21:00 为你匹配一个最合拍的人</strong>。一次只认识一个人，认真了解 TA。</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">谁可以注册？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p>支持拥有 <strong>@csu.edu.cn</strong>、<strong>@hnu.edu.cn</strong>、<strong>@hunnu.edu.cn</strong> 学校邮箱的中南大学、湖南大学、湖南师范大学在校学生（本科生、研究生、博士生）注册。我们通过邮箱验证确保每位用户的真实学生身份。</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">YueluDate 收费吗？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p><strong>完全免费。</strong>YueluDate 是由岳麓山高校学生自主开发的公益项目，不收取任何费用，也没有会员制或付费功能。</p></div>
+        </div>
+      </div>
+
+      <div class="faq-category reveal">
+        <div class="faq-category-label">Matching · 匹配机制</div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">匹配是怎么算出来的？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p>我们的算法基于你的问卷答案，从多个维度构建个人画像，综合<strong>价值观权重</strong>、<strong>生活方式兼容性</strong>和<strong>性格互补性</strong>进行评分。你标记为"重要"的选项会获得更高权重，最终为你匹配当周池中契合度最高的对象。</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">为什么每周只匹配一个人？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p>因为我们相信<strong>深度胜于广度</strong>。一次只认识一个人，花一周的时间去了解 TA，远比同时浏览几十个头像来得有意义。这种「慢社交」的方式，让每一次匹配都更有仪式感和期待感。</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">这周没有匹配到人怎么办？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p>如果匹配池中没有找到足够契合的对象，我们宁可不匹配，也不会推荐一个不合适的人。<strong>下周我们会扩大搜索范围</strong>，为你找到更合拍的人。质量永远优先于数量。</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">什么是「Shoot Your Shot」？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p>如果你心里已经有某个人，可以输入 TA 的学校邮箱发起 Shoot Your Shot。<strong>如果 TA 也向你发起了，立即触发双向匹配。</strong>如果没有，TA 永远不会知道——完全零风险。每月限用一次。</p></div>
+        </div>
+      </div>
+
+      <div class="faq-category reveal">
+        <div class="faq-category-label">Privacy & Safety · 隐私与安全</div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">我的问卷答案会被别人看到吗？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p><strong>不会。</strong>你的问卷答案仅用于匹配算法计算，不会展示给任何其他用户。匹配对象只能看到兼容性分析报告，而不是你的原始答案。</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">对方能看到我的微信号吗？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p>只有在<strong>双向匹配成功</strong>（双方都表达了兴趣）之后，微信号才会互相解锁。单方面不会泄露任何联系方式。</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">可以删除我的数据吗？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p>当然。你可以在个人设置中随时<strong>暂停匹配</strong>或<strong>导出并删除全部数据</strong>。你的数据，你做主。</p></div>
+        </div>
+      </div>
+
+      <div class="faq-category reveal">
+        <div class="faq-category-label">Others · 其他</div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">支持同性匹配吗？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p><strong>支持。</strong>在问卷的基本信息部分可以选择性别认同和性取向偏好，算法会尊重你的选择。YueluDate 欢迎每一个真诚寻找连接的人。</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">可以修改问卷答案吗？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p>可以。在个人设置中随时重新填写问卷，更新后的答案在下一次匹配中生效。</p></div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">可以暂停匹配吗？<span class="material-symbols-outlined">expand_more</span></button>
+          <div class="faq-answer"><p>可以。在个人资料页打开「暂停匹配」开关即可。暂停期间你的资料不会进入匹配池，<strong>数据会被保留</strong>，随时可以重新开启。</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="cta-section"><div class="cta-inner reveal"><span class="accent-line accent-line-center" style="margin-bottom:1.5rem"></span><h2 class="cta-title">准备好开启<br>周四惊喜了吗？</h2><p class="cta-desc">加入岳麓人的行列，寻找那个不仅能一起看电影，还能一起爬岳麓山讨论人生的人。</p><button onclick="startQuiz()" class="btn-primary btn-lg">立即开启匹配 →</button></div></section>
   </main>
-  <footer class="site-footer"><div class="footer-inner"><div><span class="footer-logo">CSU Date</span><p class="footer-desc">致力于创造高质量、有深度的校园连接。拒绝快餐，拥抱共鸣。</p><p style="color:var(--text-ghost);font-size:.75rem;margin-top:.75rem">仅限 @csu.edu.cn 邮箱注册</p></div><div><p class="footer-col-label">关于</p><ul class="footer-links"><li><a href="#" class="hover-line">匹配算法</a></li><li><a href="#" class="hover-line">隐私政策</a></li><li><a href="#" class="hover-line">联系我们</a></li></ul></div><div><p class="footer-col-label">社区</p><ul class="footer-links"><li><a href="#" class="hover-line">校园大使</a></li><li><a href="#" class="hover-line">成功故事</a></li></ul></div><div><p class="footer-col-label">安全</p><p style="color:var(--text-dim);font-size:.875rem;line-height:1.7">所有用户均经过学生身份验证。</p></div></div><div class="footer-bottom"><p>&copy; 2026 CSU Date &middot; 中南大学校园匹配平台</p><p>本项目为学生自主开发，非学校官方项目</p><p style="margin-top:.75rem;font-size:.6875rem;letter-spacing:.1em">长沙高校匹配联盟 · 即将开放湖大、师大</p></div></footer>
+  <footer class="site-footer"><div class="footer-inner"><div><span class="footer-logo">YueluDate</span><p class="footer-desc">致力于创造高质量、有深度的校园连接。拒绝快餐，拥抱共鸣。</p><p style="color:var(--text-ghost);font-size:.75rem;margin-top:.75rem">支持中南·湖大·湖师大教育邮箱</p></div><div><p class="footer-col-label">关于</p><ul class="footer-links"><li><a href="about.html" class="hover-line">匹配算法</a></li><li><a href="about.html" class="hover-line">隐私政策</a></li><li><a href="about.html#disclaimer" class="hover-line">免责声明</a></li><li><a href="about.html" class="hover-line">联系我们</a></li></ul></div><div><p class="footer-col-label">社区</p><ul class="footer-links"><li><a href="about.html" class="hover-line">校园大使</a></li><li><a href="#faq" class="hover-line">常见问题</a></li></ul></div><div><p class="footer-col-label">安全</p><p style="color:var(--text-dim);font-size:.875rem;line-height:1.7">所有用户均经过学生身份验证。</p></div></div><div class="footer-bottom"><p>&copy; 2026 YueluDate &middot; 岳麓山高校匹配平台</p><p>本项目为学生自主开发，非学校官方项目</p><p style="margin-top:.75rem;font-size:.6875rem;letter-spacing:.1em">岳麓山大学城 · 中南 · 湖大 · 湖师大</p></div></footer>
   <nav class="mobile-nav"><div class="nav-items"><a class="nav-item active" onclick="navigateTo('page-landing')"><span class="material-symbols-outlined">auto_stories</span><span>发现</span></a><a class="nav-item" onclick="goToAuthPage('dashboard.html')"><span style="position:relative;display:inline-flex"><span class="material-symbols-outlined">favorite</span><span class="badge-dot"></span></span><span>匹配</span></a><a class="nav-item" onclick="goToAuthPage('profile.html')"><span class="material-symbols-outlined">person</span><span>我的</span></a></div></nav>
 </div>
 
@@ -373,8 +529,38 @@ input[type="range"]::-moz-range-track{background:transparent;height:4px;border:n
 <!-- ═══════════════════════ SCRIPT ═══════════════════════ -->
 <script src="api.js"></script>
 <script>
+/* ═══════ TOP ANNOUNCEMENT BANNER ═══════ */
+function closeAnnBanner(){
+  document.getElementById('announceBanner').classList.remove('show');
+  sessionStorage.setItem('ann_closed','1');
+}
+(async function(){
+  if(sessionStorage.getItem('ann_closed'))return;
+  try{
+    var res=await fetch('/api/announcements');
+    var items=await res.json();
+    if(!res.ok||!items.length)return;
+    var tagMap={update:['修复','ann-tag-update'],feature:['新功能','ann-tag-feature'],notice:['公告','ann-tag-notice']};
+    var html='';
+    items.slice(0,3).forEach(function(item,i){
+      var tag=tagMap[item.type]||tagMap.notice;
+      var t=item.title||'';
+      if(i>0)html+='<span style="color:rgba(255,255,255,.2)">|</span> ';
+      html+='<span class="ann-entry"><span class="ann-tag '+tag[1]+'">'+tag[0]+'</span><span class="ann-text">'+t.replace(/</g,'&lt;')+'</span></span>';
+    });
+    document.getElementById('annItems').innerHTML=html;
+    document.getElementById('announceBanner').classList.add('show');
+  }catch(e){}
+})();
+
 /* ═══════ DATA ═══════ */
-const colleges=['数学与统计学院','物理与电子学院','化学化工学院','材料科学与工程学院','机电工程学院','能源科学与工程学院','资源与安全工程学院','资源加工与生物工程学院','冶金与环境学院','交通运输工程学院','土木工程学院','粉末冶金研究院','地球科学与信息物理学院','自动化学院','计算机学院','建筑与艺术学院','商学院','法学院','公共管理学院','人文学院','外国语学院','马克思主义学院','基础医学院','湘雅公共卫生学院','湘雅护理学院','湘雅口腔医学院','湘雅药学院','生命科学学院','体育教研部','临床医学八年制','信息科学与工程学院','邓迪国际学院','其他'];
+const collegesBySchool={
+'中南大学':['数学与统计学院','物理与电子学院','化学化工学院','材料科学与工程学院','机电工程学院','能源科学与工程学院','资源与安全工程学院','资源加工与生物工程学院','冶金与环境学院','交通运输工程学院','土木工程学院','粉末冶金研究院','地球科学与信息物理学院','自动化学院','计算机学院','建筑与艺术学院','商学院','法学院','公共管理学院','人文学院','外国语学院','马克思主义学院','基础医学院','湘雅公共卫生学院','湘雅护理学院','湘雅口腔医学院','湘雅药学院','生命科学学院','体育教研部','临床医学八年制','信息科学与工程学院','邓迪国际学院'],
+'湖南大学':['岳麓书院','经济与贸易学院','金融与统计学院','法学院','马克思主义学院','教育科学研究院','体育学院','中国语言文学学院','外国语学院','新闻与传播学院','数学学院','物理与微电子科学学院','化学化工学院','生物学院','机械与运载工程学院','材料科学与工程学院','电气与信息工程学院','计算机学院','网络空间安全学院','人工智能与机器人学院','建筑与规划学院','土木工程学院','环境科学与工程学院','隆平农学院','工商管理学院','公共管理学院','半导体学院','设计艺术学院'],
+'湖南师范大学':['文学院','历史文化学院','法学院','公共管理学院','商学院','教育科学学院','数学与统计学院','物理与电子科学学院','化学化工学院','生命科学学院','信息科学与工程学院','地理科学学院','音乐学院','美术学院','体育学院','外国语学院','新闻与传播学院','旅游学院','医学部','马克思主义学院','工程与设计学院','国际汉语文化学院','教师教育学院']
+};
+const colleges=Object.values(collegesBySchool).flat().filter((v,i,a)=>a.indexOf(v)===i);
+colleges.push('其他');
 const provinces=['北京','天津','河北','山西','内蒙古','辽宁','吉林','黑龙江','上海','江苏','浙江','安徽','福建','江西','山东','河南','湖北','湖南','广东','广西','海南','重庆','四川','贵州','云南','西藏','陕西','甘肃','青海','宁夏','新疆','香港','澳门','台湾'];
 const traitOptions=['充满好奇心','诚实正直','聪明智慧','温柔善良','乐观开朗','有勇气','有创造力','高度自律','顾家','独立','忠诚','有野心','幽默风趣','经世致用','霸蛮坚韧'];
 const interestCats=[
@@ -383,7 +569,7 @@ const interestCats=[
   {label:'文艺与知识',items:['阅读','音乐/乐器','绘画/手工','摄影','历史/社科','看展/博物馆','Vlog/短视频']},
   {label:'生活方式',items:['探店/美食','旅行','猫狗宠物','烹饪/烘焙','咖啡/茶道']},
   {label:'极客与硬核',items:['编程/算法','硬件DIY/数码','科学探索','金融/投资','开源/技术社区']},
-  {label:'中南特色',items:['爬岳麓山','后湖散步','橘子洲骑行','逛太平街']},
+  {label:'岳麓山特色',items:['爬岳麓山','后湖散步','橘子洲骑行','逛太平街']},
 ];
 const moduleNames=['基本信息','人生观','性格','生活方式','亲密关系','兴趣','特质'];
 const modules=[
@@ -391,13 +577,14 @@ const modules=[
   {key:'gender',text:'你的性别',t:'sel',opts:['男','女','非二元'],cols:3},
   {key:'sexuality',text:'你的性取向',t:'sel',opts:['异性恋','同性恋','双性恋','其他'],cols:2},
   {key:'grade',text:'你的年级',t:'sel',opts:['大一','大二','大三','大四','硕士','博士'],cols:3},
-  {key:'campus',text:'你住在哪个校区？',t:'sel',opts:['岳麓山','潇湘','南校区','天心','湘雅'],cols:3},
+  {key:'school',text:'你的学校',t:'sel',opts:['中南大学','湖南大学','湖南师范大学'],cols:3},
+  {key:'campus',text:'你住在哪个校区？',t:'sel',opts:['新校区','南校区','本部','湘雅校区','铁道校区','南校区(湖大)','财院校区','二里半校区','天马校区','南院校区','咸嘉湖校区','桃花坪校区','张公岭校区'],cols:3},
   {key:'college',text:'你的学院',t:'drop',opts:colleges},
   {key:'height',text:'你的身高',t:'height'},
   {key:'heightPref',text:'你能接受的匹配对象身高范围',t:'heightRange'},
   {key:'hometown',text:'你的家乡省份',t:'drop',opts:provinces},
-  {t:'div',text:'关于跨校区和同学院匹配',hint:'如果你选了"不接受"跨校区，我们会优先在你所在校区内匹配。'},
-  {key:'crossCampus',text:'对于"跨校区恋爱"（如岳麓山-天心），你的态度是',t:'sel',opts:['可以接受','不接受'],cols:2},
+  {t:'div',text:'关于跨校区和同学院匹配',hint:'如果你选了"不接受"，我们会优先在你所在校区或学校内匹配。'},
+  {key:'crossCampus',text:'对于"跨校区/跨校恋爱"，你的态度是',t:'sel',opts:['可以接受','不接受'],cols:2},
   {key:'sameCollege',text:'对于"匹配到同学院的人"，你的态度是',t:'sel',opts:['接受','不接受','无所谓'],cols:3},
 ]},
 {id:2,title:'人生观与事业观',sub:'聚焦你在事业、财富和人生轨迹上的观念。若某道题对你特别重要，点击「☆ 设为重要」。',qs:[
@@ -407,6 +594,7 @@ const modules=[
   {key:'marriage',text:'对未来婚姻的看法',l:'坚决不婚',r:'一定要结婚',t:'lk'},
   {key:'goodness',text:'关键利益面前，善良比聪明更重要？',l:'强烈不同意',r:'强烈同意',t:'lk'},
   {key:'idealism',text:'愿意为理想信念放弃物质舒适？',l:'强烈不同意',r:'强烈同意',t:'lk'},
+  {key:'money_attitude',text:'你对金钱的核心态度',l:'安全感第一，能省则省',r:'体验至上，愿为品质付费',t:'lk'},
 ]},
 {id:3,title:'性格与价值观',sub:'了解你看待世界的方式——这决定了你和谁能深度共鸣。',qs:[
   {key:'family_career',text:'家庭幸福 vs 个人事业成功',l:'事业绝对优先',r:'家庭绝对优先',t:'lk'},
@@ -419,7 +607,7 @@ const modules=[
 {id:4,title:'生活方式',sub:'柴米油盐里的默契，比任何浪漫都更长久。',qs:[
   {key:'sleep',text:'日常作息节律',l:'重度夜猫子',r:'早起鸟',t:'lk'},
   {key:'tidy',text:'伴侣在整洁方面比较随性，对我来说',l:'完全无法接受',r:'完全不在意',t:'lk'},
-  {key:'canteen',text:'在中南的日常饮食更偏好',l:'几乎全在食堂解决',r:'频繁点外卖或出去吃',t:'lk'},
+  {key:'canteen',text:'日常饮食更偏好',l:'几乎全在食堂解决',r:'频繁点外卖或出去吃',t:'lk'},
   {key:'spicy',text:'饮食口味（辣的接受程度）',l:'一点辣都不行',r:'无辣不欢',t:'lk'},
   {key:'diet',text:'特殊饮食要求',t:'ssel',opts:['无特殊要求','清真（不吃猪肉）','素食','其他'],cols:2},
   {key:'datespot',text:'周末约会更倾向于',l:'校园内散步学习',r:'去五一广场太平街',t:'lk'},
@@ -439,6 +627,8 @@ const modules=[
   {key:'intimacy_pace',text:'和伴侣发展亲密关系的节奏',l:'确认关系后很快',r:'需要很长时间建立信任',t:'lk'},
   {key:'meet_freq',text:'恋爱期间期待的线下见面频率',t:'ssel',opts:['每天','一周3-4次','一周1-2次','看情况，不固定'],cols:2},
   {key:'social_pda',text:'愿意在社交媒体上"秀恩爱"吗',l:'恋爱很私密',r:'喜欢记录分享',t:'lk'},
+  {key:'conflict_response',text:'伴侣指出你的问题时，你的本能反应',l:'先为自己辩解',r:'先试着理解TA的感受',t:'lk'},
+  {key:'depend_comfort',text:'在关系中依赖伴侣对你来说',l:'很难完全信赖和依赖',r:'很自然，愿意依赖对方',t:'lk'},
 ]},
 {id:6,title:'兴趣爱好',sub:'不限类别，选出 2-5 个你最核心的爱好。共同的爱好是最好的破冰话题。',qs:[
   {key:'interests',text:'选出你的核心兴趣爱好',t:'interests',min:2,max:5},
@@ -527,6 +717,17 @@ function renderQ(q){
 function pickOpt(q,v,el){
   quiz[q]=v;
   document.querySelectorAll('[data-q="'+q+'"]').forEach(b=>b.classList.toggle('sel',b.dataset.v===v));
+  // 选学校后联动更新学院下拉
+  if(q==='school'&&collegesBySchool[v]){
+    var sel=document.querySelector('select[onchange*="college"]');
+    if(sel){
+      var cur=quiz.college||'';
+      sel.innerHTML='<option value="" disabled selected>请选择</option>';
+      collegesBySchool[v].forEach(function(c){sel.innerHTML+='<option value="'+c+'"'+(c===cur?' selected':'')+'>'+c+'</option>';});
+      sel.innerHTML+='<option value="其他">其他</option>';
+      if(!collegesBySchool[v].includes(cur))quiz.college='';
+    }
+  }
   checkMod();
 }
 function pickSpecial(q,v,el){
@@ -602,12 +803,142 @@ function navigateTo(id){
   cur.style.transition='opacity .25s,transform .25s';cur.style.opacity='0';cur.style.transform='translateY(-.5rem)';
   setTimeout(()=>{cur.classList.remove('active');cur.removeAttribute('style');nxt.classList.add('active');window.scrollTo(0,0);},260);
 }
-function startQuiz(){
+async function startQuiz(){
   const raw=localStorage.getItem('csudate_user');
   if(!raw){window.location.href='login.html?redirect=quiz';return;}
-  try{const u=JSON.parse(raw);if(!u.loggedIn){window.location.href='login.html?redirect=quiz';return;}}
+  let u;
+  try{u=JSON.parse(raw);if(!u.loggedIn){window.location.href='login.html?redirect=quiz';return;}}
   catch(e){window.location.href='login.html?redirect=quiz';return;}
-  resetQuiz();navigateTo('page-quiz');
+
+  // 已填过问卷 → 弹窗确认是否重新填写
+  if(u.quizCompleted){
+    document.getElementById('quizDoneModal').classList.add('open');
+    return;
+  }
+
+  await doStartQuiz();
+}
+async function doStartQuiz(){
+  resetQuiz();
+
+  // 如果已填过问卷，从后端加载并回填
+  if(window.csudateGetToken && csudateGetToken()){
+    try{
+      const res=await csudateFetch('/api/user/quiz',{method:'GET'});
+      const data=await res.json().catch(()=>({}));
+      if(data.saved && data.quiz) restoreQuiz(data.quiz);
+    }catch(e){console.warn('加载已有问卷失败',e);}
+  }
+
+  navigateTo('page-quiz');
+}
+function closeQuizDoneModal(){document.getElementById('quizDoneModal').classList.remove('open');}
+function confirmRefillQuiz(){closeQuizDoneModal();doStartQuiz();}
+
+function restoreQuiz(saved){
+  // 恢复简单字段
+  const simpleKeys=['gender','sexuality','grade','campus','college','hometown','crossCampus','sameCollege','spending','diet','studyspot','meet_freq','seasonal'];
+  simpleKeys.forEach(k=>{if(saved[k]!=null) quiz[k]=saved[k];});
+
+  // 恢复数值字段
+  if(saved.height!=null) quiz.height=saved.height;
+  if(saved.heightPrefMin!=null) quiz.heightPrefMin=saved.heightPrefMin;
+  if(saved.heightPrefMax!=null) quiz.heightPrefMax=saved.heightPrefMax;
+
+  // 恢复数组字段
+  if(Array.isArray(saved.interests)) quiz.interests=saved.interests.slice();
+  if(Array.isArray(saved.selfTraits)) quiz.selfTraits=saved.selfTraits.slice();
+  if(Array.isArray(saved.partnerTraits)) quiz.partnerTraits=saved.partnerTraits.slice();
+  if(saved.partnerTraitsImportant!=null) quiz.partnerTraitsImportant=saved.partnerTraitsImportant;
+
+  // 恢复 likert
+  if(saved.likert && typeof saved.likert==='object'){
+    for(const k in saved.likert){
+      quiz.likert[k]=Object.assign({},saved.likert[k]);
+      // 标记 touched
+      const block=saved.likert[k];
+      if(block.self!=null) touched.add(block.partner!=null?k+'-self':k);
+      if(block.partner!=null) touched.add(k+'-partner');
+      if(block.important) importance[k]=true;
+    }
+  }
+
+  // 重新渲染所有模块
+  modules.forEach(m=>renderModule(m));
+
+  // 回填 UI 状态
+  // sel 按钮
+  simpleKeys.concat(['seasonal']).forEach(k=>{
+    if(quiz[k]!=null) document.querySelectorAll('[data-q="'+k+'"]').forEach(b=>b.classList.toggle('sel',b.dataset.v===quiz[k]));
+  });
+
+  // 下拉框
+  ['college','hometown'].forEach(k=>{
+    if(quiz[k]){
+      document.querySelectorAll('.styled-select').forEach(sel=>{
+        for(let i=0;i<sel.options.length;i++){
+          if(sel.options[i].value===quiz[k]){sel.selectedIndex=i;break;}
+        }
+      });
+    }
+  });
+
+  // 身高滑块
+  const heightSlider=document.querySelector('#module-1 input[type="range"][min="140"]');
+  if(heightSlider&&quiz.height){heightSlider.value=quiz.height;fillSlider(heightSlider);const hv=document.getElementById('height-val');if(hv)hv.textContent=quiz.height;}
+  // 身高范围输入
+  const hInputs=document.querySelectorAll('.height-input');
+  if(hInputs.length>=2){if(quiz.heightPrefMin)hInputs[0].value=quiz.heightPrefMin;if(quiz.heightPrefMax)hInputs[1].value=quiz.heightPrefMax;}
+
+  // likert 滑块
+  document.querySelectorAll('input[type="range"][min="1"][max="7"]').forEach(sl=>{
+    // 找到对应的 key —— 通过 oninput 属性解析
+    const attr=sl.getAttribute('oninput')||'';
+    const m1=attr.match(/onLikert\('([^']+)','([^']+)'/);
+    if(!m1)return;
+    const key=m1[1],track=m1[2];
+    const block=quiz.likert[key];
+    if(!block||block[track]==null)return;
+    sl.value=block[track];
+    sl.classList.remove('untouched');
+    fillSlider(sl);
+    // 更新数值显示
+    const isDual=!!sl.closest('.dual-slider');
+    const valId=isDual?'sv-'+key+'-'+track:'sv-'+key;
+    const valEl=document.getElementById(valId);
+    if(valEl) valEl.textContent=block[track];
+  });
+
+  // importance 按钮
+  document.querySelectorAll('.importance-btn').forEach(btn=>{
+    const attr=btn.getAttribute('onclick')||'';
+    const m2=attr.match(/toggleImp\('([^']+)'/);
+    if(!m2)return;
+    const k=m2[1];
+    if(importance[k]){btn.classList.add('on');btn.textContent='★ 已标为重要（匹配加权）';}
+  });
+
+  // interests 标签
+  quiz.interests.forEach(id=>{
+    document.querySelectorAll('#module-6 .val-tag:not([data-tt])').forEach(t=>{if(t.textContent===id)t.classList.add('sel');});
+  });
+  const ict=document.getElementById('interest-count');
+  if(ict) ict.textContent='已选择 '+quiz.interests.length+'/5';
+
+  // traits 标签
+  ['self','partner'].forEach(tt=>{
+    const arr=tt==='self'?quiz.selfTraits:quiz.partnerTraits;
+    arr.forEach(id=>{
+      document.querySelectorAll('.val-tag[data-tt="'+tt+'"]').forEach(t=>{if(t.textContent===id)t.classList.add('sel');});
+    });
+    const ct=document.getElementById(tt+'-trait-count');
+    if(ct) ct.textContent='已选择 '+arr.length+'/5';
+  });
+
+  // 更新所有模块的按钮状态
+  for(let i=1;i<=7;i++){curMod=i;checkMod();}
+  curMod=1;
+  updateProgress();
 }
 function goToModule(n){
   const cur=document.querySelector('.quiz-step.active');
@@ -713,10 +1044,10 @@ function goToAuthPage(page){
 
 /* ═══════ LANDING PAGE ═══════ */
 const sloganData=[
-  {main:'停车坐爱，麓山有你',sub:"Where hearts meet under Yuelu's maple glow"},
-  {main:'惟楚有材，于斯遇你',sub:'Among the finest talents, here I find you'},
   {main:'爱晚，不晚',sub:'Love late? Never too late.'},
   {main:'湘江月照两个人',sub:'Moonlight on the Xiang, shining on just us two'},
+  {main:'停车坐爱，麓山有你',sub:"Where hearts meet under Yuelu's maple glow"},
+  {main:'惟楚有材，于斯遇你',sub:'Among the finest talents, here I find you'},
 ];
 let sloganIdx=0,sloganTimer=null;
 const sMain=document.getElementById('slogan-main'),sDots=document.getElementById('slogan-dots');
@@ -731,12 +1062,16 @@ if(sMain&&sDots){
 }
 function sloganGoTo(n){
   if(n===sloganIdx)return;const items=sMain.children,dots=sDots.children;
+  const bg=document.getElementById('hero-bg');if(bg&&bg.children[sloganIdx]&&bg.children[n]){bg.children[sloganIdx].classList.remove('active');bg.children[n].classList.add('active');}
   items[sloganIdx].className='slogan-item exit';dots[sloganIdx].className='slogan-dot';
   const prev=sloganIdx;
   setTimeout(()=>{items[prev].className='slogan-item';sloganIdx=n;items[sloganIdx].className='slogan-item active';dots[sloganIdx].className='slogan-dot on';},300);
   clearInterval(sloganTimer);sloganTimer=setInterval(sloganNext,3500);
 }
 function sloganNext(){sloganGoTo((sloganIdx+1)%sloganData.length);}
+
+/* FAQ accordion */
+function toggleFaq(btn){const item=btn.closest('.faq-item');const wasOpen=item.classList.contains('open');item.closest('.faq-category').querySelectorAll('.faq-item.open').forEach(el=>el.classList.remove('open'));if(!wasOpen)item.classList.add('open');}
 
 /* Scroll reveal */
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});},{threshold:.12,rootMargin:'0px 0px -50px 0px'});
@@ -748,11 +1083,37 @@ if(header){let ht=false;window.addEventListener('scroll',()=>{if(!ht){requestAni
 
 /* Live count */
 function animateCount(el,target,dur){dur=dur||2000;let c=0;const inc=target/(dur/16);const t=setInterval(()=>{c+=inc;if(c>=target){c=target;clearInterval(t);}el.textContent=Math.floor(c).toLocaleString();},16);}
-setTimeout(()=>{const el=document.getElementById('live-count');if(el)animateCount(el,1247);},600);
+(async function loadLiveCount(){
+  const el=document.getElementById('live-count');
+  if(!el)return;
+  try{
+    const base=window.CSU_DATE_API_BASE?CSU_DATE_API_BASE():'';
+    const res=await fetch(base+'/api/stats');
+    const data=await res.json();
+    setTimeout(()=>animateCount(el,data.totalUsers||0),600);
+  }catch(e){
+    console.warn('获取统计失败，使用默认值',e);
+    setTimeout(()=>animateCount(el,0),600);
+  }
+})();
 
 /* ═══════ INIT ═══════ */
 modules.forEach(m=>renderModule(m));
 updateProgress();
 </script>
+
+<!-- ═══════ QUIZ-DONE MODAL ═══════ -->
+<div id="quizDoneModal" class="modal-overlay" onclick="if(event.target===this)closeQuizDoneModal()">
+  <div class="modal-body">
+    <div class="modal-icon">💌</div>
+    <div class="modal-title">你已经填过问卷啦</div>
+    <div class="modal-desc">你之前已完成问卷并进入匹配池。重新填写将覆盖之前的问卷内容，确定要重新填写吗？</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeQuizDoneModal()">返回</button>
+      <button class="btn-primary" onclick="confirmRefillQuiz()">重新填写</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

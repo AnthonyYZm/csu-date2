@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>打个招呼 · CSU Date</title>
+<title>打个招呼 · YueluDate</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -118,7 +118,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 
 <nav class="topbar" id="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="topbar-logo">CSU Date</a>
+    <a href="index.html" class="topbar-logo">YueluDate</a>
     <span class="topbar-spacer"></span>
     <a href="dashboard.html" class="topbar-back">
       <span class="material-symbols-outlined">arrow_back</span>
@@ -132,11 +132,11 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   <!-- Compose State -->
   <div class="compose-state" id="composeState">
     <div class="recipient">
-      <div class="recipient-avatar"><span>陈</span></div>
+      <div class="recipient-avatar"><span id="peerInitial">?</span></div>
       <div class="recipient-info">
-        <div class="recipient-label">本周匹配 · 86% 契合</div>
-        <div class="recipient-name">陈屿辰</div>
-        <div class="recipient-meta">潇湘校区 · 大三 · 建筑学 · 8209190233@csu.edu.cn</div>
+        <div class="recipient-label" id="recipientLabel">加载中…</div>
+        <div class="recipient-name" id="peerName"></div>
+        <div class="recipient-meta" id="peerMeta"></div>
       </div>
     </div>
 
@@ -175,7 +175,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
       <span class="material-symbols-outlined">check</span>
     </div>
     <h2 class="sent-title">已送出</h2>
-    <p class="sent-desc">你的招呼已经在路上了。如果陈屿辰也向你打了招呼，你们就能看到彼此的消息。</p>
+    <p class="sent-desc" id="sentDesc">你的招呼已经在路上了。对方也留言后，你们就能看到彼此的消息。</p>
     <a href="inbox.html" class="btn-back" style="margin-right:.5rem">
       <span class="material-symbols-outlined" style="font-size:1rem">mail</span>
       查看信箱
@@ -204,6 +204,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   </div>
 </nav>
 
+<script src="api.js"></script>
 <script>
 // Auth guard
 (function(){
@@ -218,6 +219,52 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
   const tb=document.getElementById('topbar');
   let t=false;
   window.addEventListener('scroll',()=>{if(!t){requestAnimationFrame(()=>{tb.classList.toggle('scrolled',scrollY>8);t=false;});t=true;}},{passive:true});
+})();
+
+var matchId=new URLSearchParams(location.search).get('id');
+var matchData=null;
+
+// Toast 提示组件
+function showToast(msg,isError){
+  var existing=document.getElementById('_greetToast');
+  if(existing)existing.remove();
+  var toast=document.createElement('div');
+  toast.id='_greetToast';
+  toast.textContent=msg;
+  toast.setAttribute('style','position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;'
+    +'padding:12px 24px;border-radius:12px;font-size:.875rem;font-weight:500;'
+    +'box-shadow:0 4px 20px rgba(0,0,0,.15);transition:opacity .3s;'
+    +(isError?'background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;'
+             :'background:#f0fdf4;color:#16a34a;border:1px solid #86efac;'));
+  document.body.appendChild(toast);
+  setTimeout(function(){toast.style.opacity='0';setTimeout(function(){toast.remove();},300);},3000);
+}
+
+// Load match info and populate recipient
+(async function(){
+  if(!matchId){document.getElementById('recipientLabel').textContent='缺少匹配 ID';return;}
+  if(!window.csudateGetToken||!csudateGetToken()){window.location.href='login.html';return;}
+  try{
+    var res=await csudateFetch('/api/match/'+matchId,{method:'GET'});
+    var d=await res.json().catch(function(){return {};});
+    if(!res.ok){document.getElementById('recipientLabel').textContent=d.detail||'加载失败';return;}
+    matchData=d;
+    document.getElementById('peerInitial').textContent=(d.peerName||'?')[0];
+    var weekText=d.weekNumber===0?'Shoot 匹配':(d.weekNumber?'第 '+d.weekNumber+' 周匹配':'匹配');
+    document.getElementById('recipientLabel').textContent=weekText+(d.score?' · '+d.score+'% 契合':'');
+    document.getElementById('peerName').textContent=d.peerName||'YueluDate 用户';
+    var meta=[d.peerCampus,d.peerGrade,d.peerMajor,d.peerEmail].filter(Boolean).join(' · ');
+    document.getElementById('peerMeta').textContent=meta;
+    // Check if already sent
+    if(d.yourMessage){
+      document.getElementById('composeState').classList.add('hidden');
+      var sent=document.getElementById('sentState');
+      document.getElementById('sentDesc').textContent='你已向 '+d.peerName+' 发送过消息了。';
+      sent.classList.add('show');
+    }
+  }catch(e){
+    document.getElementById('recipientLabel').textContent='网络错误';
+  }
 })();
 
 function updateCount(){
@@ -236,21 +283,40 @@ function usePrompt(el){
   updateCount();
 }
 
-function sendGreeting(){
+async function sendGreeting(){
   const msg=document.getElementById('msgInput').value.trim();
-  if(!msg)return;
+  if(!msg||!matchId)return;
   const btn=document.getElementById('sendBtn');
+  const prevHtml=btn.innerHTML;
   btn.innerHTML='<span class="material-symbols-outlined" style="animation:spin .6s linear infinite">progress_activity</span>';
   btn.disabled=true;
-  const style=document.createElement('style');
-  style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
-  document.head.appendChild(style);
+  if(!document.getElementById('spin-style')){
+    const s=document.createElement('style');s.id='spin-style';
+    s.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(s);
+  }
 
-  setTimeout(()=>{
+  try{
+    var res=await csudateFetch('/api/match/'+matchId+'/greet',{
+      method:'POST',
+      body:JSON.stringify({message:msg})
+    });
+    var data=await res.json().catch(function(){return {};});
+    if(!res.ok){
+      showToast(data.detail||'发送失败',true);
+      btn.innerHTML=prevHtml;btn.disabled=false;
+      return;
+    }
     document.getElementById('composeState').classList.add('hidden');
-    const sent=document.getElementById('sentState');
+    var sent=document.getElementById('sentState');
+    if(matchData&&matchData.peerName){
+      document.getElementById('sentDesc').textContent='你的招呼已送出。'+matchData.peerName+' 也留言后，你们就能看到彼此的消息。';
+    }
     sent.classList.add('show');
-  },800);
+  }catch(e){
+    showToast('网络错误，请重试',true);
+    btn.innerHTML=prevHtml;btn.disabled=false;
+  }
 }
 </script>
 

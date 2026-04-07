@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>信箱 · CSU Date</title>
+<title>信箱 · YueluDate</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -125,7 +125,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 
 <nav class="topbar" id="topbar">
   <div class="topbar-inner">
-    <a href="index.html" class="topbar-logo">CSU Date</a>
+    <a href="index.html" class="topbar-logo">YueluDate</a>
     <span class="topbar-spacer"></span>
     <div class="topbar-nav">
       <a href="dashboard.html">首页</a>
@@ -240,6 +240,7 @@ function renderInboxThreads(threads){
         (t.yourMessage?('<div class="msg-reply"><div class="msg-reply-label">你发给 TA 的</div><div class="msg-reply-text">'+esc(t.yourMessage)+'</div></div><div class="msg-divider"></div>'):'')+
         '<p style="font-size:.75rem;color:var(--text-ghost);text-align:center">'+meta+'</p>'+
         '<div class="msg-wechat mutual-wechat" data-match-wechat="'+escAttr(t.peerWechat)+'"><div class="msg-divider"></div></div>'+
+        (t.kind==='algorithm'?'<div style="text-align:center;padding:.75rem 0"><a href="report.html?id='+t.id+'" style="font-size:.8125rem;font-weight:600;color:var(--coral-hex);text-decoration:none">查看匹配报告 →</a></div>':'')+
         '</div></div><div class="msg-time">'+esc(wk)+'</div></div>';
     }
     return '<div class="msg-item" data-type="waiting" onclick="toggleMsg(this)">'+

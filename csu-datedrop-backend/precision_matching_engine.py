@@ -35,6 +35,9 @@ SINGLE_LIKERT_FIELDS: Tuple[str, ...] = (
     "caretaker",
     "intimacy_pace",
     "social_pda",
+    "money_attitude",
+    "conflict_response",
+    "depend_comfort",
 )
 
 DUAL_TRACK_FIELDS: Tuple[str, ...] = (
@@ -56,60 +59,66 @@ CATEGORICAL_FIELDS: Tuple[str, ...] = (
 ALL_SELF_FIELDS: Tuple[str, ...] = SINGLE_LIKERT_FIELDS + DUAL_TRACK_FIELDS
 
 FIELD_LABELS: Dict[str, str] = {
-    "citylife": "city life preference",
-    "marriage": "marriage view",
-    "goodness": "goodness value",
-    "idealism": "idealism",
-    "family_career": "family vs career",
-    "process_result": "process vs result",
-    "novelty": "novelty preference",
-    "conflict": "conflict handling",
-    "sleep": "sleep schedule",
-    "tidy": "tidiness",
-    "canteen": "canteen preference",
-    "spicy": "spicy food preference",
-    "datespot": "date location",
-    "together": "togetherness style",
-    "travel": "travel style",
-    "consume": "consumption habit",
-    "reply_anxiety": "reply anxiety",
-    "ritual": "sense of ritual",
-    "opposite_friend": "boundary with opposite-sex friends",
-    "dominance": "relationship dominance",
-    "caretaker": "caretaker tendency",
-    "intimacy_pace": "intimacy pace",
-    "social_pda": "public affection comfort",
-    "hustle": "ambition",
-    "logic_feel": "logic vs feeling",
-    "introvert": "introvert vs extrovert",
-    "smoke": "smoking attitude",
-    "drink": "drinking attitude",
-    "appearance": "appearance / vibe",
-    "spending": "spending style",
-    "diet": "diet preference",
-    "studyspot": "study spot",
-    "meet_freq": "meeting frequency",
-    "traits": "traits",
-    "interests": "interests",
+    "citylife": "城市偏好",
+    "marriage": "婚姻观",
+    "goodness": "善良观",
+    "idealism": "理想主义",
+    "family_career": "家庭vs事业",
+    "process_result": "过程vs结果",
+    "novelty": "新鲜感",
+    "conflict": "冲突处理",
+    "sleep": "作息节律",
+    "tidy": "整洁度",
+    "canteen": "饮食习惯",
+    "spicy": "辣度接受",
+    "datespot": "约会地点",
+    "together": "黏人程度",
+    "travel": "旅行风格",
+    "consume": "消费观",
+    "reply_anxiety": "回复焦虑",
+    "ritual": "仪式感",
+    "opposite_friend": "异性好友",
+    "dominance": "主导性",
+    "caretaker": "照顾倾向",
+    "intimacy_pace": "亲密节奏",
+    "social_pda": "秀恩爱",
+    "hustle": "上进心",
+    "logic_feel": "理性vs感性",
+    "introvert": "内向vs外向",
+    "smoke": "吸烟态度",
+    "drink": "饮酒态度",
+    "appearance": "外貌气质",
+    "money_attitude": "经济观",
+    "conflict_response": "冲突回应",
+    "depend_comfort": "依赖舒适度",
+    "spending": "消费风格",
+    "diet": "饮食要求",
+    "studyspot": "自习偏好",
+    "meet_freq": "见面频率",
+    "traits": "核心特质",
+    "interests": "兴趣爱好",
 }
 
 CRITICAL_ALIGNMENT_WEIGHTS: Dict[str, float] = {
     "marriage": 1.60,
     "smoke": 1.55,
-    "drink": 1.30,
     "intimacy_pace": 1.35,
+    "drink": 1.30,
     "opposite_friend": 1.20,
-    "social_pda": 0.90,
-    "family_career": 1.05,
+    "consume": 1.15,          # elevated: #1 divorce predictor (Dew & Britt 2012)
     "conflict": 1.10,
+    "family_career": 1.05,
+    "conflict_response": 1.00,  # Gottman: defensiveness vs repair attempts
+    "depend_comfort": 0.95,   # attachment avoidance (ECR-R; Candel & Turliuc 2019)
+    "social_pda": 0.90,
+    "reply_anxiety": 0.85,    # attachment anxiety proxy
 }
 
 WORLDVIEW_ALIGNMENT_WEIGHTS: Dict[str, float] = {
-    "goodness": 0.95,
-    "idealism": 0.80,
+    "goodness": 1.05,         # self-transcendence (Van der Wal et al. 2023)
+    "money_attitude": 0.90,   # financial philosophy alignment
     "ritual": 0.85,
-    "reply_anxiety": 0.75,
-    "consume": 0.80,
+    "idealism": 0.80,
 }
 
 LIFESTYLE_LIKERT_WEIGHTS: Dict[str, float] = {
@@ -126,13 +135,13 @@ CHEMISTRY_SHARED_WEIGHTS: Dict[str, float] = {
     "novelty": 0.55,
     "citylife": 0.45,
     "process_result": 0.40,
-    "dominance": 0.35,
-    "caretaker": 0.35,
 }
 
 SAFE_COMPLEMENT_FIELDS: Dict[str, float] = {
     "introvert": 1.00,
     "logic_feel": 0.85,
+    "dominance": 0.70,        # complementarity evidence (Dijkstra & Barelds 2008)
+    "caretaker": 0.65,        # care-give vs care-receive complementarity
 }
 
 PREFERENCE_DIM_WEIGHTS: Dict[str, float] = {
@@ -150,15 +159,18 @@ SENSITIVITY_BY_DIM: Dict[str, float] = {
     "drink": 0.82,
     "intimacy_pace": 0.78,
     "opposite_friend": 0.82,
+    "consume": 0.85,          # stricter: financial conflict evidence
+    "money_attitude": 0.88,
+    "conflict_response": 0.90,
     "social_pda": 0.95,
     "family_career": 0.95,
     "conflict": 0.95,
+    "depend_comfort": 0.95,
+    "hustle": 1.00,
+    "reply_anxiety": 1.00,
     "sleep": 1.05,
     "tidy": 1.05,
-    "consume": 1.00,
     "ritual": 1.05,
-    "reply_anxiety": 1.00,
-    "hustle": 1.00,
     "logic_feel": 1.12,
     "introvert": 1.15,
     "appearance": 1.25,
@@ -191,12 +203,15 @@ DEFAULT_CATEGORICAL_COMPATIBILITY: Dict[str, Dict[str, Dict[str, float]]] = {
 
 @dataclass
 class PrecisionMatchConfig:
-    preference_group_weight: float = 0.38
-    value_group_weight: float = 0.22
-    lifestyle_group_weight: float = 0.18
-    traits_group_weight: float = 0.12
+    # Group weights — rebalanced per evidence hierarchy
+    # Values/lifestyle elevated (Schwartz 2023, Dew & Britt 2012);
+    # traits reduced (Joel et al. 2017: weak predictive power)
+    preference_group_weight: float = 0.35
+    value_group_weight: float = 0.25
+    lifestyle_group_weight: float = 0.20
+    traits_group_weight: float = 0.08
     interest_group_weight: float = 0.06
-    context_group_weight: float = 0.04
+    context_group_weight: float = 0.06
 
     mutual_weight: float = 0.78
     chemistry_weight: float = 0.22
@@ -205,31 +220,35 @@ class PrecisionMatchConfig:
     chemistry_traits_weight: float = 0.35
     chemistry_complement_weight: float = 0.20
 
-    important_multiplier: float = 1.90
+    # Reduced: stated preferences overfit actual importance
+    # (Eastwick & Finkel 2008)
+    important_multiplier: float = 1.55
     double_important_bonus: float = 1.12
     trait_important_multiplier: float = 1.25
 
-    candidate_threshold: float = 0.57
-    reveal_threshold: float = 0.68
+    candidate_threshold: float = 0.50
+    reveal_threshold: float = 0.62
 
-    asymmetry_penalty_weight: float = 0.08
+    asymmetry_penalty_weight: float = 0.05
     repeat_penalty: float = 0.08
 
     severe_conflict_threshold: float = 0.22
     moderate_conflict_threshold: float = 0.35
     soft_conflict_threshold: float = 0.48
 
-    severe_conflict_cap: float = 0.38
-    moderate_conflict_cap: float = 0.72
-    soft_conflict_cap: float = 0.88
+    severe_conflict_cap: float = 0.42
+    moderate_conflict_cap: float = 0.75
+    soft_conflict_cap: float = 0.90
 
     important_conflict_drop: float = 0.08
 
-    coverage_floor: float = 0.80
+    coverage_floor: float = 0.85
     coverage_power: float = 0.90
 
-    mutual_rank_bonus_max: float = 0.05
-    exclusivity_bonus_max: float = 0.04
+    mutual_rank_bonus_max: float = 0.07
+    exclusivity_bonus_max: float = 0.06
+
+    target_match_rate: float = 0.50
 
     strict_same_college_filter: bool = True
     strict_diet_filter: bool = False
@@ -249,6 +268,7 @@ class Participant:
 
     grade: Optional[int] = None
     campus: Optional[str] = None
+    school: Optional[str] = None
     college: Optional[str] = None
     hometown: Optional[str] = None
 
@@ -324,6 +344,7 @@ class Participant:
             acceptable_partner_genders=acceptable_partner_genders,
             grade=_maybe_int(hard.get("grade")),
             campus=normalize_token(hard.get("campus")),
+            school=normalize_token(hard.get("school")),
             college=normalize_token(hard.get("college")),
             hometown=normalize_token(hard.get("hometown")),
             height=_maybe_float(hard.get("height")),
@@ -802,8 +823,11 @@ def directional_context_fit(owner: Participant, other: Participant) -> GroupScor
     score = 0.52
     detail: Dict[str, Any] = {"group": "context_fit", "signals": {}}
 
+    if owner.school and other.school and owner.school == other.school:
+        score += 0.10
+        detail["signals"]["same_school"] = True
     if owner.campus and other.campus and owner.campus == other.campus:
-        score += 0.16
+        score += 0.12
         detail["signals"]["same_campus"] = True
     if owner.grade is not None and other.grade is not None:
         gap = abs(owner.grade - other.grade)
@@ -1030,6 +1054,32 @@ def compute_conflict_profile(a: Participant, b: Participant, config: PrecisionMa
                 }
             )
 
+    # Composite: anxious-avoidant attachment mismatch detection
+    # Pursue-withdraw dynamics are among the strongest dissolution predictors
+    # (Candel & Turliuc 2019; Li & Chan 2012 TARA model)
+    _ANX_DIMS = ("reply_anxiety", "together")
+    _AVO_DIMS = ("intimacy_pace",)       # high = needs long trust-building
+    _AVO_INV = ("depend_comfort",)       # low = hard to depend on partner
+
+    for p_anx, p_avo, tag in ((a, b, "A_anx_B_avo"), (b, a, "B_anx_A_avo")):
+        anx_vals = [p_anx.self_likert[d] for d in _ANX_DIMS if d in p_anx.self_likert]
+        avo_vals = [p_avo.self_likert[d] for d in _AVO_DIMS if d in p_avo.self_likert]
+        avo_vals += [8 - p_avo.self_likert[d] for d in _AVO_INV if d in p_avo.self_likert]
+        if anx_vals and avo_vals:
+            anx_m = sum(anx_vals) / len(anx_vals) / 7.0
+            avo_m = sum(avo_vals) / len(avo_vals) / 7.0
+            if anx_m >= 0.65 and avo_m >= 0.65:
+                sev = "moderate" if (anx_m >= 0.78 and avo_m >= 0.78) else "soft"
+                cap = _cap_after_conflict(cap, config, sev)
+                flags.append({
+                    "type": "attachment_mismatch",
+                    "field": "attachment",
+                    "label": "依恋模式冲突",
+                    "score": round(1.0 - anx_m * avo_m, 4),
+                    "severity": sev,
+                    "detail": tag,
+                })
+
     return {
         "cap": cap,
         "risk_flags": flags[:8],
@@ -1132,7 +1182,7 @@ def build_evidence(
             {
                 "type": "partner_trait_hit",
                 "field": "traits",
-                "label": "A wanted traits found in B",
+                "label": "你期望的特质对方都有",
                 "score": round(a_to_b["groups"]["trait_fit"].detail.get("pref_fit", 0.0), 4),
                 "items": a_wanted_hit[:5],
             }
@@ -1142,7 +1192,7 @@ def build_evidence(
             {
                 "type": "partner_trait_hit",
                 "field": "traits",
-                "label": "B wanted traits found in A",
+                "label": "对方期望的特质你都有",
                 "score": round(b_to_a["groups"]["trait_fit"].detail.get("pref_fit", 0.0), 4),
                 "items": b_wanted_hit[:5],
             }
@@ -1197,6 +1247,18 @@ def top_directional_reasons(directional: Dict[str, Any], top_n: int = 4) -> List
     return reasons[:top_n]
 
 
+def rescale_display_score(raw: float) -> float:
+    """Nonlinear score calibration (Finkel et al. 2012).
+
+    Pairs passing hard filters already have baseline compatibility.
+    Power curve boosts mid-range scores to reflect this, preserving ordering.
+    0.60 raw → 0.65 display, 0.70 → 0.74, 0.80 → 0.82.
+    """
+    if raw <= 0.0:
+        return 0.0
+    return min(1.0, raw ** 0.82)
+
+
 def score_pair(
     a: Participant,
     b: Participant,
@@ -1222,7 +1284,7 @@ def score_pair(
     raw_score = config.mutual_weight * mutual + config.chemistry_weight * chemistry["score"]
     raw_score = max(0.0, raw_score - asymmetry_penalty)
     base_score = raw_score * conflict["cap"] * confidence
-    total_score = max(0.0, min(1.0, base_score - sum(penalties.values())))
+    total_score = rescale_display_score(max(0.0, min(1.0, base_score - sum(penalties.values()))))
 
     soft_penalty_detail: Dict[str, Any] = {}
     if not strict_constraints:
@@ -1306,6 +1368,19 @@ def score_pair(
         "conflict_cap": round(conflict["cap"], 6),
     }
 
+    # Per-group averaged scores (harmonic mean of both directions) for frontend display
+    group_names = ("preference_fit", "value_alignment", "lifestyle_fit", "trait_fit", "interest_fit")
+    per_group: Dict[str, float] = {}
+    for gn in group_names:
+        sa = a_to_b["groups"][gn].score
+        sb = b_to_a["groups"][gn].score
+        if sa is not None and sb is not None:
+            per_group[gn] = round(harmonic_mean(sa, sb), 6)
+        elif sa is not None:
+            per_group[gn] = round(sa, 6)
+        elif sb is not None:
+            per_group[gn] = round(sb, 6)
+
     breakdown = {
         "directional_a_to_b": round(a_to_b["score"], 6),
         "directional_b_to_a": round(b_to_a["score"], 6),
@@ -1318,6 +1393,11 @@ def score_pair(
         "base_score": round(base_score, 6),
         "rank_bonus": 0.0,
         "exclusivity_bonus": 0.0,
+        "preference_fit": per_group.get("preference_fit", 0.0),
+        "value_alignment": per_group.get("value_alignment", 0.0),
+        "lifestyle_fit": per_group.get("lifestyle_fit", 0.0),
+        "trait_fit": per_group.get("trait_fit", 0.0),
+        "interest_fit": per_group.get("interest_fit", 0.0),
     }
     if soft_penalty_detail:
         breakdown["heightPenalty"] = soft_penalty_detail.get("heightPenalty", 0.0)
@@ -1428,7 +1508,8 @@ def maximum_weight_matching(edges: Sequence[MatchEdge], participants: Sequence[P
     graph.add_nodes_from([p.user_id for p in participants])
 
     for edge in edges:
-        graph.add_edge(edge.user_a, edge.user_b, weight=edge.match_weight)
+        w = edge.match_weight
+        graph.add_edge(edge.user_a, edge.user_b, weight=w)
 
     matching = nx.algorithms.matching.max_weight_matching(
         graph,
@@ -1503,27 +1584,22 @@ def solve_weekly_matches(
             }
         )
 
-    def _greedy_pick_pairs(edges: List[MatchEdge]) -> List[MatchEdge]:
-        edges_sorted = sorted(edges, key=lambda e: e.total_score, reverse=True)
-        used: Set[str] = set()
-        chosen: List[MatchEdge] = []
-        for e in edges_sorted:
-            if e.user_a in used or e.user_b in used:
-                continue
-            used.add(e.user_a)
-            used.add(e.user_b)
-            chosen.append(e)
-        return chosen
+    # Dynamic match rate control — cap at target_match_rate
+    if config.target_match_rate < 1.0:
+        max_matched_users = max(2, round(len(active_participants) * config.target_match_rate))
+        target_pairs = max(1, max_matched_users // 2)
+        if len(matches) > target_pairs:
+            matches.sort(key=lambda m: m["scoreTotal"], reverse=True)
+            for excess in matches[target_pairs:]:
+                matched_users.discard(excess["userA"])
+                matched_users.discard(excess["userB"])
+            matches = matches[:target_pairs]
 
-    # -------------------------
-    # Round 1: strict constraints
-    # -------------------------
-    edges_round1: List[MatchEdge] = []
-    for a, b in combinations(active_participants, 2):
-        edge = score_pair(a, b, config, strict_constraints=True)
-        if edge is None:
-            continue
-        all_edges_considered.append(edge)
+    candidate_count_by_user: Dict[str, int] = {p.user_id: 0 for p in participants}
+    best_score_by_user: Dict[str, float] = {p.user_id: 0.0 for p in participants}
+    for edge in candidate_edges:
+        candidate_count_by_user[edge.user_a] = candidate_count_by_user.get(edge.user_a, 0) + 1
+        candidate_count_by_user[edge.user_b] = candidate_count_by_user.get(edge.user_b, 0) + 1
         best_score_by_user[edge.user_a] = max(best_score_by_user.get(edge.user_a, 0.0), edge.total_score)
         best_score_by_user[edge.user_b] = max(best_score_by_user.get(edge.user_b, 0.0), edge.total_score)
         if edge.total_score >= first_round_threshold:
@@ -1579,7 +1655,7 @@ def solve_weekly_matches(
 
     return {
         "cycleId": payload.get("cycleId"),
-        "algorithmVersion": payload.get("algorithmVersion", "precision-v2.0.0"),
+        "algorithmVersion": payload.get("algorithmVersion", "precision-v3.0.0"),
         "matches": matches,
         "unmatched": unmatched,
         "debug": {

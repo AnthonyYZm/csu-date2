@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>关于我们 · YueluDate</title>
+<meta name="description" content="了解 YueluDate 的故事、匹配算法、隐私政策与联系方式。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+SC:wght@200;400;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<style>
+:root{--ink:oklch(18% 0.09 275);--ink-hex:#111148;--ink-soft:oklch(30% 0.08 275);--coral:oklch(48% 0.17 28);--coral-hex:#b5391a;--coral-warm:oklch(55% 0.15 30);--gold:oklch(72% 0.12 75);--gold-hex:#c2983a;--gold-soft:oklch(88% 0.06 80);--sage:oklch(65% 0.08 155);--sage-hex:#6a9e72;--cream:#f9f5eb;--cream-mid:#f0ebe0;--cream-deep:#e6e0d3;--cream-rose:oklch(96% 0.012 30);--cream-sky:oklch(96% 0.012 250);--text:#1e1d18;--text-dim:#6d6a62;--text-ghost:#a8a39a;--white-warm:#fffdf7}
+*,*::before,*::after{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;font-size:16px}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh}
+::selection{background:oklch(48% 0.17 28/0.12)}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24}
+.font-display{font-family:'Instrument Serif',serif}
+.font-headline{font-family:'Noto Serif SC','Noto Serif',serif}
+
+/* ── Header ── */
+.site-header{position:fixed;top:0;left:0;right:0;z-index:50;padding:1.25rem 1.5rem;background:oklch(97% 0.01 80/0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 1px 0 oklch(18% 0.09 275/0.04)}
+.header-inner{max-width:72rem;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.header-logo{font-family:'Noto Serif SC',serif;font-weight:900;font-style:italic;color:var(--ink-hex);font-size:1.125rem;letter-spacing:-.03em;text-decoration:none}
+.header-logo::after{content:'';display:inline-block;width:1.75rem;height:2px;background:var(--coral-hex);margin-left:.75rem;vertical-align:middle;opacity:.6}
+.header-nav{display:flex;align-items:center;gap:clamp(1.25rem,3vw,2rem)}
+.header-nav a{font-size:.8125rem;font-weight:500;color:var(--text-ghost);text-decoration:none;transition:color .3s}
+.header-nav a:hover{color:var(--text)}
+.header-nav a.active{color:var(--ink-hex);font-weight:600}
+
+/* ── Hero ── */
+.about-hero{padding:clamp(8rem,16vw,12rem) 1.5rem clamp(4rem,8vw,6rem);text-align:center;background:radial-gradient(ellipse at 50% 30%,oklch(95% 0.02 30) 0%,transparent 50%),var(--cream)}
+.about-hero-eyebrow{font-size:.625rem;font-weight:700;letter-spacing:.35em;text-transform:uppercase;color:var(--coral-hex);margin-bottom:1rem}
+.about-hero-title{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(2.2rem,6vw,4rem);line-height:1.1;color:var(--ink-hex);letter-spacing:-.02em;margin-bottom:1.5rem}
+.about-hero-desc{max-width:36ch;margin:0 auto;color:var(--text-dim);font-size:clamp(.9375rem,1.2vw,1.0625rem);line-height:1.85}
+
+/* ── Content Sections ── */
+.about-section{padding:clamp(4rem,10vw,7rem) 1.5rem}
+.about-section:nth-child(even){background:var(--cream-mid)}
+.about-inner{max-width:56rem;margin:0 auto}
+.section-label{font-family:'Outfit',sans-serif;font-size:.625rem;font-weight:700;letter-spacing:.35em;text-transform:uppercase;color:var(--coral-hex);margin-bottom:1rem}
+.section-title{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(1.5rem,3.5vw,2.25rem);color:var(--ink-hex);letter-spacing:-.01em;margin-bottom:1.5rem;line-height:1.2}
+.section-body{color:var(--text-dim);font-size:.9375rem;line-height:2}
+.section-body p+p{margin-top:1.25rem}
+.section-body strong{color:var(--text);font-weight:600}
+
+/* ── Algorithm Cards ── */
+.algo-grid{display:grid;grid-template-columns:1fr;gap:1.25rem;margin-top:2rem}
+@media(min-width:768px){.algo-grid{grid-template-columns:repeat(3,1fr)}}
+.algo-card{background:var(--white-warm);border-radius:2rem;padding:clamp(1.5rem,3vw,2rem);transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.algo-card:hover{transform:translateY(-3px)}
+.algo-icon{width:3rem;height:3rem;border-radius:1rem;display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+.algo-icon .material-symbols-outlined{font-size:1.5rem;color:var(--white-warm)}
+.algo-icon-coral{background:var(--coral-hex)}
+.algo-icon-ink{background:var(--ink-hex)}
+.algo-icon-sage{background:var(--sage-hex)}
+.algo-card h3{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1rem;color:var(--ink-hex);margin-bottom:.5rem}
+.algo-card p{font-size:.8125rem;color:var(--text-dim);line-height:1.8}
+
+/* ── Values ── */
+.values-grid{display:grid;grid-template-columns:1fr;gap:2rem;margin-top:2rem}
+@media(min-width:640px){.values-grid{grid-template-columns:1fr 1fr}}
+.value-item{display:flex;gap:1rem;align-items:flex-start}
+.value-num{font-family:'Noto Serif SC',serif;font-weight:900;font-size:clamp(2rem,5vw,3rem);color:oklch(18% 0.09 275/0.06);line-height:1;flex-shrink:0}
+.value-text h3{font-family:'Noto Serif SC',serif;font-weight:700;font-size:1rem;color:var(--ink-hex);margin-bottom:.25rem}
+.value-text p{font-size:.8125rem;color:var(--text-dim);line-height:1.8}
+
+/* ── Contact ── */
+.contact-grid{display:grid;grid-template-columns:1fr;gap:1rem;margin-top:2rem}
+@media(min-width:640px){.contact-grid{grid-template-columns:repeat(2,1fr)}}
+.contact-card{display:flex;align-items:center;gap:1rem;background:var(--white-warm);border-radius:1.5rem;padding:1.25rem 1.5rem;transition:transform .25s cubic-bezier(.16,1,.3,1)}
+.contact-card:hover{transform:translateY(-2px)}
+.contact-card .material-symbols-outlined{font-size:1.5rem;color:var(--coral-hex)}
+.contact-card-info{min-width:0}
+.contact-card-label{font-size:.6875rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-ghost)}
+.contact-card-value{font-weight:600;font-size:.9375rem;color:var(--ink-hex);margin-top:.125rem}
+
+/* ── Privacy Highlights ── */
+.privacy-list{margin-top:1.5rem;display:flex;flex-direction:column;gap:1rem}
+.privacy-item{display:flex;align-items:flex-start;gap:.75rem}
+.privacy-item .material-symbols-outlined{font-size:1.25rem;color:var(--sage-hex);flex-shrink:0;margin-top:.125rem;font-variation-settings:'FILL' 1}
+.privacy-item p{font-size:.9375rem;color:var(--text-dim);line-height:1.7}
+
+/* ── Scroll Reveal ── */
+.reveal{opacity:0;transform:translateY(1.5rem);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* ── Footer ── */
+.site-footer{background:var(--cream-mid);padding:4rem 1.5rem calc(2rem + env(safe-area-inset-bottom,0px))}
+@media(max-width:767px){.site-footer{padding-bottom:calc(6rem + env(safe-area-inset-bottom,0px))}}
+.footer-inner{max-width:72rem;margin:0 auto;display:grid;grid-template-columns:1fr;gap:2.5rem}
+@media(min-width:768px){.footer-inner{grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem}}
+.footer-logo{font-family:'Noto Serif SC',serif;font-weight:900;font-style:italic;color:var(--ink-hex);font-size:1.125rem;letter-spacing:-.03em}
+.footer-desc{color:var(--text-dim);font-size:.875rem;line-height:1.7;max-width:26ch;margin-top:.75rem}
+.footer-col-label{font-size:.5625rem;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-hex);margin-bottom:1rem}
+.footer-links{list-style:none;padding:0;display:flex;flex-direction:column;gap:.625rem}
+.footer-links a{color:var(--text-dim);font-size:.875rem;text-decoration:none;transition:color .3s}
+.footer-links a:hover{color:var(--coral-hex)}
+.hover-line{position:relative;display:inline-block}
+.hover-line::after{content:'';position:absolute;bottom:-2px;left:0;width:0;height:1px;background:currentColor;transition:width .5s cubic-bezier(.16,1,.3,1)}
+.hover-line:hover::after{width:100%}
+.footer-bottom{max-width:72rem;margin:2.5rem auto 0;padding-top:1.5rem;border-top:1px solid oklch(18% 0.09 275/0.06)}
+.footer-bottom p{color:var(--text-ghost);font-size:.5625rem;letter-spacing:.15em;text-transform:uppercase}
+.footer-bottom p+p{margin-top:.375rem}
+
+/* ── Mobile Nav ── */
+.mobile-nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--cream);border-top:1px solid oklch(18% 0.09 275/0.06);padding:.625rem 2rem calc(.5rem + env(safe-area-inset-bottom,0px))}
+@media(min-width:768px){.mobile-nav{display:none}}
+.nav-items{display:flex;justify-content:space-around;align-items:center}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:.125rem;color:var(--text-ghost);font-size:.5625rem;font-weight:600;letter-spacing:.05em;cursor:pointer;transition:color .3s;padding:.375rem .75rem;border:none;background:none;text-decoration:none}
+.nav-item .material-symbols-outlined{font-size:1.25rem}
+.nav-item.active{color:var(--ink-hex)}
+
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<!-- ─── Header ─── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="header-logo">YueluDate</a>
+    <nav class="header-nav">
+      <a href="about.html" class="active">关于</a>
+      <a href="index.html#faq">FAQ</a>
+      <a href="index.html">首页</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ─── Hero ─── -->
+<section class="about-hero">
+  <div class="about-hero-eyebrow">ABOUT YUELUDATE</div>
+  <h1 class="about-hero-title">不刷屏，<br>只遇对的人</h1>
+  <p class="about-hero-desc">我们相信，好的关系不是从一万次滑动中筛出来的，而是在深度了解中自然生长的。YueluDate 是岳麓山高校共享的校园匹配平台。</p>
+</section>
+
+<!-- ─── Our Story ─── -->
+<section class="about-section">
+  <div class="about-inner reveal">
+    <span class="section-label">Our Story</span>
+    <h2 class="section-title">一封来自岳麓山下的情书</h2>
+    <div class="section-body">
+      <p>2025 年秋天，几个岳麓山下的学生坐在后湖边聊天，聊起校园社交的尴尬现状：交友软件上的人太多，但真正合拍的太少。大家不缺认识人的渠道，缺的是<strong>认真了解一个人的机会</strong>。</p>
+      <p>于是 YueluDate 诞生了。我们不做刷屏式的左滑右滑，而是<strong>每周四晚 21:00，只为你匹配一个最合拍的人</strong>。一次只认识一个人，花一周去了解 TA——这是我们对浪漫最朴素的定义。</p>
+      <p>从中南大学的新校区到湖南大学的南校区，从湖南师范大学的二里半到湘雅的教学楼——YueluDate 连接着岳麓山下三所高校的学生，让距离不再是阻碍，让共鸣成为桥梁。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Values ─── -->
+<section class="about-section">
+  <div class="about-inner reveal">
+    <span class="section-label">Our Values</span>
+    <h2 class="section-title">我们相信的事</h2>
+    <div class="values-grid">
+      <div class="value-item d1 reveal">
+        <span class="value-num">01</span>
+        <div class="value-text">
+          <h3>深度胜于广度</h3>
+          <p>认真了解一个人，远胜过随意浏览一百个头像。每周一次匹配，让每段连接都值得被认真对待。</p>
+        </div>
+      </div>
+      <div class="value-item d2 reveal">
+        <span class="value-num">02</span>
+        <div class="value-text">
+          <h3>价值观先行</h3>
+          <p>外貌会变，但一个人对世界的看法、对生活的态度，才是长期关系中最重要的基石。</p>
+        </div>
+      </div>
+      <div class="value-item d3 reveal">
+        <span class="value-num">03</span>
+        <div class="value-text">
+          <h3>安全与尊重</h3>
+          <p>支持中南·湖大·湖师大教育邮箱注册，每位用户都经过学生身份验证。你的隐私和安全感是一切的前提。</p>
+        </div>
+      </div>
+      <div class="value-item d4 reveal">
+        <span class="value-num">04</span>
+        <div class="value-text">
+          <h3>真诚而非表演</h3>
+          <p>没有精心修饰的个人主页，没有粉丝数和点赞。在这里，你只需要做最真实的自己。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Algorithm ─── -->
+<section class="about-section">
+  <div class="about-inner reveal">
+    <span class="section-label">Matching Algorithm</span>
+    <h2 class="section-title">匹配算法：找到你的共鸣</h2>
+    <div class="section-body">
+      <p>我们的匹配算法基于一份深度问卷，从<strong>七个维度</strong>全方位了解你：基本信息、人生观与职业规划、性格与价值观、生活方式、亲密关系观、兴趣爱好、外貌气质与核心特质。</p>
+    </div>
+    <div class="algo-grid">
+      <div class="algo-card d1 reveal">
+        <div class="algo-icon algo-icon-coral">
+          <span class="material-symbols-outlined">psychology</span>
+        </div>
+        <h3>多维度建模</h3>
+        <p>不是简单的标签匹配。我们为每个用户构建多维画像，综合价值观权重、生活方式兼容性和性格互补性进行评分。</p>
+      </div>
+      <div class="algo-card d2 reveal">
+        <div class="algo-icon algo-icon-ink">
+          <span class="material-symbols-outlined">tune</span>
+        </div>
+        <h3>尊重你的偏好</h3>
+        <p>你可以标记哪些维度对你更重要——被你加星的选项，在算法中会获得更高权重。你的优先级，就是算法的优先级。</p>
+      </div>
+      <div class="algo-card d3 reveal">
+        <div class="algo-icon algo-icon-sage">
+          <span class="material-symbols-outlined">verified</span>
+        </div>
+        <h3>持续优化</h3>
+        <p>匹配结果不是一成不变的。随着更多用户加入和反馈积累，算法会不断学习和调优，为你找到更合拍的人。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Privacy ─── -->
+<section class="about-section">
+  <div class="about-inner reveal">
+    <span class="section-label">Privacy & Safety</span>
+    <h2 class="section-title">隐私政策</h2>
+    <div class="section-body">
+      <p>你的信任是我们最珍贵的资产。以下是我们对隐私保护的承诺：</p>
+    </div>
+    <div class="privacy-list">
+      <div class="privacy-item d1 reveal">
+        <span class="material-symbols-outlined">shield</span>
+        <p><strong>身份验证：</strong>仅接受教育邮箱（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）注册，确保平台内都是经过验证的岳麓山高校在校师生。</p>
+      </div>
+      <div class="privacy-item d2 reveal">
+        <span class="material-symbols-outlined">lock</span>
+        <p><strong>信息保密：</strong>你的问卷答案仅用于匹配算法计算，不会被展示给其他用户，也不会分享给任何第三方。</p>
+      </div>
+      <div class="privacy-item d3 reveal">
+        <span class="material-symbols-outlined">visibility_off</span>
+        <p><strong>微信号保护：</strong>你的微信号只有在双方互相表达兴趣（双向匹配成功）后才会解锁，单方面不会泄露任何联系方式。</p>
+      </div>
+      <div class="privacy-item d4 reveal">
+        <span class="material-symbols-outlined">delete_sweep</span>
+        <p><strong>数据可控：</strong>你可以随时在个人设置中暂停匹配或导出、删除你的全部数据。你的数据，你做主。</p>
+      </div>
+      <div class="privacy-item d4 reveal">
+        <span class="material-symbols-outlined">gavel</span>
+        <p><strong>Shoot Your Shot 保密机制：</strong>如果你对某人发起了 Shoot Your Shot，除非对方也向你发起，否则 TA 永远不会知道。完全零风险。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Edu Email Guide ─── -->
+<section class="about-section" id="edu-email-guide">
+  <div class="about-inner reveal">
+    <span class="section-label">Email Guide</span>
+    <h2 class="section-title">教育邮箱注册指引</h2>
+    <div class="section-body">
+      <p>YueluDate 支持以下三所高校的教育邮箱注册。如果你尚未开通教育邮箱，请按对应学校的指引操作：</p>
+
+      <p><strong>中南大学（@csu.edu.cn）</strong><br>
+      访问 <a href="https://mail.csu.edu.cn" target="_blank" style="color:var(--coral-hex)">mail.csu.edu.cn</a>，使用学号和统一身份认证密码登录即可激活。首次登录后即可收发邮件。如遇问题请联系学校信息化办公室。</p>
+
+      <p><strong>湖南大学（@hnu.edu.cn）</strong><br>
+      访问 <a href="https://mail.hnu.edu.cn" target="_blank" style="color:var(--coral-hex)">mail.hnu.edu.cn</a>，通过个人门户 <a href="https://pt.hnu.edu.cn" target="_blank" style="color:var(--coral-hex)">pt.hnu.edu.cn</a> 注册激活邮箱，存储无限制，终身免费。</p>
+
+      <p><strong>湖南师范大学（@hunnu.edu.cn）</strong><br>
+      访问 <a href="https://mail.hunnu.edu.cn" target="_blank" style="color:var(--coral-hex)">mail.hunnu.edu.cn</a>，使用统一身份认证账号登录。师生邮箱已合并为 @hunnu.edu.cn 统一域名。</p>
+
+      <p style="margin-top:1.5rem;color:var(--text-ghost);font-size:.875rem">如果你使用非教育邮箱注册了 YueluDate，可以在登录后前往仪表盘绑定你的教育邮箱。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Disclaimer ─── -->
+<section class="about-section" id="disclaimer">
+  <div class="about-inner reveal">
+    <span class="section-label">Disclaimer</span>
+    <h2 class="section-title">免责声明</h2>
+    <div class="section-body">
+      <p>YueluDate（以下简称"本平台"）是由岳麓山高校在校学生自主开发和运营的非营利性校园社交实验项目，<strong>与中南大学、湖南大学、湖南师范大学官方均无任何隶属、合作或授权关系</strong>。使用本平台即表示你已阅读、理解并同意以下条款：</p>
+
+      <p><strong>1. 服务性质</strong><br>
+      本平台仅提供基于问卷数据的匹配推荐服务，不对匹配结果的准确性、满意度或任何后续交往结果作出保证。匹配结果仅供参考，用户应自行判断。</p>
+
+      <p><strong>2. 用户行为</strong><br>
+      用户在本平台注册即承诺所填写信息真实有效。用户通过本平台认识他人后的一切线下行为（包括但不限于见面、交往、交易等）均与本平台无关，本平台不承担任何由此产生的法律责任。请用户注意人身与财产安全。</p>
+
+      <p><strong>3. 数据与隐私</strong><br>
+      本平台承诺不会主动向任何第三方出售或分享用户个人信息。但由于本平台为学生项目，技术能力和资源有限，<strong>无法保证数据的绝对安全</strong>，可能因技术故障、服务器异常等不可控因素导致数据丢失或泄露。用户应避免在平台上填写高度敏感的个人信息。</p>
+
+      <p><strong>4. 服务可用性</strong><br>
+      本平台不保证服务的持续性和稳定性。平台可能因维护、升级、技术故障或其他原因随时中断、暂停或永久停止运营，届时将尽可能提前通知用户，但不承担因服务中断造成的任何损失。</p>
+
+      <p><strong>5. 知识产权</strong><br>
+      本平台的代码、设计、内容等知识产权归开发团队所有。用户上传的个人信息和问卷数据的所有权归用户本人所有，用户有权随时要求删除。</p>
+
+      <p><strong>6. 未成年人保护</strong><br>
+      本平台面向在校大学生及研究生，未满 18 周岁的用户请勿注册使用。</p>
+
+      <p><strong>7. 免责范围</strong><br>
+      在法律允许的最大范围内，本平台及其开发团队对因使用本平台而产生的任何直接、间接、附带、特殊或惩罚性损失不承担责任，包括但不限于数据丢失、隐私泄露、情感伤害、财产损失等。</p>
+
+      <p><strong>8. 条款修改</strong><br>
+      本平台保留随时修改本免责声明的权利。修改后的条款将在页面更新后立即生效，继续使用本平台即视为接受修改后的条款。</p>
+
+      <p style="margin-top:2rem;color:var(--text-ghost);font-size:.8125rem">最后更新：2026 年 4 月 7 日</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Contact ─── -->
+<section class="about-section">
+  <div class="about-inner reveal">
+    <span class="section-label">Contact Us</span>
+    <h2 class="section-title">联系我们</h2>
+    <div class="section-body">
+      <p>有任何建议、反馈或合作意向？我们很乐意听到你的声音。</p>
+    </div>
+    <div class="contact-grid">
+      <div class="contact-card d1 reveal">
+        <span class="material-symbols-outlined">mail</span>
+        <div class="contact-card-info">
+          <div class="contact-card-label">邮箱</div>
+          <div class="contact-card-value">csudate@csu.edu.cn</div>
+        </div>
+      </div>
+      <div class="contact-card d2 reveal">
+        <span class="material-symbols-outlined">forum</span>
+        <div class="contact-card-info">
+          <div class="contact-card-label">微信公众号</div>
+          <div class="contact-card-value">YueluDate</div>
+        </div>
+      </div>
+      <div class="contact-card d3 reveal">
+        <span class="material-symbols-outlined">group</span>
+        <div class="contact-card-info">
+          <div class="contact-card-label">校园大使</div>
+          <div class="contact-card-value">各校区招募中</div>
+        </div>
+      </div>
+      <div class="contact-card d4 reveal">
+        <span class="material-symbols-outlined">bug_report</span>
+        <div class="contact-card-info">
+          <div class="contact-card-label">问题反馈</div>
+          <div class="contact-card-value">feedback@csudate.cn</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Footer ─── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div><span class="footer-logo">YueluDate</span><p class="footer-desc">致力于创造高质量、有深度的校园连接。拒绝快餐，拥抱共鸣。</p><p style="color:var(--text-ghost);font-size:.75rem;margin-top:.75rem">支持中南·湖大·湖师大教育邮箱</p></div>
+    <div><p class="footer-col-label">关于</p><ul class="footer-links"><li><a href="about.html" class="hover-line">匹配算法</a></li><li><a href="about.html" class="hover-line">隐私政策</a></li><li><a href="about.html#disclaimer" class="hover-line">免责声明</a></li><li><a href="about.html" class="hover-line">联系我们</a></li></ul></div>
+    <div><p class="footer-col-label">社区</p><ul class="footer-links"><li><a href="about.html" class="hover-line">校园大使</a></li><li><a href="index.html#faq" class="hover-line">常见问题</a></li></ul></div>
+    <div><p class="footer-col-label">安全</p><p style="color:var(--text-dim);font-size:.875rem;line-height:1.7">所有用户均经过学生身份验证。</p></div>
+  </div>
+  <div class="footer-bottom">
+    <p>&copy; 2026 YueluDate &middot; 岳麓山高校匹配平台</p>
+    <p>本项目为学生自主开发，非学校官方项目</p>
+    <p style="margin-top:.75rem;font-size:.6875rem;letter-spacing:.1em">岳麓山大学城 · 中南 · 湖大 · 湖师大</p>
+  </div>
+</footer>
+
+<!-- ─── Mobile Nav ─── -->
+<nav class="mobile-nav">
+  <div class="nav-items">
+    <a class="nav-item" href="index.html"><span class="material-symbols-outlined">auto_stories</span><span>发现</span></a>
+    <a class="nav-item" href="dashboard.html"><span class="material-symbols-outlined">favorite</span><span>匹配</span></a>
+    <a class="nav-item" href="profile.html"><span class="material-symbols-outlined">person</span><span>我的</span></a>
+  </div>
+</nav>
+
+<script>
+// Scroll reveal
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

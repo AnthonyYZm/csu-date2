@@ -5,13 +5,35 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
+from config import (
+    DEFAULT_HEIGHT_CM,
+    DEFAULT_HEIGHT_PREF_MAX,
+    DEFAULT_HEIGHT_PREF_MIN,
+    EDU_VERIFY_DAYS,
+    SCORE_SCALE_FACTOR,
+    is_edu_email,
+)
 from models import Match, Profile, User
+
+
+def _is_edu_blocked(user: User) -> bool:
+    """非教育邮箱用户超过验证期限未验证教育邮箱则封锁。"""
+    if is_edu_email(user.email or ""):
+        return False
+    if user.edu_email_verified_at:
+        return False
+    if not user.created_at:
+        return False
+    deadline = user.created_at + timedelta(days=EDU_VERIFY_DAYS)
+    now = datetime.now(timezone.utc)
+    deadline_aware = deadline.replace(tzinfo=timezone.utc) if deadline.tzinfo is None else deadline
+    return now >= deadline_aware
 from precision_matching_engine import PrecisionMatchConfig, solve_weekly_matches
 
 logger = logging.getLogger(__name__)
@@ -109,10 +131,18 @@ def map_studyspot(raw: Optional[str]) -> str:
         return "library"
     t = str(raw).strip()
     m = {
+        # 中南大学
         "新校区图书馆": "library",
         "本部老图": "library",
         "铁道校区图书馆": "library",
+        # 湖南大学
+        "湖大图书馆": "library",
+        "岳麓书院自习室": "library",
+        # 湖南师范大学
+        "师大图书馆": "library",
+        # 共享
         "后湖边长椅": "anywhere",
+        "桃子湖边": "anywhere",
         "咖啡馆": "cafe",
         "不自习": "dorm",
     }
@@ -215,19 +245,19 @@ def user_profile_to_participant_item(
 
     height = raw.get("height")
     try:
-        height_f = float(height) if height is not None else 170.0
+        height_f = float(height) if height is not None else DEFAULT_HEIGHT_CM
     except (TypeError, ValueError):
-        height_f = 170.0
-    hmin = raw.get("heightPrefMin", 150)
-    hmax = raw.get("heightPrefMax", 190)
+        height_f = DEFAULT_HEIGHT_CM
+    hmin = raw.get("heightPrefMin", DEFAULT_HEIGHT_PREF_MIN)
+    hmax = raw.get("heightPrefMax", DEFAULT_HEIGHT_PREF_MAX)
     try:
         hmin_f = float(hmin)
     except (TypeError, ValueError):
-        hmin_f = 150.0
+        hmin_f = DEFAULT_HEIGHT_PREF_MIN
     try:
         hmax_f = float(hmax)
     except (TypeError, ValueError):
-        hmax_f = 190.0
+        hmax_f = DEFAULT_HEIGHT_PREF_MAX
 
     college = raw.get("college")
     college_s = str(college).strip().lower() if college else "other"
@@ -250,6 +280,9 @@ def user_profile_to_participant_item(
     studyspot = map_studyspot(raw.get("studyspot"))
     meet_freq = map_meet_freq(raw.get("meet_freq"))
 
+    school = raw.get("school")
+    school_s = str(school).strip().lower() if school else None
+
     return {
         "userId": str(user.id),
         "hardFilters": {
@@ -257,6 +290,7 @@ def user_profile_to_participant_item(
             "sexuality": map_sexuality(profile.sexuality),
             "grade": grade_to_int(user.grade, default=3),
             "campus": str(profile.campus or "").strip().lower() or None,
+            "school": school_s,
             "college": college_s,
             "hometown": hometown_s,
             "height": height_f,
@@ -298,7 +332,7 @@ def run_weekly_matching(db: Session, week_id: int) -> Dict[str, Any]:
     """
     查询可匹配用户，组装 payload，调用 solve_weekly_matches，将结果写入 Match 表。
     """
-    rows = (
+    all_rows = (
         db.query(User, Profile)
         .join(Profile, Profile.user_id == User.id)
         .filter(
@@ -307,6 +341,12 @@ def run_weekly_matching(db: Session, week_id: int) -> Dict[str, Any]:
         )
         .all()
     )
+
+    # 过滤掉未验证教育邮箱且超过 3 天的非edu用户（女生豁免，保障匹配池性别平衡）
+    rows = [(u, p) for u, p in all_rows if not _is_edu_blocked(u) or p.gender == "女"]
+    edu_blocked_count = len(all_rows) - len(rows)
+    if edu_blocked_count > 0:
+        logger.info("edu_blocked: %d users excluded from matching (female exempted)", edu_blocked_count)
 
     if len(rows) < 2:
         return {
@@ -372,7 +412,7 @@ def run_weekly_matching(db: Session, week_id: int) -> Dict[str, Any]:
             sc = float(score_total) if score_total is not None else 0.0
         except (TypeError, ValueError):
             sc = 0.0
-        score_db = round(sc * 100.0, 2)
+        score_db = round(sc * SCORE_SCALE_FACTOR, 2)
 
         breakdown = m.get("scoreBreakdown") or {}
         report_data = {

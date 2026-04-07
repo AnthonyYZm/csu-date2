@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>登录 · CSU Date</title>
+<title>登录 · YueluDate</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -89,9 +89,14 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── Error ── */
-.form-error{display:none;align-items:center;gap:.5rem;padding:.75rem 1rem;border-radius:1rem;background:oklch(48% 0.17 28/0.06);color:var(--coral-hex);font-size:.8125rem;font-weight:500;margin-bottom:1.25rem}
+.form-error{display:none;align-items:center;gap:.5rem;padding:.75rem 1rem;border-radius:1rem;background:oklch(48% 0.17 28/0.06);color:var(--coral-hex);font-size:.8125rem;font-weight:500;margin-bottom:.75rem}
 .form-error.show{display:flex}
 .form-error .material-symbols-outlined{font-size:1rem;flex-shrink:0}
+
+/* ── School selector buttons ── */
+.school-btn{padding:.5rem 1rem;border-radius:9999px;border:1.5px solid var(--cream-deep);background:var(--white-warm);color:var(--text-dim);font-family:'Outfit',sans-serif;font-size:.8125rem;font-weight:500;cursor:pointer;transition:all .2s}
+.school-btn:hover{border-color:var(--coral-hex);color:var(--coral-hex)}
+.school-btn.sel{background:var(--coral-hex);color:var(--white-warm);border-color:var(--coral-hex)}
 
 /* ── Hidden groups ── */
 .reg-fields{display:none}
@@ -141,14 +146,14 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     <div class="brand-watermark">遇</div>
     <div class="brand-deco">
       <span class="brand-deco-line"></span>
-      <span class="brand-eyebrow">CSU Date</span>
+      <span class="brand-eyebrow">YueluDate</span>
     </div>
     <div class="brand-content">
       <h1 class="brand-tagline">不刷屏，<br>每周遇见<em>一个</em><br>对的人</h1>
-      <p class="brand-desc">中南大学专属校园匹配平台。<br>填写问卷，每周四收到你的专属匹配。</p>
+      <p class="brand-desc">岳麓山高校匹配平台。<br>填写问卷，每周四收到你的专属匹配。</p>
       <div class="brand-stat">
         <span class="pulse"></span>
-        <span>本周活跃 <strong>2,847</strong> 位中南人</span>
+        <span>已有 <strong id="activeUsersCount">--</strong> 位岳麓人加入</span>
       </div>
     </div>
   </div>
@@ -158,15 +163,10 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     <div class="form-wrapper">
       <div class="form-header">
         <h2 class="form-title" id="formTitle">欢迎回来</h2>
-        <p class="form-subtitle" id="formSubtitle">登录你的 CSU Date 账户</p>
+        <p class="form-subtitle" id="formSubtitle">登录你的 YueluDate 账户</p>
       </div>
 
       <form id="loginForm" onsubmit="handleSubmit(event)">
-        <div class="form-error" id="formError">
-          <span class="material-symbols-outlined">error</span>
-          <span id="errorMsg">请填写完整的信息</span>
-        </div>
-
         <!-- Registration-only fields -->
         <div class="reg-fields" id="regFields">
           <div class="input-group">
@@ -182,11 +182,25 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
               <div class="input-field">
                 <select id="regCampus">
                   <option value="">选择校区</option>
-                  <option>岳麓山校区</option>
-                  <option>潇湘校区</option>
-                  <option>南校区</option>
-                  <option>天心校区</option>
-                  <option>湘雅校区</option>
+                  <optgroup label="中南大学">
+                    <option>新校区</option>
+                    <option>南校区</option>
+                    <option>本部</option>
+                    <option>湘雅校区</option>
+                    <option>铁道校区</option>
+                  </optgroup>
+                  <optgroup label="湖南大学">
+                    <option>南校区(湖大)</option>
+                    <option>财院校区</option>
+                  </optgroup>
+                  <optgroup label="湖南师范大学">
+                    <option>二里半校区</option>
+                    <option>天马校区</option>
+                    <option>南院校区</option>
+                    <option>咸嘉湖校区</option>
+                    <option>桃花坪校区</option>
+                    <option>张公岭校区</option>
+                  </optgroup>
                 </select>
                 <span class="material-symbols-outlined field-icon">location_on</span>
               </div>
@@ -216,13 +230,30 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
         </div>
 
         <!-- Shared fields -->
-        <div class="input-group">
-          <label class="input-label" for="email">学校邮箱</label>
-          <div class="input-field">
-            <input type="text" id="email" placeholder="你的学号" autocomplete="username" required/>
-            <span class="material-symbols-outlined field-icon">mail</span>
-            <span class="input-suffix">@csu.edu.cn</span>
+        <div class="input-group" id="schoolSelectGroup">
+          <label class="input-label">选择学校</label>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <button type="button" class="school-btn sel" data-domain="@csu.edu.cn" onclick="pickSchool(this)">中南大学</button>
+            <button type="button" class="school-btn" data-domain="@hnu.edu.cn" onclick="pickSchool(this)">湖南大学</button>
+            <button type="button" class="school-btn" data-domain="@hunnu.edu.cn" onclick="pickSchool(this)">湖南师范大学</button>
           </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label" for="email" id="emailLabel">学校邮箱</label>
+          <div class="input-field">
+            <input type="text" id="email" placeholder="学号 或 完整邮箱地址" autocomplete="username" required/>
+            <span class="material-symbols-outlined field-icon">mail</span>
+            <span class="input-suffix" id="emailSuffix">@csu.edu.cn</span>
+          </div>
+          <input type="checkbox" id="noEdu" style="display:none"/>
+          <span id="emailHint" style="display:block;margin-top:.4rem;font-size:.7rem;color:var(--text-secondary);opacity:.75">
+            其他邮箱注册的用户，请直接输入完整邮箱地址登录
+          </span>
+          <a href="about.html#edu-email-guide" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:.25rem;margin-top:.5rem;font-size:.75rem;color:var(--coral-hex);text-decoration:none;font-weight:500">
+            <span class="material-symbols-outlined" style="font-size:.875rem">help</span>
+            没有教育邮箱？查看各校注册指引
+          </a>
         </div>
 
         <!-- Verification code (register only) -->
@@ -260,7 +291,12 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
             <input type="checkbox" id="remember" name="remember"/>
             记住我
           </label>
-          <a href="#" class="forgot-link">忘记密码？</a>
+          <a href="javascript:void(0)" class="forgot-link" onclick="enterResetMode()">忘记密码？</a>
+        </div>
+
+        <div class="form-error" id="formError">
+          <span class="material-symbols-outlined">error</span>
+          <span id="errorMsg">请填写完整的信息</span>
         </div>
 
         <button type="submit" class="btn-login" id="submitBtn">
@@ -272,6 +308,9 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
       <div class="form-footer" id="formFooter">
         <p>还没有账户？<a onclick="toggleMode()">立即注册</a></p>
       </div>
+      <p style="text-align:center;margin-top:1.25rem;font-size:.6875rem;color:var(--text-ghost);line-height:1.6">
+        注册或登录即表示你已阅读并同意<br><a href="about.html#disclaimer" target="_blank" style="color:var(--coral-hex);text-decoration:none;font-weight:500">《免责声明》</a>和<a href="about.html" target="_blank" style="color:var(--coral-hex);text-decoration:none;font-weight:500">《隐私政策》</a>
+      </p>
     </div>
   </div>
 
@@ -294,14 +333,66 @@ let generatedCode=null;
 let codeTimer=null;
 let codeCooldown=0;
 
+function toggleNoEdu(){
+  const checked=document.getElementById('noEdu').checked;
+  const emailInput=document.getElementById('email');
+  const suffix=document.getElementById('emailSuffix');
+  const label=document.getElementById('emailLabel');
+  if(checked){
+    suffix.style.display='none';
+    emailInput.placeholder='输入你的邮箱地址';
+    emailInput.type='email';
+    label.textContent='邮箱';
+  }else{
+    suffix.style.display='';
+    emailInput.placeholder='学号 或 完整邮箱地址';
+    emailInput.type='text';
+    label.textContent='学校邮箱';
+  }
+}
+
+var selectedDomain='@csu.edu.cn';
+function pickSchool(btn){
+  document.querySelectorAll('.school-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+  selectedDomain=btn.dataset.domain;
+  document.getElementById('emailSuffix').textContent=selectedDomain;
+  // 如果用户还没输入@，更新后缀显示
+  var emailVal=document.getElementById('email').value;
+  if(!emailVal.includes('@')){
+    document.getElementById('emailSuffix').style.display='';
+  }
+}
+
+// 自动检测：用户输入@时隐藏后缀，方便非教育邮箱用户直接输入完整邮箱登录
+document.addEventListener('DOMContentLoaded',function(){
+  const emailInput=document.getElementById('email');
+  const suffix=document.getElementById('emailSuffix');
+  const label=document.getElementById('emailLabel');
+  const hint=document.getElementById('emailHint');
+  emailInput.addEventListener('input',function(){
+    const val=emailInput.value;
+    if(val.includes('@')){
+      suffix.style.display='none';
+      label.textContent='邮箱';
+      hint.style.display='none';
+    }else if(!document.getElementById('noEdu').checked){
+      suffix.style.display='';
+      label.textContent='学校邮箱';
+      hint.style.display='block';
+    }
+  });
+});
+
 function toggleMode(){
   mode=mode==='login'?'register':'login';
   document.getElementById('formError').classList.remove('show');
   const isReg=mode==='register';
   document.getElementById('formTitle').textContent=isReg?'创建账户':'欢迎回来';
-  document.getElementById('formSubtitle').textContent=isReg?'注册 CSU Date，开启每周匹配':'登录你的 CSU Date 账户';
+  document.getElementById('formSubtitle').textContent=isReg?'注册 YueluDate，开启每周匹配':'登录你的 YueluDate 账户';
   document.getElementById('regFields').classList.toggle('show',isReg);
   document.getElementById('codeFields').classList.toggle('show',isReg);
+  document.getElementById('schoolSelectGroup').style.display='';
   document.getElementById('loginExtras').style.display=isReg?'none':'flex';
   document.getElementById('btnText').textContent=isReg?'注册':'登录';
   document.getElementById('formFooter').innerHTML=isReg
@@ -316,36 +407,92 @@ function toggleMode(){
   sendBtn.textContent='发送验证码';
 }
 
-function sendCode(){
+function enterResetMode(){
+  mode='reset';
+  document.getElementById('formError').classList.remove('show');
+  document.getElementById('formTitle').textContent='重置密码';
+  document.getElementById('formSubtitle').textContent='通过邮箱验证码重置你的密码';
+  document.getElementById('regFields').classList.remove('show');
+  document.getElementById('codeFields').classList.add('show');
+  document.getElementById('loginExtras').style.display='none';
+  document.getElementById('btnText').textContent='重置密码';
+  document.getElementById('formFooter').innerHTML='<p>想起密码了？<a onclick="exitResetMode()">返回登录</a></p>';
+  generatedCode=null;
+  document.getElementById('codeSent').classList.remove('show');
+  if(codeTimer){clearInterval(codeTimer);codeTimer=null;}
+  var sendBtn=document.getElementById('sendCodeBtn');
+  sendBtn.disabled=false;
+  sendBtn.textContent='发送验证码';
+}
+
+function exitResetMode(){
+  mode='login';
+  document.getElementById('formError').classList.remove('show');
+  document.getElementById('formTitle').textContent='欢迎回来';
+  document.getElementById('formSubtitle').textContent='登录你的 YueluDate 账户';
+  document.getElementById('regFields').classList.remove('show');
+  document.getElementById('codeFields').classList.remove('show');
+  document.getElementById('loginExtras').style.display='flex';
+  document.getElementById('btnText').textContent='登录';
+  document.getElementById('formFooter').innerHTML='<p>还没有账户？<a onclick="toggleMode()">立即注册</a></p>';
+}
+
+// 统一处理邮箱：学号自动拼上选中学校的域名
+function resolveEmail(raw){
+  if(!raw) return raw;
+  if(raw.includes('@')) return raw;
+  return raw + selectedDomain;
+}
+
+async function sendCode(){
   const email=document.getElementById('email').value.trim();
   if(!email){
     showError('请先填写学号');
     return;
   }
-  // Generate a 6-digit code (simulated)
-  generatedCode=String(Math.floor(100000+Math.random()*900000));
-  console.log('[CSU Date] 验证码已发送至 '+email+'@csu.edu.cn：'+generatedCode);
-
-  // Show confirmation
-  const sentEl=document.getElementById('codeSent');
-  document.getElementById('codeSentMsg').textContent='验证码已发送至 '+email+'@csu.edu.cn（控制台查看）';
-  sentEl.classList.add('show');
-
-  // Start cooldown
-  codeCooldown=60;
   const btn=document.getElementById('sendCodeBtn');
   btn.disabled=true;
-  btn.textContent=codeCooldown+'s';
-  codeTimer=setInterval(()=>{
-    codeCooldown--;
-    if(codeCooldown<=0){
-      clearInterval(codeTimer);codeTimer=null;
+  btn.textContent='发送中...';
+
+  try{
+    const noEdu=document.getElementById('noEdu').checked;
+    const res=await csudateFetch('/api/auth/send-code',{
+      method:'POST',
+      body:JSON.stringify({email:resolveEmail(email),no_edu:noEdu})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){
+      showError(data.detail||'发送失败，请稍后重试');
       btn.disabled=false;
-      btn.textContent='重新发送';
-    }else{
-      btn.textContent=codeCooldown+'s';
+      btn.textContent='发送验证码';
+      return;
     }
-  },1000);
+    generatedCode='server';
+
+    const sentEl=document.getElementById('codeSent');
+    const noEdu2=document.getElementById('noEdu').checked;
+    const displayEmail=noEdu2?email:(email.includes('@')?email:email+selectedDomain);
+    document.getElementById('codeSentMsg').textContent='验证码已发送至 '+displayEmail+'，请查收邮箱';
+    sentEl.classList.add('show');
+
+    codeCooldown=60;
+    btn.textContent=codeCooldown+'s';
+    codeTimer=setInterval(()=>{
+      codeCooldown--;
+      if(codeCooldown<=0){
+        clearInterval(codeTimer);codeTimer=null;
+        btn.disabled=false;
+        btn.textContent='重新发送';
+      }else{
+        btn.textContent=codeCooldown+'s';
+      }
+    },1000);
+  }catch(err){
+    console.error(err);
+    showError('无法连接服务器');
+    btn.disabled=false;
+    btn.textContent='发送验证码';
+  }
 }
 
 function showError(msg){
@@ -369,7 +516,6 @@ function resetSubmitBtn(){
 function persistSession(payload){
   if(payload.access_token){
     localStorage.setItem('csudate_token',payload.access_token);
-    localStorage.setItem('csudate_access_token',payload.access_token);
   }
   localStorage.setItem('csudate_user',JSON.stringify(payload.user));
 }
@@ -399,31 +545,6 @@ async function handleSubmit(e){
   btn.classList.add('loading');
   btn.innerHTML='<span class="spinner"></span>';
 
-  // 离线演示账号（不请求后端、无 JWT）
-  if(mode==='login'&&(email==='test'||email==='test2')&&pw==='test'){
-    csudateLogout();
-    const demoUser={
-      id:'8209190101',
-      email:'8209190101@csu.edu.cn',
-      name:'林晓霜',
-      campus:'岳麓山校区',
-      grade:'大三',
-      major:'计算机科学与技术',
-      bio:'喜欢在图书馆靠窗的位置看书，偶尔去岳麓山跑步。相信慢慢来，比较快。',
-      values:['经世致用','共情力','独立思考','好奇心'],
-      wechat:'xiaoshuang_csu',
-      stats:{matches:email==='test'?12:3,bestScore:email==='test'?89:76,weeks:7},
-      loggedIn:true,
-      loginTime:Date.now(),
-      quizCompleted:true,
-      weeklyMatch:email==='test',
-      paused:false
-    };
-    localStorage.setItem('csudate_user',JSON.stringify(demoUser));
-    setTimeout(()=>{window.location.href=getRedirectUrl(demoUser);},400);
-    return;
-  }
-
   try{
     if(mode==='register'){
       const name=document.getElementById('regName').value.trim();
@@ -437,21 +558,28 @@ async function handleSubmit(e){
         resetSubmitBtn();
         return;
       }
+      if(pw.length<6){
+        errMsg.textContent='密码至少需要6位';
+        errEl.classList.add('show');
+        resetSubmitBtn();
+        return;
+      }
       if(!generatedCode){
         errMsg.textContent='请先发送验证码';
         errEl.classList.add('show');
         resetSubmitBtn();
         return;
       }
-      if(code!==generatedCode){
-        errMsg.textContent='验证码错误，请重新输入';
+      if(!code||code.length!==6){
+        errMsg.textContent='请输入6位验证码';
         errEl.classList.add('show');
         resetSubmitBtn();
         return;
       }
+      const noEduReg=document.getElementById('noEdu').checked;
       const res=await csudateFetch('/api/auth/register',{
         method:'POST',
-        body:JSON.stringify({email:email,password:pw,name:name,campus:campus,grade:grade,major:major})
+        body:JSON.stringify({email:resolveEmail(email),password:pw,code:code,name:name,campus:campus,grade:grade,major:major,no_edu:noEduReg})
       });
       const data=await res.json().catch(()=>({}));
       if(!res.ok){
@@ -461,10 +589,45 @@ async function handleSubmit(e){
       }
       persistSession(data);
       window.location.href=getRedirectUrl(data.user);
+    }else if(mode==='reset'){
+      const code=document.getElementById('verifyCode').value.trim();
+      if(pw.length<6){
+        showError('新密码至少需要6位');
+        resetSubmitBtn();
+        return;
+      }
+      if(!generatedCode){
+        showError('请先发送验证码');
+        resetSubmitBtn();
+        return;
+      }
+      if(!code||code.length!==6){
+        showError('请输入6位验证码');
+        resetSubmitBtn();
+        return;
+      }
+      const noEduReset=document.getElementById('noEdu').checked;
+      const res=await csudateFetch('/api/auth/reset-password',{
+        method:'POST',
+        body:JSON.stringify({email:resolveEmail(email),new_password:pw,code:code,no_edu:noEduReset})
+      });
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok){
+        showError(csudateApiErrorMessage(data));
+        resetSubmitBtn();
+        return;
+      }
+      exitResetMode();
+      showError('密码已重置，请重新登录');
+      document.getElementById('formError').style.background='rgba(34,197,94,0.08)';
+      document.getElementById('formError').style.borderColor='rgba(34,197,94,0.3)';
+      document.getElementById('formError').style.color='#22c55e';
+      resetSubmitBtn();
     }else{
+      const noEduLogin=document.getElementById('noEdu').checked;
       const res=await csudateFetch('/api/auth/login',{
         method:'POST',
-        body:JSON.stringify({email:email,password:pw})
+        body:JSON.stringify({email:resolveEmail(email),password:pw,no_edu:noEduLogin})
       });
       const data=await res.json().catch(()=>({}));
       if(!res.ok){
@@ -504,6 +667,17 @@ async function handleSubmit(e){
   if(redirectParam==='quiz'&&!raw){
     toggleMode();
   }
+})();
+
+// 动态加载用户统计
+(function(){
+  fetch(CSU_DATE_API_BASE()+'/api/stats')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var el=document.getElementById('activeUsersCount');
+      if(el&&d.totalUsers) el.textContent=d.totalUsers.toLocaleString();
+    })
+    .catch(function(){});
 })();
 </script>
 

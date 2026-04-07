@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Database
+*.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs_*.txt
+
+# Data files
+*.xlsx
+*.png
+*.json
+!stitch/vercel.json
+!csu-datedrop-backend/accounts.json
+!csu-datedrop-backend/announcements.json
+
+# Local scripts
+*.bat
+backfill_created_at.py
+create_demo_account.py
+deploy_dashboard.py
+export_matches.py
+fetch_logs.py
+plot_growth.py
+run_local_matching.py
+debug_leo.py
+matching_result_local.json
+preview_edu_warning.html
+datedrop_remote.db
+
+# Claude
+.claude/

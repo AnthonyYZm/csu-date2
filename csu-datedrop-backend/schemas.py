@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -12,7 +12,7 @@ class QuizSubmit(BaseModel):
     campus: Optional[str] = None
     crossCampus: Optional[str] = None
     sexuality: Optional[str] = None
-    raw_quiz_data: dict[str, Any] = Field(default_factory=dict)
+    raw_quiz_data: Dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="before")
     @classmethod
@@ -31,20 +31,31 @@ class QuizSubmit(BaseModel):
 
 
 class RegisterRequest(BaseModel):
-    email: str = Field(..., description="完整邮箱或学号（将自动补全 @csu.edu.cn）")
+    email: str = Field(..., description="完整邮箱或学号（将自动补全 @csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）")
     password: str = Field(..., min_length=6)
+    code: str = Field(..., min_length=6, max_length=6, description="邮箱验证码")
     name: str
     campus: str
     grade: str
     major: str
+    no_edu: bool = False
 
 
 class LoginRequest(BaseModel):
     email: str
     password: str
+    no_edu: bool = False
 
 
 # --- User ---
+
+
+class ProfileUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    bio: Optional[str] = None
+    campus: Optional[str] = None
+    grade: Optional[str] = None
+    major: Optional[str] = None
 
 
 class WechatUpdateRequest(BaseModel):
@@ -58,6 +69,36 @@ class ShootRequest(BaseModel):
 
 class PausedRequest(BaseModel):
     paused: bool
+
+
+class GreetRequest(BaseModel):
+    message: str
+
+
+class SendCodeRequest(BaseModel):
+    email: str = Field(..., description="完整邮箱或学号")
+    no_edu: bool = False
+
+
+class VerifyCodeRequest(BaseModel):
+    email: str
+    code: str = Field(..., min_length=6, max_length=6)
+
+
+class EduEmailSendCodeRequest(BaseModel):
+    edu_email: str = Field(..., description="教育邮箱地址（@csu.edu.cn / @hnu.edu.cn / @hunnu.edu.cn）")
+
+
+class EduEmailVerifyRequest(BaseModel):
+    edu_email: str = Field(..., description="教育邮箱地址")
+    code: str = Field(..., min_length=6, max_length=6, description="验证码")
+
+
+class ResetPasswordRequest(BaseModel):
+    email: str = Field(..., description="注册邮箱")
+    code: str = Field(..., min_length=6, max_length=6, description="验证码")
+    new_password: str = Field(..., min_length=6, description="新密码")
+    no_edu: bool = False
 
 
 class RunMatchBody(BaseModel):
