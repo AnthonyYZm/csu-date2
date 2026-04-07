@@ -122,9 +122,21 @@ def generate_and_send(email: str):
         email_id = r.get("id") if isinstance(r, dict) else getattr(r, "id", None)
         if email_id:
             try:
-                time.sleep(1)
-                detail = resend.Emails.get(email_id)
-                last_event = detail.get("last_event") if isinstance(detail, dict) else getattr(detail, "last_event", None)
+                # 等待并轮询状态（退信可能需要几秒才返回）
+                last_event = None
+                for _wait in (1, 2):
+                    time.sleep(_wait)
+                    detail = resend.Emails.get(email_id)
+                    last_event = detail.get("last_event") if isinstance(detail, dict) else getattr(detail, "last_event", None)
+                    if last_event in ("bounced", "suppressed", "delivered"):
+                        break
+                if last_event == "bounced":
+                    log.warning("邮件退信: %s (email_id=%s)", email, email_id)
+                    _store.pop(email, None)
+                    return False, (
+                        f"邮件发送失败：{email} 不存在或未注册。"
+                        "请检查邮箱地址是否正确，或前往学校邮箱系统先激活账号。"
+                    )
                 if last_event == "suppressed":
                     log.warning("Resend 抑制，回退 QQ SMTP: %s", email)
                     if _send_via_qq_smtp(email, code):
