@@ -256,15 +256,6 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
     <p class="greeting-sub" id="greetingSub"></p>
   </div>
 
-  <!-- Announcement Board -->
-  <div class="announce-card hidden" id="announceCard">
-    <div class="announce-head">
-      <div class="announce-icon"><span class="material-symbols-outlined">campaign</span></div>
-      <h2 class="announce-title">近期更新</h2>
-    </div>
-    <div class="announce-list" id="announceList"></div>
-  </div>
-
   <!-- Edu Email Verification Banner (non-edu users only) -->
   <div class="edu-banner hidden" id="eduBanner">
     <div class="edu-banner-head">
@@ -730,7 +721,6 @@ function renderMatchHistory(threads){
   try{
     applyDashboardUser(u);
     showEduBanner(u);
-    loadAnnouncements();
   }catch(e){window.location.href='login.html';}
 
   // 从 /api/inbox 加载真实匹配数据
