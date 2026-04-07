@@ -268,6 +268,7 @@ class Participant:
 
     grade: Optional[int] = None
     campus: Optional[str] = None
+    school: Optional[str] = None
     college: Optional[str] = None
     hometown: Optional[str] = None
 
@@ -343,6 +344,7 @@ class Participant:
             acceptable_partner_genders=acceptable_partner_genders,
             grade=_maybe_int(hard.get("grade")),
             campus=normalize_token(hard.get("campus")),
+            school=normalize_token(hard.get("school")),
             college=normalize_token(hard.get("college")),
             hometown=normalize_token(hard.get("hometown")),
             height=_maybe_float(hard.get("height")),
@@ -798,8 +800,11 @@ def directional_context_fit(owner: Participant, other: Participant) -> GroupScor
     score = 0.52
     detail: Dict[str, Any] = {"group": "context_fit", "signals": {}}
 
+    if owner.school and other.school and owner.school == other.school:
+        score += 0.10
+        detail["signals"]["same_school"] = True
     if owner.campus and other.campus and owner.campus == other.campus:
-        score += 0.16
+        score += 0.12
         detail["signals"]["same_campus"] = True
     if owner.grade is not None and other.grade is not None:
         gap = abs(owner.grade - other.grade)

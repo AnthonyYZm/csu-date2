@@ -131,10 +131,18 @@ def map_studyspot(raw: Optional[str]) -> str:
         return "library"
     t = str(raw).strip()
     m = {
+        # 中南大学
         "新校区图书馆": "library",
         "本部老图": "library",
         "铁道校区图书馆": "library",
+        # 湖南大学
+        "湖大图书馆": "library",
+        "岳麓书院自习室": "library",
+        # 湖南师范大学
+        "师大图书馆": "library",
+        # 共享
         "后湖边长椅": "anywhere",
+        "桃子湖边": "anywhere",
         "咖啡馆": "cafe",
         "不自习": "dorm",
     }
@@ -272,6 +280,9 @@ def user_profile_to_participant_item(
     studyspot = map_studyspot(raw.get("studyspot"))
     meet_freq = map_meet_freq(raw.get("meet_freq"))
 
+    school = raw.get("school")
+    school_s = str(school).strip().lower() if school else None
+
     return {
         "userId": str(user.id),
         "hardFilters": {
@@ -279,6 +290,7 @@ def user_profile_to_participant_item(
             "sexuality": map_sexuality(profile.sexuality),
             "grade": grade_to_int(user.grade, default=3),
             "campus": str(profile.campus or "").strip().lower() or None,
+            "school": school_s,
             "college": college_s,
             "hometown": hometown_s,
             "height": height_f,
