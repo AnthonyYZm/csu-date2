@@ -93,6 +93,11 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
 .form-error.show{display:flex}
 .form-error .material-symbols-outlined{font-size:1rem;flex-shrink:0}
 
+/* ── School selector buttons ── */
+.school-btn{padding:.5rem 1rem;border-radius:9999px;border:1.5px solid var(--cream-deep);background:var(--white-warm);color:var(--text-dim);font-family:'Outfit',sans-serif;font-size:.8125rem;font-weight:500;cursor:pointer;transition:all .2s}
+.school-btn:hover{border-color:var(--coral-hex);color:var(--coral-hex)}
+.school-btn.sel{background:var(--coral-hex);color:var(--white-warm);border-color:var(--coral-hex)}
+
 /* ── Hidden groups ── */
 .reg-fields{display:none}
 .reg-fields.show{display:block}
@@ -177,11 +182,25 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
               <div class="input-field">
                 <select id="regCampus">
                   <option value="">选择校区</option>
-                  <option>岳麓山校区</option>
-                  <option>潇湘校区</option>
-                  <option>南校区</option>
-                  <option>天心校区</option>
-                  <option>湘雅校区</option>
+                  <optgroup label="中南大学">
+                    <option>新校区</option>
+                    <option>南校区</option>
+                    <option>本部</option>
+                    <option>湘雅校区</option>
+                    <option>铁道校区</option>
+                  </optgroup>
+                  <optgroup label="湖南大学">
+                    <option>南校区(湖大)</option>
+                    <option>财院校区</option>
+                  </optgroup>
+                  <optgroup label="湖南师范大学">
+                    <option>二里半校区</option>
+                    <option>天马校区</option>
+                    <option>南院校区</option>
+                    <option>咸嘉湖校区</option>
+                    <option>桃花坪校区</option>
+                    <option>张公岭校区</option>
+                  </optgroup>
                 </select>
                 <span class="material-symbols-outlined field-icon">location_on</span>
               </div>
@@ -211,6 +230,14 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
         </div>
 
         <!-- Shared fields -->
+        <div class="input-group" id="schoolSelectGroup" style="display:none">
+          <label class="input-label">选择学校</label>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <button type="button" class="school-btn sel" data-domain="@csu.edu.cn" onclick="pickSchool(this)">中南大学</button>
+            <button type="button" class="school-btn" data-domain="@hnu.edu.cn" onclick="pickSchool(this)">湖南大学</button>
+            <button type="button" class="school-btn" data-domain="@hunnu.edu.cn" onclick="pickSchool(this)">湖南师范大学</button>
+          </div>
+        </div>
         <div class="input-group">
           <label class="input-label" for="email" id="emailLabel">学校邮箱</label>
           <div class="input-field">
@@ -220,7 +247,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
           </div>
           <input type="checkbox" id="noEdu" style="display:none"/>
           <span id="emailHint" style="display:block;margin-top:.4rem;font-size:.7rem;color:var(--text-secondary);opacity:.75">
-            非教育邮箱注册的用户，请直接输入完整邮箱地址登录
+            其他邮箱注册的用户，请直接输入完整邮箱地址登录
           </span>
           <a href="about.html#edu-email-guide" target="_blank" rel="noopener"
              style="display:inline-flex;align-items:center;gap:.25rem;margin-top:.5rem;font-size:.75rem;color:var(--coral-hex);text-decoration:none;font-weight:500">
@@ -324,6 +351,19 @@ function toggleNoEdu(){
   }
 }
 
+var selectedDomain='@csu.edu.cn';
+function pickSchool(btn){
+  document.querySelectorAll('.school-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+  selectedDomain=btn.dataset.domain;
+  document.getElementById('emailSuffix').textContent=selectedDomain;
+  // 如果用户还没输入@，更新后缀显示
+  var emailVal=document.getElementById('email').value;
+  if(!emailVal.includes('@')){
+    document.getElementById('emailSuffix').style.display='';
+  }
+}
+
 // 自动检测：用户输入@时隐藏后缀，方便非教育邮箱用户直接输入完整邮箱登录
 document.addEventListener('DOMContentLoaded',function(){
   const emailInput=document.getElementById('email');
@@ -352,6 +392,7 @@ function toggleMode(){
   document.getElementById('formSubtitle').textContent=isReg?'注册 YueluDate，开启每周匹配':'登录你的 YueluDate 账户';
   document.getElementById('regFields').classList.toggle('show',isReg);
   document.getElementById('codeFields').classList.toggle('show',isReg);
+  document.getElementById('schoolSelectGroup').style.display=isReg?'':'none';
   document.getElementById('loginExtras').style.display=isReg?'none':'flex';
   document.getElementById('btnText').textContent=isReg?'注册':'登录';
   document.getElementById('formFooter').innerHTML=isReg
@@ -423,7 +464,7 @@ async function sendCode(){
 
     const sentEl=document.getElementById('codeSent');
     const noEdu2=document.getElementById('noEdu').checked;
-    const displayEmail=noEdu2?email:email+'@csu.edu.cn';
+    const displayEmail=noEdu2?email:(email.includes('@')?email:email+selectedDomain);
     document.getElementById('codeSentMsg').textContent='验证码已发送至 '+displayEmail+'，请查收邮箱';
     sentEl.classList.add('show');
 
