@@ -683,6 +683,9 @@ def auth_login(body: LoginRequest, db: Session = Depends(get_db)):
     user = None
     for email in candidates:
         user = db.query(User).filter(User.email == email).first()
+        if not user:
+            # 也尝试匹配已绑定的教育邮箱（非教育邮箱注册用户验证后可用教育邮箱登录）
+            user = db.query(User).filter(User.edu_email == email).first()
         if user:
             break
     if not user or not verify_password(body.password, user.hashed_password):
