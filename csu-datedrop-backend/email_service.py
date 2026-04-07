@@ -1,12 +1,15 @@
 """
-邮箱验证服务 — 基于 Resend
+邮箱验证服务 — 基于 Resend，Resend 抑制时回退到 QQ 邮箱 SMTP。
 验证码存储在内存中（带 TTL），生产环境可换 Redis。
 """
 
 import logging
 import os
 import random
+import smtplib
 import time
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from typing import Optional
 
 import resend
@@ -20,6 +23,10 @@ resend.api_key = os.getenv("RESEND_API_KEY", "")
 
 # 发件地址：域名验证通过后可用任意前缀
 FROM_EMAIL = os.getenv("FROM_EMAIL", "verify@csudate.com")
+
+# QQ 邮箱 SMTP 回退配置
+QQ_SMTP_EMAIL = os.getenv("QQ_SMTP_EMAIL", "")
+QQ_SMTP_AUTH_CODE = os.getenv("QQ_SMTP_AUTH_CODE", "")
 
 # ── 验证码存储（内存版，重启后清空）──
 # 格式: { "email": {"code": "123456", "expires": timestamp, "attempts": 0} }
@@ -51,8 +58,46 @@ def can_send(email: str):
     return True, ""
 
 
+def _build_code_html(code: str) -> str:
+    """构建验证码邮件 HTML 内容。"""
+    return f"""
+    <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:480px;margin:0 auto;padding:40px 24px;color:#1a1a2e">
+      <h2 style="margin:0 0 8px;font-size:22px">CSU Date 邮箱验证</h2>
+      <p style="color:#666;margin:0 0 24px;font-size:14px">你正在注册 CSU Date 账号，请使用以下验证码完成验证：</p>
+      <div style="background:#f5f3ee;border-radius:12px;padding:24px;text-align:center;margin:0 0 24px">
+        <span style="font-size:36px;font-weight:700;letter-spacing:8px;color:#1a1a2e">{code}</span>
+      </div>
+      <p style="color:#999;font-size:12px;margin:0">验证码 10 分钟内有效，请勿泄露给他人。</p>
+      <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
+      <p style="color:#bbb;font-size:11px;margin:0">如非本人操作请忽略此邮件。<br>CSU Date · 岳麓山下的匹配实验</p>
+    </div>
+    """
+
+
+def _send_via_qq_smtp(to_email: str, code: str) -> bool:
+    """通过 QQ 邮箱 SMTP 发送验证码，作为 Resend 抑制时的回退。"""
+    if not QQ_SMTP_EMAIL or not QQ_SMTP_AUTH_CODE:
+        log.error("QQ SMTP 未配置，无法回退发送")
+        return False
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["From"] = f"CSU Date <{QQ_SMTP_EMAIL}>"
+        msg["To"] = to_email
+        msg["Subject"] = "【CSU Date】邮箱验证码"
+        msg.attach(MIMEText(_build_code_html(code), "html", "utf-8"))
+
+        with smtplib.SMTP_SSL("smtp.qq.com", 465, timeout=10) as s:
+            s.login(QQ_SMTP_EMAIL, QQ_SMTP_AUTH_CODE)
+            s.sendmail(QQ_SMTP_EMAIL, [to_email], msg.as_string())
+        log.info("QQ SMTP 回退发送成功: %s", to_email)
+        return True
+    except Exception as e:
+        log.error("QQ SMTP 发送失败: %s -> %s", to_email, e)
+        return False
+
+
 def generate_and_send(email: str):
-    """生成验证码并通过 Resend 发送邮件。返回 (成功, 消息)。"""
+    """生成验证码并通过 Resend 发送邮件；被抑制时自动回退到 QQ 邮箱。返回 (成功, 消息)。"""
     ok, reason = can_send(email)
     if not ok:
         return False, reason
@@ -70,18 +115,7 @@ def generate_and_send(email: str):
             "from": FROM_EMAIL,
             "to": [email],
             "subject": "【CSU Date】邮箱验证码",
-            "html": f"""
-            <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:480px;margin:0 auto;padding:40px 24px;color:#1a1a2e">
-              <h2 style="margin:0 0 8px;font-size:22px">CSU Date 邮箱验证</h2>
-              <p style="color:#666;margin:0 0 24px;font-size:14px">你正在注册 CSU Date 账号，请使用以下验证码完成验证：</p>
-              <div style="background:#f5f3ee;border-radius:12px;padding:24px;text-align:center;margin:0 0 24px">
-                <span style="font-size:36px;font-weight:700;letter-spacing:8px;color:#1a1a2e">{code}</span>
-              </div>
-              <p style="color:#999;font-size:12px;margin:0">验证码 10 分钟内有效，请勿泄露给他人。</p>
-              <hr style="border:none;border-top:1px solid #eee;margin:24px 0">
-              <p style="color:#bbb;font-size:11px;margin:0">如非本人操作请忽略此邮件。<br>CSU Date · 岳麓山下的匹配实验</p>
-            </div>
-            """,
+            "html": _build_code_html(code),
         })
 
         # 检查邮件是否被 Resend 抑制（之前退信/投诉导致）
@@ -92,11 +126,12 @@ def generate_and_send(email: str):
                 detail = resend.Emails.get(email_id)
                 last_event = detail.get("last_event") if isinstance(detail, dict) else getattr(detail, "last_event", None)
                 if last_event == "suppressed":
-                    log.warning("邮件被 Resend 抑制: %s (email_id=%s)", email, email_id)
+                    log.warning("Resend 抑制，回退 QQ SMTP: %s", email)
+                    if _send_via_qq_smtp(email, code):
+                        return True, "验证码已发送（备用通道）"
                     _store.pop(email, None)
                     return False, (
-                        f"邮件发送失败：{email} 已被邮件服务标记为无法送达。"
-                        "请联系管理员解除限制，或尝试使用其他邮箱。"
+                        f"邮件发送失败：{email} 暂时无法送达，请稍后再试或联系管理员。"
                     )
                 log.info("邮件已发送: %s (email_id=%s, status=%s)", email, email_id, last_event)
             except Exception as check_err:
@@ -104,8 +139,10 @@ def generate_and_send(email: str):
 
         return True, "验证码已发送"
     except Exception as e:
-        # 发送失败时清除存储的验证码
-        log.error("邮件发送异常: %s -> %s", email, e)
+        # Resend 完全失败时也尝试 QQ SMTP 回退
+        log.warning("Resend 异常，回退 QQ SMTP: %s -> %s", email, e)
+        if _send_via_qq_smtp(email, code):
+            return True, "验证码已发送（备用通道）"
         _store.pop(email, None)
         return False, f"邮件发送失败: {e}"
 
