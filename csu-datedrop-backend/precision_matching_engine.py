@@ -548,7 +548,12 @@ def diet_compatible(a: Participant, b: Participant, config: PrecisionMatchConfig
     return ((da, db) not in config.diet_hard_conflicts) and ((db, da) not in config.diet_hard_conflicts)
 
 
-def hard_filter_pair(a: Participant, b: Participant, config: PrecisionMatchConfig) -> Tuple[bool, List[str]]:
+def hard_filter_pair(
+    a: Participant,
+    b: Participant,
+    config: PrecisionMatchConfig,
+    strict_constraints: bool = True,
+) -> Tuple[bool, List[str]]:
     reasons: List[str] = []
 
     if not is_active_for_cycle(a):
@@ -562,6 +567,24 @@ def hard_filter_pair(a: Participant, b: Participant, config: PrecisionMatchConfi
         reasons.append("blocked")
     if not gender_compatible(a, b):
         reasons.append("gender_or_sexuality_incompatible")
+
+    # Gender/sexuality + blocked/inactive are the only absolute hard filters.
+    if any(r in {"blocked", "gender_or_sexuality_incompatible"} for r in reasons):
+        return False, reasons
+
+    # strict_constraints=True: keep original behavior (hard eliminate).
+    if strict_constraints:
+        if not height_compatible(a, b):
+            reasons.append("height_preference_incompatible")
+        if not campus_compatible(a, b):
+            reasons.append("cross_campus_incompatible")
+        if not same_college_compatible(a, b, config):
+            reasons.append("same_college_incompatible")
+        if not diet_compatible(a, b, config):
+            reasons.append("diet_incompatible")
+        return len(reasons) == 0, reasons
+
+    # strict_constraints=False: soft mode. Do not eliminate candidates.
     if not height_compatible(a, b):
         reasons.append("height_preference_incompatible")
     if not campus_compatible(a, b):
@@ -571,7 +594,7 @@ def hard_filter_pair(a: Participant, b: Participant, config: PrecisionMatchConfi
     if not diet_compatible(a, b, config):
         reasons.append("diet_incompatible")
 
-    return len(reasons) == 0, reasons
+    return True, reasons
 
 
 def shaped_similarity(a_value: Optional[int], b_value: Optional[int], sensitivity: float = 1.0) -> Optional[float]:
@@ -1174,8 +1197,15 @@ def top_directional_reasons(directional: Dict[str, Any], top_n: int = 4) -> List
     return reasons[:top_n]
 
 
-def score_pair(a: Participant, b: Participant, config: PrecisionMatchConfig) -> Optional[MatchEdge]:
-    passed, hard_filter_reasons = hard_filter_pair(a, b, config)
+def score_pair(
+    a: Participant,
+    b: Participant,
+    config: PrecisionMatchConfig,
+    strict_constraints: bool = True,
+) -> Optional[MatchEdge]:
+    passed, hard_filter_reasons = hard_filter_pair(
+        a, b, config, strict_constraints=strict_constraints
+    )
     if not passed:
         return None
 
@@ -1194,6 +1224,67 @@ def score_pair(a: Participant, b: Participant, config: PrecisionMatchConfig) -> 
     base_score = raw_score * conflict["cap"] * confidence
     total_score = max(0.0, min(1.0, base_score - sum(penalties.values())))
 
+    soft_penalty_detail: Dict[str, Any] = {}
+    if not strict_constraints:
+        # Height: if partner is outside preference range, subtract 0.02 per 1cm.
+        # We use the worst-direction outside distance for conservative scoring.
+        def _height_outside_cm(pref_owner: Participant, partner: Participant) -> float:
+            if (
+                pref_owner.height_pref_min is None
+                or pref_owner.height_pref_max is None
+                or partner.height is None
+            ):
+                return 0.0
+            if partner.height < pref_owner.height_pref_min:
+                return float(pref_owner.height_pref_min - partner.height)
+            if partner.height > pref_owner.height_pref_max:
+                return float(partner.height - pref_owner.height_pref_max)
+            return 0.0
+
+        d1 = _height_outside_cm(a, b)
+        d2 = _height_outside_cm(b, a)
+        max_outside_cm = max(d1, d2)
+
+        height_penalty = 0.0
+        if max_outside_cm > 0:
+            height_penalty = min(0.99, 0.02 * max_outside_cm)
+            total_score = max(0.0, total_score - height_penalty)
+
+        soft_penalty_detail["heightOutsideCmMax"] = round(max_outside_cm, 6)
+        soft_penalty_detail["heightPenalty"] = round(height_penalty, 6)
+
+        # Cross-campus: if someone doesn't accept cross-campus and campuses differ, multiply by 0.7.
+        cross_multiplier = 1.0
+        if a.campus and b.campus and a.campus != b.campus:
+            if (not a.cross_campus) or (not b.cross_campus):
+                cross_multiplier = 0.7
+        total_score *= cross_multiplier
+        soft_penalty_detail["crossCampusMultiplier"] = round(cross_multiplier, 6)
+
+        # Same college: mild multiplier when someone doesn't accept same-college matching.
+        same_col_multiplier = 1.0
+        if a.college and b.college and a.college != b.college:
+            if (not a.accept_same_college) or (not b.accept_same_college):
+                same_col_multiplier = 0.85
+        total_score *= same_col_multiplier
+        soft_penalty_detail["sameCollegeMultiplier"] = round(same_col_multiplier, 6)
+
+        # Diet: mild multiplier when categorical compatibility is poor.
+        diet_multiplier = 1.0
+        try:
+            da = a.categorical.get("diet")
+            db = b.categorical.get("diet")
+            if da is not None and db is not None:
+                ds = categorical_pair_score("diet", da, db, config)
+                if ds is not None and ds < 0.8:
+                    diet_multiplier = 0.9
+        except Exception:
+            pass
+        total_score *= diet_multiplier
+        soft_penalty_detail["dietMultiplier"] = round(diet_multiplier, 6)
+
+        total_score = float(max(0.0, min(1.0, total_score)))
+
     evidence = build_evidence(
         a=a,
         b=b,
@@ -1203,6 +1294,8 @@ def score_pair(a: Participant, b: Participant, config: PrecisionMatchConfig) -> 
         conflict=conflict,
     )
     evidence["hard_filter_reasons"] = hard_filter_reasons
+    if soft_penalty_detail:
+        evidence["soft_penalties"] = soft_penalty_detail
     evidence["mutual_profile"] = {
         "a_to_b": round(a_to_b["score"], 6),
         "b_to_a": round(b_to_a["score"], 6),
@@ -1226,13 +1319,22 @@ def score_pair(a: Participant, b: Participant, config: PrecisionMatchConfig) -> 
         "rank_bonus": 0.0,
         "exclusivity_bonus": 0.0,
     }
+    if soft_penalty_detail:
+        breakdown["heightPenalty"] = soft_penalty_detail.get("heightPenalty", 0.0)
+        breakdown["crossCampusMultiplier"] = soft_penalty_detail.get(
+            "crossCampusMultiplier", 1.0
+        )
+        breakdown["sameCollegeMultiplier"] = soft_penalty_detail.get(
+            "sameCollegeMultiplier", 1.0
+        )
+        breakdown["dietMultiplier"] = soft_penalty_detail.get("dietMultiplier", 1.0)
 
     return MatchEdge(
         user_a=a.user_id,
         user_b=b.user_id,
         base_score=round(base_score, 6),
         total_score=round(total_score, 6),
-        match_weight=0.0,
+        match_weight=round(total_score, 6),
         breakdown=breakdown,
         evidence=evidence,
         penalties=penalties,
@@ -1369,70 +1471,111 @@ def solve_weekly_matches(
     participants = [Participant.from_payload(x) for x in payload.get("participants", [])]
     active_participants = [p for p in participants if is_active_for_cycle(p)]
 
-    candidate_edges = build_candidate_edges(active_participants, config)
-    apply_market_recalibration(candidate_edges, config)
-
-    matched_pairs = maximum_weight_matching(candidate_edges, active_participants)
-    edge_lookup = index_edges(candidate_edges)
+    # Two-round strategy:
+    # 1) “神仙眷侣局” (strict constraints) + 相似度门槛
+    # 2) “将就局/盲盒局” (relaxed constraints) + Top-by-score greedy (no absolute score line)
+    first_round_threshold = 0.70
 
     matched_users: Set[str] = set()
     matches: List[Dict[str, Any]] = []
 
-    for user_a, user_b in matched_pairs:
-        edge = edge_lookup[(user_a, user_b)]
-        if edge.total_score < config.reveal_threshold:
-            continue
+    best_score_by_user: Dict[str, float] = {p.user_id: 0.0 for p in participants}
+    all_edges_considered: List[MatchEdge] = []
 
-        matched_users.add(user_a)
-        matched_users.add(user_b)
+    def _add_match_from_edge(edge: MatchEdge) -> None:
+        ev = edge.evidence or {}
         matches.append(
             {
-                "userA": user_a,
-                "userB": user_b,
+                "userA": edge.user_a,
+                "userB": edge.user_b,
                 "scoreTotal": edge.total_score,
                 "scoreBreakdown": edge.breakdown,
                 "marketContext": edge.market_context,
                 "evidence": edge.evidence,
                 "reportPayload": {
-                    "shared_points": edge.evidence["shared_points"],
-                    "complementary_points": edge.evidence["complementary_points"],
-                    "risk_flags": edge.evidence["risk_flags"],
-                    "directional_reasons": edge.evidence["directional_reasons"],
-                    "mutual_profile": edge.evidence["mutual_profile"],
-                    "chemistry_detail": edge.evidence["chemistry_detail"],
+                    "shared_points": ev.get("shared_points", []),
+                    "complementary_points": ev.get("complementary_points", []),
+                    "risk_flags": ev.get("risk_flags", []),
+                    "directional_reasons": ev.get("directional_reasons", {}),
+                    "mutual_profile": ev.get("mutual_profile", {}),
+                    "chemistry_detail": ev.get("chemistry_detail", {}),
                 },
             }
         )
 
-    candidate_count_by_user: Dict[str, int] = {p.user_id: 0 for p in participants}
-    best_score_by_user: Dict[str, float] = {p.user_id: 0.0 for p in participants}
-    for edge in candidate_edges:
-        candidate_count_by_user[edge.user_a] = candidate_count_by_user.get(edge.user_a, 0) + 1
-        candidate_count_by_user[edge.user_b] = candidate_count_by_user.get(edge.user_b, 0) + 1
+    def _greedy_pick_pairs(edges: List[MatchEdge]) -> List[MatchEdge]:
+        edges_sorted = sorted(edges, key=lambda e: e.total_score, reverse=True)
+        used: Set[str] = set()
+        chosen: List[MatchEdge] = []
+        for e in edges_sorted:
+            if e.user_a in used or e.user_b in used:
+                continue
+            used.add(e.user_a)
+            used.add(e.user_b)
+            chosen.append(e)
+        return chosen
+
+    # -------------------------
+    # Round 1: strict constraints
+    # -------------------------
+    edges_round1: List[MatchEdge] = []
+    for a, b in combinations(active_participants, 2):
+        edge = score_pair(a, b, config, strict_constraints=True)
+        if edge is None:
+            continue
+        all_edges_considered.append(edge)
         best_score_by_user[edge.user_a] = max(best_score_by_user.get(edge.user_a, 0.0), edge.total_score)
         best_score_by_user[edge.user_b] = max(best_score_by_user.get(edge.user_b, 0.0), edge.total_score)
+        if edge.total_score >= first_round_threshold:
+            edges_round1.append(edge)
 
+    chosen_round1 = _greedy_pick_pairs(edges_round1)
+    for e in chosen_round1:
+        matched_users.add(e.user_a)
+        matched_users.add(e.user_b)
+        _add_match_from_edge(e)
+
+    # -------------------------
+    # Round 2: relaxed constraints (soft penalties)
+    # -------------------------
+    remaining = [p for p in active_participants if p.user_id not in matched_users]
+    edges_round2: List[MatchEdge] = []
+    for a, b in combinations(remaining, 2):
+        edge = score_pair(a, b, config, strict_constraints=False)
+        if edge is None:
+            continue
+        all_edges_considered.append(edge)
+        best_score_by_user[edge.user_a] = max(best_score_by_user.get(edge.user_a, 0.0), edge.total_score)
+        best_score_by_user[edge.user_b] = max(best_score_by_user.get(edge.user_b, 0.0), edge.total_score)
+        edges_round2.append(edge)
+
+    chosen_round2 = _greedy_pick_pairs(edges_round2)
+    for e in chosen_round2:
+        matched_users.add(e.user_a)
+        matched_users.add(e.user_b)
+        _add_match_from_edge(e)
+
+    # -------------------------
+    # Unmatched summary
+    # -------------------------
     unmatched: List[Dict[str, Any]] = []
     for p in participants:
+        if p.user_id in matched_users:
+            continue
         if not is_active_for_cycle(p):
             reason = "inactive_for_cycle"
-        elif p.user_id in matched_users:
-            continue
-        elif candidate_count_by_user.get(p.user_id, 0) == 0:
-            reason = "no_candidate_after_precision_filter"
-        elif best_score_by_user.get(p.user_id, 0.0) < config.reveal_threshold:
-            reason = "below_reveal_threshold"
         else:
-            reason = "not_selected_in_global_optimization"
-
+            reason = "not_selected_in_two_rounds"
         unmatched.append(
             {
                 "userId": p.user_id,
                 "reason": reason,
-                "candidateCount": candidate_count_by_user.get(p.user_id, 0),
+                "candidateCount": 0,
                 "bestScore": round(best_score_by_user.get(p.user_id, 0.0), 6),
             }
         )
+
+    edges_preview = sorted(all_edges_considered, key=lambda e: e.total_score, reverse=True)[:200]
 
     return {
         "cycleId": payload.get("cycleId"),
@@ -1442,7 +1585,9 @@ def solve_weekly_matches(
         "debug": {
             "participantCount": len(participants),
             "activeParticipantCount": len(active_participants),
-            "candidateEdgeCount": len(candidate_edges),
+            "round1EdgeCount": len(edges_round1),
+            "round2EdgeCount": len(edges_round2),
+            "chosenMatchCount": len(matches),
             "candidateEdges": [
                 {
                     "userA": e.user_a,
@@ -1454,7 +1599,7 @@ def solve_weekly_matches(
                     "marketContext": e.market_context,
                     "penalties": e.penalties,
                 }
-                for e in sorted(candidate_edges, key=lambda x: x.total_score, reverse=True)
+                for e in edges_preview
             ],
         },
     }
