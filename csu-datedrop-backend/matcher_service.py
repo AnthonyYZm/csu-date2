@@ -342,11 +342,11 @@ def run_weekly_matching(db: Session, week_id: int) -> Dict[str, Any]:
         .all()
     )
 
-    # 过滤掉未验证教育邮箱且超过 3 天的非edu用户
-    rows = [(u, p) for u, p in all_rows if not _is_edu_blocked(u)]
+    # 过滤掉未验证教育邮箱且超过 3 天的非edu用户（女生豁免，保障匹配池性别平衡）
+    rows = [(u, p) for u, p in all_rows if not _is_edu_blocked(u) or p.gender == "女"]
     edu_blocked_count = len(all_rows) - len(rows)
     if edu_blocked_count > 0:
-        logger.info("edu_blocked: %d users excluded from matching", edu_blocked_count)
+        logger.info("edu_blocked: %d users excluded from matching (female exempted)", edu_blocked_count)
 
     if len(rows) < 2:
         return {

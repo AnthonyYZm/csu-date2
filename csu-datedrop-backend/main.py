@@ -530,6 +530,19 @@ def admin_dashboard_stats(db: Session = Depends(get_db)):
     cross_yes = db.query(Profile).filter(Profile.cross_campus_ok == True).count()
     cross_no = db.query(Profile).filter(Profile.cross_campus_ok == False).count()
 
+    # 学校分布
+    all_users = db.query(User).all()
+    school_counts = {"中南大学": 0, "湖南大学": 0, "湖南师范大学": 0}
+    for u in all_users:
+        e = (u.email or "").lower()
+        if e.endswith("@hnu.edu.cn"):
+            school_counts["湖南大学"] += 1
+        elif e.endswith("@hunnu.edu.cn"):
+            school_counts["湖南师范大学"] += 1
+        else:
+            school_counts["中南大学"] += 1
+    school_dist = [{"name": k, "value": v} for k, v in school_counts.items() if v > 0]
+
     return {
         "overview": {
             "totalUsers": total,
@@ -540,6 +553,7 @@ def admin_dashboard_stats(db: Session = Depends(get_db)):
             "matchedUsers": total_matches * 2,
             "unmatchedUsers": quiz_done - paused - total_matches * 2 if quiz_done - paused > total_matches * 2 else 0,
         },
+        "schoolDist": school_dist,
         "campusDist": campus_dist,
         "gradeDist": grade_dist,
         "genderDist": gender_dist,
