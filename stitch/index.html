@@ -333,28 +333,35 @@ input[type="range"]::-moz-range-track{background:transparent;height:4px;border:n
 .modal-actions{display:flex;gap:.75rem;margin-top:.25rem}
 .modal-actions .btn-primary,.modal-actions .btn-secondary{flex:1;text-align:center}
 
-/* ══════════ ANNOUNCEMENTS ══════════ */
-.announce-section{padding:clamp(2.5rem,5vw,4rem) 1.5rem;background:var(--cream)}
-.announce-inner{max-width:48rem;margin:0 auto}
-.announce-head{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding-left:4%}
-.announce-icon{width:2.5rem;height:2.5rem;border-radius:50%;background:oklch(72% 0.12 75/0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.announce-icon .material-symbols-outlined{font-size:1.125rem;color:var(--gold-hex)}
-.announce-title{font-family:'Noto Serif SC',serif;font-weight:700;font-size:clamp(1.125rem,2.5vw,1.375rem);color:var(--ink-hex)}
-.announce-list{display:flex;flex-direction:column;gap:.625rem}
-.announce-item{display:flex;gap:.875rem;padding:1rem 1.25rem;border-radius:1.5rem;background:var(--white-warm);transition:background .2s}
-.announce-item:hover{background:var(--cream-mid)}
-.announce-tag{flex-shrink:0;padding:.2rem .625rem;border-radius:9999px;font-size:.625rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;height:fit-content;margin-top:.125rem}
-.tag-update{background:oklch(48% 0.17 28/0.1);color:var(--coral-hex)}
-.tag-feature{background:oklch(65% 0.08 155/0.1);color:var(--sage-hex)}
-.tag-notice{background:oklch(72% 0.12 75/0.1);color:var(--gold-hex)}
-.announce-body{min-width:0;flex:1}
-.announce-item-title{font-weight:600;font-size:.875rem;color:var(--text);margin-bottom:.1875rem}
-.announce-item-desc{font-size:.8125rem;color:var(--text-dim);line-height:1.6}
-.announce-date{flex-shrink:0;font-size:.6875rem;color:var(--text-ghost);margin-top:.125rem}
+/* ══════════ TOP ANNOUNCEMENT BANNER ══════════ */
+.announce-banner{position:fixed;top:0;left:0;right:0;z-index:999;background:var(--ink-hex);color:var(--white-warm);transform:translateY(-100%);transition:transform .4s cubic-bezier(.16,1,.3,1);overflow:hidden}
+.announce-banner.show{transform:translateY(0)}
+.announce-banner-inner{max-width:72rem;margin:0 auto;padding:.625rem 1.5rem;display:flex;align-items:center;gap:.75rem;font-size:.8125rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.announce-banner-inner::-webkit-scrollbar{display:none}
+.announce-banner .ann-icon{flex-shrink:0;font-size:1rem;color:var(--gold-hex)}
+.announce-banner .ann-items{display:flex;align-items:center;gap:1.5rem;flex:1;min-width:0;white-space:nowrap}
+.announce-banner .ann-entry{display:inline-flex;align-items:center;gap:.5rem;animation:annScroll 20s linear infinite}
+.announce-banner .ann-tag{padding:.125rem .5rem;border-radius:9999px;font-size:.5625rem;font-weight:700;letter-spacing:.05em;flex-shrink:0}
+.ann-tag-update{background:oklch(48% 0.17 28/0.3);color:#fca5a5}
+.ann-tag-feature{background:oklch(65% 0.08 155/0.3);color:#86efac}
+.ann-tag-notice{background:oklch(72% 0.12 75/0.3);color:#fde68a}
+.announce-banner .ann-text{opacity:.9}
+.announce-banner .ann-close{flex-shrink:0;background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:.25rem;display:flex;align-items:center;transition:color .2s}
+.announce-banner .ann-close:hover{color:#fff}
+.announce-banner .ann-close .material-symbols-outlined{font-size:1.125rem}
 </style>
 </head>
 
 <body>
+
+<!-- Top Announcement Banner -->
+<div class="announce-banner" id="announceBanner">
+  <div class="announce-banner-inner">
+    <span class="material-symbols-outlined ann-icon">campaign</span>
+    <div class="ann-items" id="annItems"></div>
+    <button class="ann-close" onclick="closeAnnBanner()"><span class="material-symbols-outlined">close</span></button>
+  </div>
+</div>
 
 <!-- ═══════════════════════ PAGE: LANDING ═══════════════════════ -->
 <div id="page-landing" class="page active">
@@ -389,16 +396,6 @@ input[type="range"]::-moz-range-track{background:transparent;height:4px;border:n
         <button onclick="startQuiz()" class="btn-primary">开始匹配</button>
         <div class="live-indicator"><span class="pulse-dot"></span><strong id="live-count">0</strong> 人已加入</div>
       </div>
-    </div>
-  </section>
-  <!-- Announcement Board -->
-  <section class="announce-section hidden" id="announceSection">
-    <div class="announce-inner reveal">
-      <div class="announce-head">
-        <div class="announce-icon"><span class="material-symbols-outlined">campaign</span></div>
-        <h2 class="announce-title">近期更新</h2>
-      </div>
-      <div class="announce-list" id="announceList"></div>
     </div>
   </section>
   <section class="manifesto"><div class="manifesto-inner reveal"><span class="accent-line" style="margin-bottom:2rem"></span><blockquote class="manifesto-quote">越过岳麓晚霞，穿过后湖倒影，<br>我们相信在所有概率之外，定有某种默契。<br><em>每周只遇见一个人，然后认真了解&thinsp;TA。</em></blockquote></div></section>
@@ -532,21 +529,27 @@ input[type="range"]::-moz-range-track{background:transparent;height:4px;border:n
 <!-- ═══════════════════════ SCRIPT ═══════════════════════ -->
 <script src="api.js"></script>
 <script>
-/* ═══════ ANNOUNCEMENTS ═══════ */
+/* ═══════ TOP ANNOUNCEMENT BANNER ═══════ */
+function closeAnnBanner(){
+  document.getElementById('announceBanner').classList.remove('show');
+  sessionStorage.setItem('ann_closed','1');
+}
 (async function(){
+  if(sessionStorage.getItem('ann_closed'))return;
   try{
     var res=await fetch('/api/announcements');
     var items=await res.json();
     if(!res.ok||!items.length)return;
-    var tagMap={update:['修复','tag-update'],feature:['新功能','tag-feature'],notice:['公告','tag-notice']};
+    var tagMap={update:['修复','ann-tag-update'],feature:['新功能','ann-tag-feature'],notice:['公告','ann-tag-notice']};
     var html='';
-    items.slice(0,5).forEach(function(item){
+    items.slice(0,3).forEach(function(item,i){
       var tag=tagMap[item.type]||tagMap.notice;
-      var t=item.title||'';var c=item.content||'';var d=item.date||'';
-      html+='<div class="announce-item"><span class="announce-tag '+tag[1]+'">'+tag[0]+'</span><div class="announce-body"><div class="announce-item-title">'+t.replace(/</g,'&lt;')+'</div><div class="announce-item-desc">'+c.replace(/</g,'&lt;')+'</div></div><span class="announce-date">'+d.replace(/</g,'&lt;')+'</span></div>';
+      var t=item.title||'';
+      if(i>0)html+='<span style="color:rgba(255,255,255,.2)">|</span> ';
+      html+='<span class="ann-entry"><span class="ann-tag '+tag[1]+'">'+tag[0]+'</span><span class="ann-text">'+t.replace(/</g,'&lt;')+'</span></span>';
     });
-    document.getElementById('announceList').innerHTML=html;
-    document.getElementById('announceSection').classList.remove('hidden');
+    document.getElementById('annItems').innerHTML=html;
+    document.getElementById('announceBanner').classList.add('show');
   }catch(e){}
 })();
 
