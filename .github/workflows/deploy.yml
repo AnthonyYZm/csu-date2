@@ -17,6 +17,7 @@ jobs:
           script: |
             cd /opt/csudate
             git fetch origin main
-            git reset --hard origin/main
+            git checkout origin/main -- . 2>/dev/null || true
+            git reset origin/main
             systemctl restart csudate
             echo "Deploy complete: $(git log --oneline -1)"
