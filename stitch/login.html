@@ -214,11 +214,14 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
         <div class="input-group">
           <label class="input-label" for="email" id="emailLabel">学校邮箱</label>
           <div class="input-field">
-            <input type="text" id="email" placeholder="你的学号" autocomplete="username" required/>
+            <input type="text" id="email" placeholder="学号 或 完整邮箱地址" autocomplete="username" required/>
             <span class="material-symbols-outlined field-icon">mail</span>
             <span class="input-suffix" id="emailSuffix">@csu.edu.cn</span>
           </div>
           <input type="checkbox" id="noEdu" style="display:none"/>
+          <span id="emailHint" style="display:block;margin-top:.4rem;font-size:.7rem;color:var(--text-secondary);opacity:.75">
+            非教育邮箱注册的用户，请直接输入完整邮箱地址登录
+          </span>
           <a href="https://mp.weixin.qq.com/s/3EDO2ened4MGuCSNkf8FQg" target="_blank" rel="noopener"
              style="display:inline-flex;align-items:center;gap:.25rem;margin-top:.5rem;font-size:.75rem;color:var(--coral-hex);text-decoration:none;font-weight:500">
             <span class="material-symbols-outlined" style="font-size:.875rem">help</span>
@@ -312,11 +315,31 @@ function toggleNoEdu(){
     label.textContent='邮箱';
   }else{
     suffix.style.display='';
-    emailInput.placeholder='你的学号';
+    emailInput.placeholder='学号 或 完整邮箱地址';
     emailInput.type='text';
     label.textContent='学校邮箱';
   }
 }
+
+// 自动检测：用户输入@时隐藏后缀，方便非教育邮箱用户直接输入完整邮箱登录
+document.addEventListener('DOMContentLoaded',function(){
+  const emailInput=document.getElementById('email');
+  const suffix=document.getElementById('emailSuffix');
+  const label=document.getElementById('emailLabel');
+  const hint=document.getElementById('emailHint');
+  emailInput.addEventListener('input',function(){
+    const val=emailInput.value;
+    if(val.includes('@')){
+      suffix.style.display='none';
+      label.textContent='邮箱';
+      hint.style.display='none';
+    }else if(!document.getElementById('noEdu').checked){
+      suffix.style.display='';
+      label.textContent='学校邮箱';
+      hint.style.display='block';
+    }
+  });
+});
 
 function toggleMode(){
   mode=mode==='login'?'register':'login';

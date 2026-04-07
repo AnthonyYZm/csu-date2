@@ -627,8 +627,22 @@ def auth_register(body: RegisterRequest, db: Session = Depends(get_db)):
 
 @app.post("/api/auth/login")
 def auth_login(body: LoginRequest, db: Session = Depends(get_db)):
-    email = normalize_csu_email(body.email, no_edu=body.no_edu)
-    user = db.query(User).filter(User.email == email).first()
+    # 登录时宽松匹配：同时尝试教育邮箱和原始邮箱，兼容老的非教育邮箱用户
+    raw = body.email.strip().lower()
+    candidates = []
+    if "@" in raw:
+        candidates.append(raw)
+        # 如果不是教育邮箱，也尝试学号格式（以防用户输入了完整教育邮箱）
+        if not raw.endswith(EDU_DOMAIN):
+            candidates.append(f"{raw.split('@')[0]}{EDU_DOMAIN}")
+    else:
+        # 没有@，按学号处理，拼上教育邮箱后缀
+        candidates.append(f"{raw}{EDU_DOMAIN}")
+    user = None
+    for email in candidates:
+        user = db.query(User).filter(User.email == email).first()
+        if user:
+            break
     if not user or not verify_password(body.password, user.hashed_password):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "邮箱或密码错误")
     token = create_access_token(user.id)
@@ -643,8 +657,22 @@ def auth_login(body: LoginRequest, db: Session = Depends(get_db)):
 @app.post("/api/auth/reset-password")
 def auth_reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
     """通过邮箱验证码重置密码。"""
-    email = normalize_csu_email(body.email, no_edu=body.no_edu)
-    user = db.query(User).filter(User.email == email).first()
+    # 宽松匹配，兼容非教育邮箱用户
+    raw = body.email.strip().lower()
+    candidates = []
+    if "@" in raw:
+        candidates.append(raw)
+        if not raw.endswith(EDU_DOMAIN):
+            candidates.append(f"{raw.split('@')[0]}{EDU_DOMAIN}")
+    else:
+        candidates.append(f"{raw}{EDU_DOMAIN}")
+    user = None
+    email = candidates[0]
+    for e in candidates:
+        user = db.query(User).filter(User.email == e).first()
+        if user:
+            email = e
+            break
     if not user:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "该邮箱未注册")
 
