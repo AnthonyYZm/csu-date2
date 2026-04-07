@@ -230,7 +230,7 @@ body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var
         </div>
 
         <!-- Shared fields -->
-        <div class="input-group" id="schoolSelectGroup" style="display:none">
+        <div class="input-group" id="schoolSelectGroup">
           <label class="input-label">选择学校</label>
           <div style="display:flex;gap:.5rem;flex-wrap:wrap">
             <button type="button" class="school-btn sel" data-domain="@csu.edu.cn" onclick="pickSchool(this)">中南大学</button>
@@ -392,7 +392,7 @@ function toggleMode(){
   document.getElementById('formSubtitle').textContent=isReg?'注册 YueluDate，开启每周匹配':'登录你的 YueluDate 账户';
   document.getElementById('regFields').classList.toggle('show',isReg);
   document.getElementById('codeFields').classList.toggle('show',isReg);
-  document.getElementById('schoolSelectGroup').style.display=isReg?'':'none';
+  document.getElementById('schoolSelectGroup').style.display='';
   document.getElementById('loginExtras').style.display=isReg?'none':'flex';
   document.getElementById('btnText').textContent=isReg?'注册':'登录';
   document.getElementById('formFooter').innerHTML=isReg
