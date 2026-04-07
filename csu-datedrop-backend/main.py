@@ -67,7 +67,8 @@ Base.metadata.create_all(bind=engine)
 def _backfill_values_json():
     db = next(get_db())
     try:
-        users = db.query(User).filter(User.quiz_completed == True, User.values_json == None).all()
+        users = db.query(User).filter(User.quiz_completed == True).all()
+        users = [u for u in users if not u.values_json]
         if not users:
             return
         count = 0
